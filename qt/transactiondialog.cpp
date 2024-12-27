@@ -37,22 +37,13 @@ TransactionDialog::TransactionDialog(QWidget *parent) : QDialog(parent)
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 }
 
-QDate TransactionDialog::getDate() const
+Transaction TransactionDialog::getTransaction() const
 {
-	return dateInput->date();
-}
-
-QString TransactionDialog::getCategory() const
-{
-	return categoryInput->currentText();
-}
-
-QString TransactionDialog::getAmount() const
-{
-	return amountInput->text();
-}
-
-QString TransactionDialog::getDescription() const
-{
-	return descriptionInput->text();
+	Transaction transaction;
+	transaction.date = dateInput->date();
+	transaction.category = categoryInput->currentText();
+	transaction.amount = Amount{amountInput->text()};
+	transaction.description = descriptionInput->text();
+	transaction.id = transaction.hash();
+	return transaction;
 }

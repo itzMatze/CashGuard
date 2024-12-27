@@ -1,6 +1,7 @@
 #ifndef TRANSACTIONDIALOG_H
 #define TRANSACTIONDIALOG_H
 
+#include "transaction.hpp"
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDialog>
@@ -16,16 +17,13 @@ class TransactionDialog : public QDialog
 
 public:
 	TransactionDialog(QWidget *parent = nullptr);
-	QDate getDate() const;
-	QString getCategory() const;
-	QString getAmount() const;
-	QString getDescription() const;
+	Transaction getTransaction() const;
 
 private:
 	QDateEdit* dateInput;
-	QComboBox *categoryInput;
-	QLineEdit *amountInput;
-	QLineEdit *descriptionInput;
+	QComboBox* categoryInput;
+	QLineEdit* amountInput;
+	QLineEdit* descriptionInput;
 };
 
 #endif // TRANSACTIONDIALOG_H

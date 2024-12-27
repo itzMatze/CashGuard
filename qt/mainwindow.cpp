@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QTextStream>
+#include <qtablewidget.h>
 
 [[nodiscard]] bool loadData(const QString& fileName, std::vector<Transaction>& transactions)
 {
@@ -17,17 +18,15 @@
 	transactions.clear();
 	QTextStream in(&file);
 	// skip header
-	in.readLine();
+	QStringList fields = in.readLine().split(',');
 	while (!in.atEnd())
 	{
-		QString line = in.readLine();
-		QStringList cells = line.split(',');
+		QStringList cells = in.readLine().split(',');
 		Transaction transaction;
-		transaction.id = cells.at(0).toULongLong();
-		transaction.date = QDate::fromString(cells.at(1), "dd.MM.yyyy");
-		transaction.category = cells.at(2);
-		transaction.amount.value = cells.at(3).toInt();
-		transaction.description = cells.at(4);
+		for (uint32_t i = 0; i < fields.size(); i++)
+		{
+			transaction.setField(fields.at(i), cells.at(i));
+		}
 		transactions.push_back(transaction);
 	}
 
@@ -41,10 +40,17 @@
 	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text)) return false;
 	QTextStream out(&file);
 
-	out << "id,date,category,amount,description,reference_id\n";
+	QStringList fields = Transaction::getFieldNames();
+	QString outLine = "";
+	for (const QString& field : fields) outLine += field + ",";
+	outLine.removeLast();
+	out << outLine << "\n";
 	for (const Transaction& t : transactions)
 	{
-		out << t.id << "," << t.date.toString("dd.MM.yyyy") << "," << t.category << "," << t.amount.value << "," << t.description << t.reference_id << "\n";
+		outLine = "";
+		for (uint32_t i = 0; i < fields.size(); i++) outLine += t.getField(fields.at(i)) + ",";
+		outLine.removeLast();
+		out << outLine << "\n";
 	}
 
 	file.close();
@@ -74,16 +80,9 @@ void MainWindow::openAddTransactionDialog()
 {
 	TransactionDialog dialog(this);
 
-	// Show dialog and check if user confirmed
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		Transaction transaction;
-		transaction.date = dialog.getDate();
-		transaction.category = dialog.getCategory();
-		transaction.amount = Amount{dialog.getAmount().toInt()};
-		transaction.description = dialog.getDescription();
-		transaction.id = transaction.hash();
-		transactions.push_back(transaction);
+		transactions.push_back(dialog.getTransaction());
 		updateTable();
 	}
 }
@@ -113,17 +112,13 @@ void MainWindow::updateTable()
 {
 	ui->tableWidget->clear();
 	ui->tableWidget->setRowCount(transactions.size());
-	ui->tableWidget->setColumnCount(6);
-	ui->tableWidget->setHorizontalHeaderLabels({"ID", "Date", "Category", "Amount", "Description", "Reference ID"});
+	QStringList fields = Transaction::getFieldNames();
+	ui->tableWidget->setColumnCount(fields.size());
+	ui->tableWidget->setHorizontalHeaderLabels(fields);
 
 	for (uint32_t i = 0; i < transactions.size(); i++)
 	{
-		ui->tableWidget->setItem(i, 0, new QTableWidgetItem(QString::number(transactions[i].id)));
-		ui->tableWidget->setItem(i, 1, new QTableWidgetItem(transactions[i].date.toString("dd.MM.yyyy")));
-		ui->tableWidget->setItem(i, 2, new QTableWidgetItem(transactions[i].category));
-		ui->tableWidget->setItem(i, 3, new QTableWidgetItem(transactions[i].amount.toString()));
-		ui->tableWidget->setItem(i, 4, new QTableWidgetItem(transactions[i].description));
-		ui->tableWidget->setItem(i, 5, new QTableWidgetItem(QString::number(transactions[i].reference_id)));
+		for (uint32_t j = 0; j < fields.size(); j++) ui->tableWidget->setItem(i, j, new QTableWidgetItem(transactions[i].getField(fields.at(j))));
 	}
 	ui->tableWidget->resizeColumnsToContents();
 	ui->tableWidget->resizeRowsToContents();
