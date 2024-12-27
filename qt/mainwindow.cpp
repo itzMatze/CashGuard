@@ -110,6 +110,7 @@ void MainWindow::loadFromFile()
 
 void MainWindow::updateTable()
 {
+	std::sort(transactions.begin(), transactions.end(), [](const Transaction& a, const Transaction& b){ return a.date < b.date; });
 	ui->tableWidget->clear();
 	ui->tableWidget->setRowCount(transactions.size());
 	QStringList fields = Transaction::getFieldNames();

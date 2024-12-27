@@ -5,7 +5,8 @@
 #include <QDate>
 #include <qregularexpression.h>
 #include <qvalidator.h>
-#include "utils/log.hpp"
+#include "util/log.hpp"
+#include "util/random_generator.hpp"
 
 const QStringList categories {
 	"Cash",
@@ -125,9 +126,15 @@ public:
 		return output;
 	}
 
-	size_t hash(uint32_t salt = 0) const
+	size_t hash() const
 	{
-		return std::hash<QString>()(toString() + QString::number(salt));
+		namespace tfn = TransactionFieldNames;
+		return std::hash<QString>()(
+			getField(tfn::Date) +
+			getField(tfn::Category) +
+			getField(tfn::Amount) +
+			getField(tfn::Description) +
+			QString::number(rng::random_int32()));
 	}
 
 	size_t id;

@@ -9,7 +9,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 
-set(SOURCE_FILES )
+set(SOURCE_FILES src/util/random_generator.cpp)
 
 add_executable(CashGuard src/main.cpp ${SOURCE_FILES}
     qt/mainwindow.h qt/mainwindow.cpp qt/mainwindow.ui
