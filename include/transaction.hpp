@@ -58,3 +58,5 @@ public:
 	Amount amount;
 	QString description;
 };
+
+bool operator<(const Transaction& a, const Transaction& b);

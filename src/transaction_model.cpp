@@ -48,7 +48,7 @@ bool TransactionModel::loadFromFile(const QString& path)
 		}
 		transactions.push_back(transaction);
 	}
-	std::sort(transactions.begin(), transactions.end(), [](const Transaction& a, const Transaction& b){ return a.date < b.date; });
+	std::sort(transactions.begin(), transactions.end(), [](const Transaction& a, const Transaction& b){ return !(a < b); });
 
 	file.close();
 	endResetModel();
@@ -85,8 +85,8 @@ void TransactionModel::removeTransaction(uint32_t idx)
 
 void TransactionModel::add(const Transaction& transaction)
 {
-	uint32_t idx = transactions.size();
-	while (idx > 0 && transactions[idx - 1].date > transaction.date) idx--;
+	uint32_t idx = 0;
+	while (idx < transactions.size() && transaction < transactions[idx]) idx++;
 	beginInsertRows(QModelIndex(), idx, idx);
 	transactions.insert(transactions.begin() + idx, transaction);
 	endInsertRows();
