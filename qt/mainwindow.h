@@ -3,6 +3,7 @@
 
 #include "transaction_model.hpp"
 #include <QMainWindow>
+#include <qshortcut.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,13 +22,14 @@ public:
 private slots:
   void openAddTransactionDialog();
   void openEditTransactionDialog();
-  void openRemoveTransactionDialog();
+  void openDeleteTransactionDialog();
 	void saveToFile();
 	void loadFromFile();
 
 private:
 	Ui::MainWindow *ui;
 	TransactionModel transactionModel;
+	QShortcut* shortcut;
 };
 
 #endif // MAINWINDOW_H
