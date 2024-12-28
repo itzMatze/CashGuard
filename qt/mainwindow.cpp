@@ -9,9 +9,10 @@
 #include <QTextStream>
 #include <qtablewidget.h>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
+	, filePath(filePath)
 {
 	ui->setupUi(this);
 
@@ -27,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveToFile);
 	connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadFromFile);
 
-	if (!transactionModel.loadFromFile("transactions.csv")) QMessageBox::warning(this, "Error", "Failed to load data!");
+	if (!transactionModel.loadFromFile(filePath)) QMessageBox::warning(this, "Error", "Failed to load data!");
 	ui->tableView->setModel(&transactionModel);
 	ui->tableView->resizeColumnsToContents();
 	ui->tableView->resizeRowsToContents();
@@ -43,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-	if (!transactionModel.saveToFile("transactions.csv")) QMessageBox::warning(this, "Error", "Failed to save data!");
+	if (!transactionModel.saveToFile(filePath)) QMessageBox::warning(this, "Error", "Failed to save data!");
 	delete ui;
 }
 

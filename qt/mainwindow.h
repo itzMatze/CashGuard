@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = nullptr);
+	explicit MainWindow(const QString& filePath, QWidget *parent = nullptr);
 	~MainWindow();
 
 private slots:
@@ -29,7 +29,7 @@ private slots:
 private:
 	Ui::MainWindow *ui;
 	TransactionModel transactionModel;
-	QShortcut* shortcut;
+	QString filePath;
 };
 
 #endif // MAINWINDOW_H
