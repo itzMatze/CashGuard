@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "transaction_model.hpp"
 #include "ui_mainwindow.h"
 #include "transactiondialog.h"
 #include <QFileDialog>
@@ -12,7 +13,7 @@
 MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-	, filePath(filePath)
+	, transactionModel(filePath)
 {
 	ui->setupUi(this);
 
@@ -28,8 +29,9 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
 	connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveToFile);
 	connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveToFile);
+	ui->saveButton->setDisabled(true);
 
-	if (!transactionModel.loadFromFile(filePath)) QMessageBox::warning(this, "Error", "Failed to load data!");
+	if (!transactionModel.loadFromFile()) QMessageBox::warning(this, "Error", "Failed to load data!");
 	ui->tableView->setModel(&transactionModel);
 	ui->tableView->resizeColumnsToContents();
 	ui->tableView->resizeRowsToContents();
@@ -45,7 +47,14 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-	if (!transactionModel.saveToFile(filePath)) QMessageBox::warning(this, "Error", "Failed to save data!");
+	if (transactionModel.isDirty())
+	{
+		QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", "Save changes?", QMessageBox::Yes | QMessageBox::No);
+		if (reply == QMessageBox::Yes)
+		{
+			if (!transactionModel.saveToFile()) QMessageBox::warning(this, "Error", "Failed to save data!");
+		}
+	}
 	delete ui;
 }
 
@@ -56,6 +65,7 @@ void MainWindow::openAddTransactionDialog()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		transactionModel.add(dialog.getTransaction());
+		ui->saveButton->setDisabled(false);
 	}
 }
 
@@ -67,6 +77,7 @@ void MainWindow::openEditTransactionDialog()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		transactionModel.setTransaction(idx, dialog.getTransaction());
+		ui->saveButton->setDisabled(false);
 	}
 }
 
@@ -75,11 +86,20 @@ void MainWindow::openDeleteTransactionDialog()
 	int32_t idx = ui->tableView->selectionModel()->currentIndex().row();
 	QString message(QString("Delete transaction %1?").arg(transactionModel.getTransaction(idx).getField(TransactionFieldNames::ID)));
 	QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", message, QMessageBox::Yes | QMessageBox::No);
-	if (reply == QMessageBox::Yes) transactionModel.removeTransaction(idx);
+	if (reply == QMessageBox::Yes)
+	{
+		transactionModel.removeTransaction(idx);
+		ui->saveButton->setDisabled(false);
+	}
 }
 
 void MainWindow::saveToFile()
 {
-	if (!transactionModel.saveToFile(filePath)) QMessageBox::warning(this, "Error", "Failed to save data!");
-	else QMessageBox::information(this, "Success", "Transactions saved!");
+	if (!transactionModel.isDirty()) return;
+	if (!transactionModel.saveToFile()) QMessageBox::warning(this, "Error", "Failed to save data!");
+	else
+	{
+		QMessageBox::information(this, "Success", "Transactions saved!");
+		ui->saveButton->setDisabled(true);
+	}
 }

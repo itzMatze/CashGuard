@@ -4,7 +4,7 @@
 #include <qabstractitemmodel.h>
 
 
-TransactionModel::TransactionModel(QObject* parent) : QAbstractTableModel(parent)
+TransactionModel::TransactionModel(const QString& filePath, QObject* parent) : filePath(filePath), QAbstractTableModel(parent), dirty(false)
 {}
 
 int TransactionModel::rowCount(const QModelIndex& parent) const
@@ -29,10 +29,10 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
 	return Transaction::getFieldNames().at(section);
 }
 
-bool TransactionModel::loadFromFile(const QString& path)
+bool TransactionModel::loadFromFile()
 {
 	beginResetModel();
-	QFile file(path);
+	QFile file(filePath);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
 	transactions.clear();
 	QTextStream in(&file);
@@ -55,9 +55,10 @@ bool TransactionModel::loadFromFile(const QString& path)
 	return true;
 }
 
-bool TransactionModel::saveToFile(const QString& path) const
+bool TransactionModel::saveToFile()
 {
-	QFile file(path);
+	if (!dirty) return true;
+	QFile file(filePath);
 	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text)) return false;
 	QTextStream out(&file);
 
@@ -73,6 +74,7 @@ bool TransactionModel::saveToFile(const QString& path) const
 	}
 
 	file.close();
+	dirty = false;
 	return true;
 }
 
@@ -81,6 +83,7 @@ void TransactionModel::removeTransaction(uint32_t idx)
 	beginRemoveRows(QModelIndex(), idx, idx);
 	transactions.erase(transactions.begin() + idx);
 	endRemoveRows();
+	dirty = true;
 }
 
 void TransactionModel::add(const Transaction& transaction)
@@ -90,6 +93,7 @@ void TransactionModel::add(const Transaction& transaction)
 	beginInsertRows(QModelIndex(), idx, idx);
 	transactions.insert(transactions.begin() + idx, transaction);
 	endInsertRows();
+	dirty = true;
 }
 
 Transaction TransactionModel::getTransaction(uint32_t idx) const
@@ -101,4 +105,10 @@ void TransactionModel::setTransaction(uint32_t idx, const Transaction& transacti
 {
 	removeTransaction(idx);
 	add(transaction);
+	dirty = true;
+}
+
+bool TransactionModel::isDirty()
+{
+	return dirty;
 }
