@@ -11,6 +11,7 @@ set(CMAKE_AUTOMOC ON)
 
 set(SOURCE_FILES
 	src/util/random_generator.cpp
+	src/transaction.cpp
 	include/transaction_model.hpp
 	src/transaction_model.cpp)
 
