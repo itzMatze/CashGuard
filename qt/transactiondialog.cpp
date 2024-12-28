@@ -1,10 +1,12 @@
 #include "transactiondialog.h"
 #include "transaction.hpp"
+#include "util/random_generator.hpp"
 
 TransactionDialog::TransactionDialog(QWidget *parent) : QDialog(parent)
 {
 	transaction.date = QDate::currentDate();
 	transaction.category = transactionCategories.back();
+	transaction.id = 0;
 	init();
 }
 
@@ -60,6 +62,7 @@ Transaction TransactionDialog::getTransaction() const
 	transaction.category = categoryInput->currentText();
 	transaction.amount = Amount{amountInput->text()};
 	transaction.description = descriptionInput->text();
-	transaction.id = transaction.hash();
+	// prevent overwriting of the id when a transaction is edited
+	if (transaction.id == 0) transaction.id = rng::random_int32();
 	return transaction;
 }

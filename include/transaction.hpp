@@ -6,7 +6,6 @@
 #include <qregularexpression.h>
 #include <qvalidator.h>
 #include "util/log.hpp"
-#include "util/random_generator.hpp"
 
 const QStringList transactionCategories {
 	"Cash",
@@ -74,7 +73,6 @@ namespace TransactionFieldNames
 	const QString Category = "Category";
 	const QString Amount = "Amount";
 	const QString Description = "Description";
-	const QString Reference_ID = "Reference_ID";
 }
 
 class Transaction
@@ -88,8 +86,7 @@ public:
 			tfn::Date,
 			tfn::Category,
 			tfn::Amount,
-			tfn::Description,
-			tfn::Reference_ID});
+			tfn::Description});
 	}
 
 	QString getField(const QString& fieldName) const
@@ -100,7 +97,6 @@ public:
 		else if (fieldName == tfn::Category) return category;
 		else if (fieldName == tfn::Amount) return amount.toString();
 		else if (fieldName == tfn::Description) return description;
-		else if (fieldName == tfn::Reference_ID) return QString::number(reference_id);
 		else CG_THROW("Invalid transaction field name!");
 	}
 
@@ -120,7 +116,6 @@ public:
 		else if (fieldName == tfn::Category) category = value;
 		else if (fieldName == tfn::Amount) amount = Amount(value);
 		else if (fieldName == tfn::Description) description = value;
-		else if (fieldName == tfn::Reference_ID) reference_id = value.toULongLong();
 		else CG_THROW("Invalid transaction field name!");
 	}
 
@@ -134,21 +129,9 @@ public:
 		return output;
 	}
 
-	size_t hash() const
-	{
-		namespace tfn = TransactionFieldNames;
-		return std::hash<QString>()(
-			getField(tfn::Date) +
-			getField(tfn::Category) +
-			getField(tfn::Amount) +
-			getField(tfn::Description) +
-			QString::number(rng::random_int32()));
-	}
-
 	size_t id;
 	QDate date;
 	QString category;
 	Amount amount;
 	QString description;
-	size_t reference_id = 0;
 };

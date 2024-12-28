@@ -2,13 +2,9 @@
 
 uint32_t get_seed()
 {
-#if defined(USE_DETERMINISTIC_SEED)
-  return 42;
-#else
   std::random_device rd;
   std::uniform_int_distribution<uint32_t> dis(0, 20000);
   return dis(rd);
-#endif
 }
 
 RandomGenerator::RandomGenerator(uint32_t seed) : distribution(std::uniform_real_distribution<float>(0.0f, 1.0f)), generator(std::mt19937(seed))
