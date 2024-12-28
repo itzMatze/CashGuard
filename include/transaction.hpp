@@ -71,7 +71,7 @@ struct Amount
 
 	QString toString() const
 	{
-		return QString::number(value / 100) + "." + QString::number(value % 100).leftJustified(2, '0');
+		return QString::number(value / 100) + "." + QString::number(value % 100).rightJustified(2, '0');
 	}
 };
 
