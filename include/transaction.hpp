@@ -23,6 +23,15 @@ const QStringList transactionCategories {
 	"None"
 };
 
+inline int32_t getTransactionCategoryIndex(const QString& category)
+{
+	for (int32_t i = 0; i < transactionCategories.size(); i++)
+	{
+		if (transactionCategories[i] == category) return i;
+	}
+	return -1;
+}
+
 inline bool validateTransactionCategory(const QString& name)
 {
 	for (const QString& category : transactionCategories)
