@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->setupUi(this);
 
 	connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::openAddTransactionDialog);
+	connect(ui->editButton, &QPushButton::clicked, this, &MainWindow::openEditTransactionDialog);
+	connect(ui->removeButton, &QPushButton::clicked, this, &MainWindow::openRemoveTransactionDialog);
 	connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveToFile);
 	connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadFromFile);
 
@@ -23,6 +25,13 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->tableView->resizeColumnsToContents();
 	ui->tableView->resizeRowsToContents();
 	if (ui->tableView->columnWidth(4) > 800) ui->tableView->setColumnWidth(4, 800);
+	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	ui->tableView->setStyleSheet(
+    "QTableView::item:hover {"
+    "    background-color: transparent;"
+    "}"
+);
 }
 
 MainWindow::~MainWindow()
@@ -39,6 +48,25 @@ void MainWindow::openAddTransactionDialog()
 	{
 		transactionModel.add(dialog.getTransaction());
 	}
+}
+
+void MainWindow::openEditTransactionDialog()
+{
+	int32_t idx = ui->tableView->selectionModel()->currentIndex().row();
+	TransactionDialog dialog(transactionModel.getTransaction(idx), this);
+
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		transactionModel.setTransaction(idx, dialog.getTransaction());
+	}
+}
+
+void MainWindow::openRemoveTransactionDialog()
+{
+	int32_t idx = ui->tableView->selectionModel()->currentIndex().row();
+	QString message(QString("Remove transaction %1?").arg(transactionModel.getTransaction(idx).getField(TransactionFieldNames::ID)));
+	QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", message, QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::Yes) transactionModel.removeTransaction(idx);
 }
 
 void MainWindow::saveToFile()

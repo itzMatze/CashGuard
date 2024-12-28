@@ -8,7 +8,7 @@
 #include "util/log.hpp"
 #include "util/random_generator.hpp"
 
-const QStringList categories {
+const QStringList transactionCategories {
 	"Cash",
 	"Cellular",
 	"Clothing",
@@ -26,7 +26,7 @@ const QStringList categories {
 
 inline bool validateTransactionCategory(const QString& name)
 {
-	for (const QString& category : categories)
+	for (const QString& category : transactionCategories)
 	{
 		if (category == name) return true;
 	}
@@ -63,7 +63,7 @@ struct Amount
 
 	QString toString() const
 	{
-		return QString::number(value / 100) + "." + QString::number(value % 100).leftJustified(2, '0') + " €";
+		return QString::number(value / 100) + "." + QString::number(value % 100).leftJustified(2, '0');
 	}
 };
 
@@ -102,6 +102,14 @@ public:
 		else if (fieldName == tfn::Description) return description;
 		else if (fieldName == tfn::Reference_ID) return QString::number(reference_id);
 		else CG_THROW("Invalid transaction field name!");
+	}
+
+	QString getFieldView(const QString& fieldName) const
+	{
+		namespace tfn = TransactionFieldNames;
+		QString output = getField(fieldName);
+		if (fieldName == tfn::Amount) output += " €";
+		return output;
 	}
 
 	void setField(const QString& fieldName, const QString& value)

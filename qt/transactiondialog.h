@@ -17,6 +17,7 @@ class TransactionDialog : public QDialog
 
 public:
 	TransactionDialog(QWidget *parent = nullptr);
+	TransactionDialog(const Transaction& transaction, QWidget *parent = nullptr);
 	Transaction getTransaction() const;
 
 private:
@@ -24,6 +25,9 @@ private:
 	QComboBox* categoryInput;
 	QLineEdit* amountInput;
 	QLineEdit* descriptionInput;
+	Transaction transaction;
+
+	void init();
 };
 
 #endif // TRANSACTIONDIALOG_H

@@ -18,6 +18,9 @@ public:
 	[[nodiscard]] bool saveToFile(const QString& path) const;
 	[[nodiscard]] bool loadFromFile(const QString& path);
 	void add(const Transaction& transaction);
+	void removeTransaction(uint32_t idx);
+	Transaction getTransaction(uint32_t idx) const;
+	void setTransaction(uint32_t idx, const Transaction& transaction);
 
 private:
 	std::vector<Transaction> transactions;

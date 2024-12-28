@@ -20,6 +20,8 @@ public:
 
 private slots:
   void openAddTransactionDialog();
+  void openEditTransactionDialog();
+  void openRemoveTransactionDialog();
 	void saveToFile();
 	void loadFromFile();
 

@@ -19,7 +19,7 @@ int TransactionModel::columnCount(const QModelIndex& parent) const
 
 QVariant TransactionModel::data(const QModelIndex& index, int role) const
 {
-	if (role == Qt::DisplayRole) return transactions[index.row()].getField(Transaction::getFieldNames().at(index.column()));
+	if (role == Qt::DisplayRole) return transactions[index.row()].getFieldView(Transaction::getFieldNames().at(index.column()));
 	return QVariant();
 }
 
@@ -76,6 +76,13 @@ bool TransactionModel::saveToFile(const QString& path) const
 	return true;
 }
 
+void TransactionModel::removeTransaction(uint32_t idx)
+{
+	beginRemoveRows(QModelIndex(), idx, idx);
+	transactions.erase(transactions.begin() + idx);
+	endRemoveRows();
+}
+
 void TransactionModel::add(const Transaction& transaction)
 {
 	uint32_t idx = transactions.size();
@@ -83,4 +90,15 @@ void TransactionModel::add(const Transaction& transaction)
 	beginInsertRows(QModelIndex(), idx, idx);
 	transactions.insert(transactions.begin() + idx, transaction);
 	endInsertRows();
+}
+
+Transaction TransactionModel::getTransaction(uint32_t idx) const
+{
+	return transactions.at(idx);
+}
+
+void TransactionModel::setTransaction(uint32_t idx, const Transaction& transaction)
+{
+	removeTransaction(idx);
+	add(transaction);
 }

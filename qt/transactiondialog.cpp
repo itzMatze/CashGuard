@@ -3,21 +3,37 @@
 
 TransactionDialog::TransactionDialog(QWidget *parent) : QDialog(parent)
 {
+	transaction.date = QDate::currentDate();
+	transaction.category = transactionCategories.back();
+	init();
+}
+
+TransactionDialog::TransactionDialog(const Transaction& transaction, QWidget *parent) : transaction(transaction)
+{
+	init();
+}
+
+void TransactionDialog::init()
+{
 	setWindowTitle("Add Transaction");
 	resize(300, 150);
 
 	dateInput = new QDateEdit(this);
 	dateInput->setDisplayFormat("dd.MM.yyyy");
-	dateInput->setDate(QDate::currentDate());
+	dateInput->setDate(transaction.date);
 
 	categoryInput = new QComboBox(this);
-	categoryInput->addItems(categories);
+	categoryInput->addItems(transactionCategories);
+	int index = categoryInput->findData(transaction.getField(TransactionFieldNames::Category));
+	categoryInput->setCurrentIndex(index);
 
 	amountInput = new QLineEdit(this);
 	amountInput->setPlaceholderText("Enter amount...");
+	amountInput->setText(transaction.getField(TransactionFieldNames::Amount));
 
 	descriptionInput = new QLineEdit(this);
 	descriptionInput->setPlaceholderText("Enter description...");
+	descriptionInput->setText(transaction.getField(TransactionFieldNames::Description));
 
 	QPushButton *okButton = new QPushButton("OK", this);
 	QPushButton *cancelButton = new QPushButton("Cancel", this);
