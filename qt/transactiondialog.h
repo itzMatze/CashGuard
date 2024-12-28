@@ -18,7 +18,7 @@ class TransactionDialog : public QDialog
 public:
 	TransactionDialog(QWidget *parent = nullptr);
 	TransactionDialog(const Transaction& transaction, QWidget *parent = nullptr);
-	Transaction getTransaction() const;
+	Transaction getTransaction();
 
 private:
 	QDateEdit* dateInput;

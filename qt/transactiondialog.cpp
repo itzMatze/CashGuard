@@ -4,9 +4,10 @@
 
 TransactionDialog::TransactionDialog(QWidget *parent) : QDialog(parent)
 {
+	transaction.id = 0;
 	transaction.date = QDate::currentDate();
 	transaction.category = transactionCategories.back();
-	transaction.id = 0;
+	transaction.amount = 0;
 	init();
 }
 
@@ -54,14 +55,13 @@ void TransactionDialog::init()
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 }
 
-Transaction TransactionDialog::getTransaction() const
+Transaction TransactionDialog::getTransaction()
 {
-	Transaction transaction;
 	transaction.date = dateInput->date();
 	transaction.category = categoryInput->currentText();
 	transaction.amount = Amount{amountInput->text()};
 	transaction.description = descriptionInput->text();
 	// prevent overwriting of the id when a transaction is edited
-	if (transaction.id == 0) transaction.id = rng::random_int32();
+	if (transaction.id == 0) transaction.id = rng::random_int64();
 	return transaction;
 }
