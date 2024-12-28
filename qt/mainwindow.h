@@ -24,7 +24,6 @@ private slots:
   void openEditTransactionDialog();
   void openDeleteTransactionDialog();
 	void saveToFile();
-	void loadFromFile();
 
 private:
 	Ui::MainWindow *ui;

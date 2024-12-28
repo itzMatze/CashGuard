@@ -25,8 +25,9 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	QShortcut* removeShortcut = new QShortcut(QKeySequence("D"), this);
 	connect(removeShortcut, &QShortcut::activated, this, &MainWindow::openDeleteTransactionDialog);
 	connect(ui->removeButton, &QPushButton::clicked, this, &MainWindow::openDeleteTransactionDialog);
+	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
+	connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveToFile);
 	connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveToFile);
-	connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadFromFile);
 
 	if (!transactionModel.loadFromFile(filePath)) QMessageBox::warning(this, "Error", "Failed to load data!");
 	ui->tableView->setModel(&transactionModel);
@@ -79,20 +80,6 @@ void MainWindow::openDeleteTransactionDialog()
 
 void MainWindow::saveToFile()
 {
-	QString fileName = QFileDialog::getSaveFileName(this, "Choose File");
-	if (fileName.isEmpty() || !fileName.endsWith(".csv")) return;
-	if (!transactionModel.saveToFile(fileName)) QMessageBox::warning(this, "Error", "Failed to save data!");
+	if (!transactionModel.saveToFile(filePath)) QMessageBox::warning(this, "Error", "Failed to save data!");
 	else QMessageBox::information(this, "Success", "Transactions saved!");
-}
-
-void MainWindow::loadFromFile()
-{
-	QString fileName = QFileDialog::getOpenFileName(this, "Open File");
-
-	if (fileName.isEmpty() || !fileName.endsWith(".csv")) return;
-	if (!transactionModel.loadFromFile(fileName))
-	{
-		QMessageBox::warning(this, "Error", "Failed to load data!");
-		return;
-	}
 }
