@@ -47,7 +47,7 @@ struct Amount
 		CG_ASSERT(validator.validate(stringValue, pos), "Invalid amount format!");
 		if (!stringValue.contains('.'))
 		{
-			value = stringValue.toInt();
+			value = 100 * stringValue.toInt();
 		}
 		else
 		{
