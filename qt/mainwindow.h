@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "transaction.hpp"
+#include "transaction_model.hpp"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -22,11 +22,10 @@ private slots:
   void openAddTransactionDialog();
 	void saveToFile();
 	void loadFromFile();
-	void updateTable();
 
 private:
 	Ui::MainWindow *ui;
-	std::vector<Transaction> transactions;
+	TransactionModel transactionModel;
 };
 
 #endif // MAINWINDOW_H
