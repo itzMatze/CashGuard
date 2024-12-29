@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "table_style_delegate.hpp"
+#include "total_amount.hpp"
 #include "transaction_model.hpp"
 #include "ui_mainwindow.h"
 #include "transactiondialog.h"
@@ -40,6 +41,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	ui->tableView->setItemDelegate(new TableStyleDelegate(ui->tableView));
+	ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString() + " €");
 }
 
 MainWindow::~MainWindow()
@@ -63,6 +65,7 @@ void MainWindow::openAddTransactionDialog()
 	{
 		transactionModel.add(dialog.getTransaction());
 		ui->saveButton->setDisabled(false);
+		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
 	}
 }
 
@@ -75,6 +78,7 @@ void MainWindow::openEditTransactionDialog()
 	{
 		transactionModel.setTransaction(idx, dialog.getTransaction());
 		ui->saveButton->setDisabled(false);
+		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
 	}
 }
 
@@ -87,6 +91,7 @@ void MainWindow::openDeleteTransactionDialog()
 	{
 		transactionModel.removeTransaction(idx);
 		ui->saveButton->setDisabled(false);
+		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
 	}
 }
 

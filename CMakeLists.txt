@@ -15,7 +15,8 @@ set(SOURCE_FILES
 	include/transaction_model.hpp
 	src/transaction_model.cpp
 	include/table_style_delegate.hpp
-	src/table_style_delegate.cpp)
+	src/table_style_delegate.cpp
+	src/total_amount.cpp)
 
 add_executable(CashGuard src/main.cpp ${SOURCE_FILES}
 	qt/mainwindow.h qt/mainwindow.cpp qt/mainwindow.ui
