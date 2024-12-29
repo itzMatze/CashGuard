@@ -29,10 +29,14 @@ Amount::Amount(int32_t value) : value(value)
 
 Amount::Amount(QString stringValue)
 {
-	stringValue.remove(QRegularExpression(" €"));
-	QRegularExpressionValidator validator(QRegularExpression(R"(\b\d+(\.\d{1,2})?\b)"));
+	stringValue.remove(QRegularExpression(" "));
+	stringValue.remove(QRegularExpression("€"));
+	QRegularExpressionValidator validator(QRegularExpression(R"((\+|-)?\b\d+(\.\d{1,2})?\b)"));
 	int pos = 0;
 	CG_ASSERT(validator.validate(stringValue, pos), "Invalid amount format!");
+	bool negative = true;
+	if (stringValue.startsWith("+")) negative = false;
+	stringValue.remove(QRegularExpression(R"(^(\+|-))"));
 	if (!stringValue.contains('.'))
 	{
 		value = 100 * stringValue.toInt();
@@ -44,11 +48,17 @@ Amount::Amount(QString stringValue)
 		int32_t cent = stringValues.at(1).toInt();
 		value = cent + 100 * euro;
 	}
+	if (negative) value = -value;
 }
 
 QString Amount::toString() const
 {
-	return QString::number(value / 100) + "." + QString::number(value % 100).rightJustified(2, '0');
+	return (isNegative() ? "- " : "+ ") + QString::number(std::abs(value) / 100) + "." + QString::number(std::abs(value) % 100).rightJustified(2, '0');
+}
+
+bool Amount::isNegative() const
+{
+	return value < 0;
 }
 
 QStringList Transaction::getFieldNames()

@@ -13,7 +13,9 @@ set(SOURCE_FILES
 	src/util/random_generator.cpp
 	src/transaction.cpp
 	include/transaction_model.hpp
-	src/transaction_model.cpp)
+	src/transaction_model.cpp
+	include/table_style_delegate.hpp
+	src/table_style_delegate.cpp)
 
 add_executable(CashGuard src/main.cpp ${SOURCE_FILES}
 	qt/mainwindow.h qt/mainwindow.cpp qt/mainwindow.ui

@@ -29,6 +29,7 @@ struct Amount
 	Amount(int32_t value);
 	Amount(QString stringValue);
 	QString toString() const;
+	bool isNegative() const;
 
 	// amount in cents
 	int32_t value;

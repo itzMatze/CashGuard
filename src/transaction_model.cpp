@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <qabstractitemmodel.h>
+#include <qnamespace.h>
 
 
 TransactionModel::TransactionModel(const QString& filePath, QObject* parent) : filePath(filePath), QAbstractTableModel(parent), dirty(false)
@@ -20,6 +21,12 @@ int TransactionModel::columnCount(const QModelIndex& parent) const
 QVariant TransactionModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole) return transactions[index.row()].getFieldView(Transaction::getFieldNames().at(index.column()));
+	if (role == Qt::BackgroundRole)
+	{
+		// Check the content of a specific column
+		if (transactions[index.row()].amount.isNegative()) return QBrush(QColor(255, 0, 0, 100));
+		else return QBrush(QColor(0, 255, 0, 100));
+	}
 	return QVariant();
 }
 

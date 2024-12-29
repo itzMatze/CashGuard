@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "table_style_delegate.hpp"
 #include "transaction_model.hpp"
 #include "ui_mainwindow.h"
 #include "transactiondialog.h"
@@ -38,11 +39,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	if (ui->tableView->columnWidth(4) > 800) ui->tableView->setColumnWidth(4, 800);
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-	ui->tableView->setStyleSheet(
-    "QTableView::item:hover {"
-    "    background-color: transparent;"
-    "}"
-);
+	ui->tableView->setItemDelegate(new TableStyleDelegate(ui->tableView));
 }
 
 MainWindow::~MainWindow()
