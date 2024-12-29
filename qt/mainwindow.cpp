@@ -97,9 +97,5 @@ void MainWindow::saveToFile()
 {
 	if (!transactionModel.isDirty()) return;
 	if (!transactionModel.saveToFile()) QMessageBox::warning(this, "Error", "Failed to save data!");
-	else
-	{
-		QMessageBox::information(this, "Success", "Transactions saved!");
-		ui->saveButton->setDisabled(true);
-	}
+	else ui->saveButton->setDisabled(true);
 }
