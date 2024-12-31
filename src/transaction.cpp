@@ -45,7 +45,7 @@ Amount::Amount(QString stringValue)
 	{
 		QStringList stringValues = stringValue.split('.');
 		int32_t euro = stringValues.at(0).toInt();
-		int32_t cent = stringValues.at(1).toInt();
+		int32_t cent = stringValues.at(1).leftJustified(2, '0').toInt();
 		value = cent + 100 * euro;
 	}
 	if (negative) value = -value;
