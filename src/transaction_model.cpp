@@ -1,11 +1,10 @@
 #include "transaction_model.hpp"
-#include <QFile>
-#include <QMessageBox>
-#include <qabstractitemmodel.h>
-#include <qnamespace.h>
 
+#include <QBrush>
 
-TransactionModel::TransactionModel(const QString& filePath, QObject* parent) : filePath(filePath), QAbstractTableModel(parent), dirty(false)
+#include "transaction.hpp"
+
+TransactionModel::TransactionModel(QObject* parent) : QAbstractTableModel(parent)
 {}
 
 int TransactionModel::rowCount(const QModelIndex& parent) const
@@ -20,11 +19,11 @@ int TransactionModel::columnCount(const QModelIndex& parent) const
 
 QVariant TransactionModel::data(const QModelIndex& index, int role) const
 {
-	if (role == Qt::DisplayRole) return transactions[index.row()].getFieldView(Transaction::getFieldNames().at(index.column()));
+	if (role == Qt::DisplayRole) return transactions[index.row()]->getFieldView(Transaction::getFieldNames().at(index.column()));
 	if (role == Qt::BackgroundRole)
 	{
 		// Check the content of a specific column
-		if (transactions[index.row()].amount.isNegative()) return QBrush(QColor(255, 0, 0, 100));
+		if (transactions[index.row()]->amount.isNegative()) return QBrush(QColor(255, 0, 0, 100));
 		else return QBrush(QColor(0, 255, 0, 100));
 	}
 	return QVariant();
@@ -36,86 +35,41 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
 	return Transaction::getFieldNames().at(section);
 }
 
-bool TransactionModel::loadFromFile()
-{
-	beginResetModel();
-	QFile file(filePath);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
-	transactions.clear();
-	QTextStream in(&file);
-	// skip header
-	QStringList fields = in.readLine().split(',');
-	while (!in.atEnd())
-	{
-		QStringList cells = in.readLine().split(',');
-		Transaction transaction;
-		for (uint32_t i = 0; i < fields.size(); i++)
-		{
-			transaction.setField(fields.at(i), cells.at(i));
-		}
-		transactions.push_back(transaction);
-	}
-	std::sort(transactions.begin(), transactions.end(), [](const Transaction& a, const Transaction& b){ return !(a < b); });
-
-	file.close();
-	endResetModel();
-	return true;
-}
-
-bool TransactionModel::saveToFile()
-{
-	if (!dirty) return true;
-	QFile file(filePath);
-	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text)) return false;
-	QTextStream out(&file);
-
-	QStringList fields = Transaction::getFieldNames();
-	QStringList outLine;
-	for (const QString& field : fields) outLine.append(field);
-	out << outLine.join(',') << "\n";
-	for (const Transaction& t : transactions)
-	{
-		outLine.clear();
-		for (uint32_t i = 0; i < fields.size(); i++) outLine.append(t.getField(fields.at(i)));
-		out << outLine.join(',') << "\n";
-	}
-
-	file.close();
-	dirty = false;
-	return true;
-}
-
 void TransactionModel::removeTransaction(uint32_t idx)
 {
 	beginRemoveRows(QModelIndex(), idx, idx);
 	transactions.erase(transactions.begin() + idx);
 	endRemoveRows();
-	dirty = true;
 }
 
-void TransactionModel::add(const Transaction& transaction)
+void TransactionModel::add(const std::shared_ptr<Transaction>& transaction)
 {
 	uint32_t idx = 0;
-	while (idx < transactions.size() && transaction < transactions[idx]) idx++;
+	while (idx < transactions.size() && *transaction < *transactions[idx]) idx++;
 	beginInsertRows(QModelIndex(), idx, idx);
 	transactions.insert(transactions.begin() + idx, transaction);
 	endInsertRows();
-	dirty = true;
 }
 
-Transaction TransactionModel::getTransaction(uint32_t idx) const
+std::shared_ptr<const Transaction> TransactionModel::getTransaction(uint32_t idx) const
 {
 	return transactions.at(idx);
 }
 
-void TransactionModel::setTransaction(uint32_t idx, const Transaction& transaction)
+void TransactionModel::setTransaction(uint32_t idx, const std::shared_ptr<Transaction>& transaction)
 {
 	removeTransaction(idx);
 	add(transaction);
-	dirty = true;
 }
 
-bool TransactionModel::isDirty()
+const std::vector<std::shared_ptr<Transaction>>& TransactionModel::getTransactions() const
 {
-	return dirty;
+	return transactions;
+}
+
+void TransactionModel::clear()
+{
+	beginResetModel();
+	transactions.clear();
+	endResetModel();
 }

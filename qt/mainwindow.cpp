@@ -2,6 +2,7 @@
 #include "table_style_delegate.hpp"
 #include "total_amount.hpp"
 #include "transaction_model.hpp"
+#include "transaction_file_handler.hpp"
 #include "ui_mainwindow.h"
 #include "transactiondialog.h"
 #include <QFileDialog>
@@ -15,7 +16,8 @@
 MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-	, transactionModel(filePath)
+	, transactionModel()
+	, filePath(filePath)
 {
 	ui->setupUi(this);
 
@@ -29,11 +31,11 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	connect(removeShortcut, &QShortcut::activated, this, &MainWindow::openDeleteTransactionDialog);
 	connect(ui->removeButton, &QPushButton::clicked, this, &MainWindow::openDeleteTransactionDialog);
 	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
-	connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveToFile);
-	connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveToFile);
-	ui->saveButton->setDisabled(true);
+	connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveTransactions);
+	connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveTransactions);
+	ui->saveButton->setEnabled(false);
 
-	if (!transactionModel.loadFromFile()) QMessageBox::warning(this, "Error", "Failed to load data!");
+	if (!loadFromFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
 	ui->tableView->setModel(&transactionModel);
 	ui->tableView->resizeColumnsToContents();
 	ui->tableView->resizeRowsToContents();
@@ -46,12 +48,12 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-	if (transactionModel.isDirty())
+	if (ui->saveButton->isEnabled())
 	{
 		QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", "Save changes?", QMessageBox::Yes | QMessageBox::No);
 		if (reply == QMessageBox::Yes)
 		{
-			if (!transactionModel.saveToFile()) QMessageBox::warning(this, "Error", "Failed to save data!");
+			if (!saveToFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
 		}
 	}
 	delete ui;
@@ -63,8 +65,8 @@ void MainWindow::openAddTransactionDialog()
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		transactionModel.add(dialog.getTransaction());
-		ui->saveButton->setDisabled(false);
+		transactionModel.add(std::make_shared<Transaction>(dialog.getTransaction()));
+		ui->saveButton->setEnabled(true);
 		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
 	}
 }
@@ -72,12 +74,12 @@ void MainWindow::openAddTransactionDialog()
 void MainWindow::openEditTransactionDialog()
 {
 	int32_t idx = ui->tableView->selectionModel()->currentIndex().row();
-	TransactionDialog dialog(transactionModel.getTransaction(idx), this);
+	TransactionDialog dialog(*transactionModel.getTransaction(idx), this);
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		transactionModel.setTransaction(idx, dialog.getTransaction());
-		ui->saveButton->setDisabled(false);
+		transactionModel.setTransaction(idx, std::make_shared<Transaction>(dialog.getTransaction()));
+		ui->saveButton->setEnabled(true);
 		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
 	}
 }
@@ -85,19 +87,19 @@ void MainWindow::openEditTransactionDialog()
 void MainWindow::openDeleteTransactionDialog()
 {
 	int32_t idx = ui->tableView->selectionModel()->currentIndex().row();
-	QString message(QString("Delete transaction %1?").arg(transactionModel.getTransaction(idx).getField(TransactionFieldNames::ID)));
+	QString message(QString("Delete transaction %1?").arg(transactionModel.getTransaction(idx)->getField(TransactionFieldNames::ID)));
 	QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", message, QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes)
 	{
 		transactionModel.removeTransaction(idx);
-		ui->saveButton->setDisabled(false);
+		ui->saveButton->setEnabled(true);
 		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
 	}
 }
 
-void MainWindow::saveToFile()
+void MainWindow::saveTransactions()
 {
-	if (!transactionModel.isDirty()) return;
-	if (!transactionModel.saveToFile()) QMessageBox::warning(this, "Error", "Failed to save data!");
-	else ui->saveButton->setDisabled(true);
+	if (!ui->saveButton->isEnabled()) return;
+	if (!saveToFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
+	else ui->saveButton->setEnabled(false);
 }

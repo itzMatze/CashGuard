@@ -6,16 +6,21 @@
 
 const QStringList transactionCategories {
 	"Cash",
-	"Cellular",
 	"Clothing",
-	"Groceries",
+	"Education",
 	"Gaming",
+	"Groceries",
+	"Internet",
 	"Leisure",
+	"Other Income",
+	"Other Outgoing",
 	"Present",
+	"Public Transport",
 	"Restaurant",
 	"Salary",
 	"Saving",
-	"Public Transport",
+	"Sport",
+	"Transport",
 	"Vacation",
 	"None"
 };
@@ -47,11 +52,12 @@ namespace TransactionFieldNames
 class Transaction
 {
 public:
+	virtual ~Transaction() = default;
 	static QStringList getFieldNames();
 	QString getField(const QString& fieldName) const;
 	QString getFieldView(const QString& fieldName) const;
 	void setField(const QString& fieldName, const QString& value);
-	QString toString() const;
+	virtual QString toString() const;
 
 	size_t id;
 	QDate date;
@@ -61,3 +67,12 @@ public:
 };
 
 bool operator<(const Transaction& a, const Transaction& b);
+
+class TransactionGroup : public Transaction
+{
+public:
+	TransactionGroup() = default;
+	QString toString() const override;
+
+	std::vector<Transaction> transactions;
+};

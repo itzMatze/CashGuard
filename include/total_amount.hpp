@@ -2,4 +2,4 @@
 
 #include "transaction_model.hpp"
 
-Amount getCurrentTotalAmount(TransactionModel& transaction_model);
+Amount getCurrentTotalAmount(const TransactionModel& transaction_model);

@@ -117,3 +117,8 @@ bool operator<(const Transaction& a, const Transaction& b)
 	if (a.date == b.date) return a.id < b.id;
 	return a.date < b.date;
 }
+
+QString TransactionGroup::toString() const
+{
+	return Transaction::toString() + "Transaction Group";
+}

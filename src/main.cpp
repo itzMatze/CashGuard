@@ -7,7 +7,7 @@
 
 int parse_args(int argc, char** argv, argparse::ArgumentParser& program)
 {
-  program.add_argument("--file").nargs(1).help("Override the .csv file that is loaded on startup and saved to on shutdown");
+  program.add_argument("--file").nargs(1).help("Override the .json file that is loaded on startup and saved to on shutdown");
 
   try
 	{
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 
 	QString filePath = getenv("HOME");
 	if (!filePath.endsWith("/")) filePath += "/";
-	filePath += QString("Documents/Stuff/CashGuardTransactions.csv");
+	filePath += QString("Documents/Stuff/CashGuardTransactions.json");
 
 	if (program.is_used("--file")) filePath = QString::fromStdString(program.get<std::string>("--file"));
 	MainWindow mainWindow(filePath);

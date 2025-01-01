@@ -14,6 +14,7 @@ set(SOURCE_FILES
 	src/transaction.cpp
 	include/transaction_model.hpp
 	src/transaction_model.cpp
+	src/transaction_file_handler.cpp
 	include/table_style_delegate.hpp
 	src/table_style_delegate.cpp
 	src/total_amount.cpp)

@@ -13,7 +13,7 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
-	Q_OBJECT
+	Q_OBJECT;
 
 public:
 	explicit MainWindow(const QString& filePath, QWidget *parent = nullptr);
@@ -23,11 +23,12 @@ private slots:
   void openAddTransactionDialog();
   void openEditTransactionDialog();
   void openDeleteTransactionDialog();
-	void saveToFile();
+	void saveTransactions();
 
 private:
 	Ui::MainWindow *ui;
 	TransactionModel transactionModel;
+	QString filePath;
 };
 
 #endif // MAINWINDOW_H
