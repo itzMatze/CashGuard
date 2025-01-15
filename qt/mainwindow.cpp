@@ -30,12 +30,9 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	QShortcut* removeShortcut = new QShortcut(QKeySequence("D"), this);
 	connect(removeShortcut, &QShortcut::activated, this, &MainWindow::openDeleteTransactionDialog);
 	connect(ui->removeButton, &QPushButton::clicked, this, &MainWindow::openDeleteTransactionDialog);
-	QShortcut* saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
-	connect(saveShortcut, &QShortcut::activated, this, &MainWindow::saveTransactions);
-	connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveTransactions);
-	ui->saveButton->setEnabled(false);
 
 	if (!loadFromFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
+	if (!loadFromFile(filePath, oldTransactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
 	ui->tableView->setModel(&transactionModel);
 	ui->tableView->resizeColumnsToContents();
 	ui->tableView->resizeRowsToContents();
@@ -48,14 +45,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-	if (ui->saveButton->isEnabled())
-	{
-		QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", "Save changes?", QMessageBox::Yes | QMessageBox::No);
-		if (reply == QMessageBox::Yes)
-		{
-			if (!saveToFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
-		}
-	}
+	if (!saveToFile(filePath + ".old", oldTransactionModel)) QMessageBox::warning(this, "Error", "Failed to save backup data!");
 	delete ui;
 }
 
@@ -66,8 +56,8 @@ void MainWindow::openAddTransactionDialog()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		transactionModel.add(std::make_shared<Transaction>(dialog.getTransaction()));
-		ui->saveButton->setEnabled(true);
 		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
+		saveTransactions();
 	}
 }
 
@@ -79,8 +69,8 @@ void MainWindow::openEditTransactionDialog()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		transactionModel.setTransaction(idx, std::make_shared<Transaction>(dialog.getTransaction()));
-		ui->saveButton->setEnabled(true);
 		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
+		saveTransactions();
 	}
 }
 
@@ -92,14 +82,12 @@ void MainWindow::openDeleteTransactionDialog()
 	if (reply == QMessageBox::Yes)
 	{
 		transactionModel.removeTransaction(idx);
-		ui->saveButton->setEnabled(true);
 		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
+		saveTransactions();
 	}
 }
 
 void MainWindow::saveTransactions()
 {
-	if (!ui->saveButton->isEnabled()) return;
 	if (!saveToFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
-	else ui->saveButton->setEnabled(false);
 }

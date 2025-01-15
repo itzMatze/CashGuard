@@ -28,6 +28,7 @@ private slots:
 private:
 	Ui::MainWindow *ui;
 	TransactionModel transactionModel;
+	TransactionModel oldTransactionModel;
 	QString filePath;
 };
 
