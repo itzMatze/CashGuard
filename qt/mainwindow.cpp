@@ -4,7 +4,7 @@
 #include "transaction_model.hpp"
 #include "transaction_file_handler.hpp"
 #include "ui_mainwindow.h"
-#include "transactiondialog.h"
+#include "transaction_dialog.h"
 #include <QFileDialog>
 #include <QTableWidget>
 #include <QPushButton>

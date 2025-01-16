@@ -1,4 +1,4 @@
-#include "transactiondialog.h"
+#include "transaction_dialog.h"
 #include "transaction.hpp"
 #include "util/random_generator.hpp"
 
