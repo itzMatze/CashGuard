@@ -82,12 +82,12 @@ bool saveToFile(const QString& filePath, const TransactionModel& transactionMode
 	rapidjson::Document doc;
 	doc.SetArray();
   auto& allocator = doc.GetAllocator();
-	for (uint32_t i = 0; i < transactionModel.rowCount(); i++)
+	for (std::shared_ptr<Transaction> transaction : transactionModel.getUnfilteredTransactions())
 	{
-		if (std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transactionModel.getTransaction(i)))
+		if (std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
 		{
 			rapidjson::Value group;
-			serializeTransaction(*transactionModel.getTransaction(i), group, allocator);
+			serializeTransaction(*transaction, group, allocator);
 			rapidjson::Value json_sub_transactions;
 			json_sub_transactions.SetArray();
 			for (const std::shared_ptr<const Transaction> sub_transaction : transaction_group->transactions)
@@ -102,7 +102,7 @@ bool saveToFile(const QString& filePath, const TransactionModel& transactionMode
 		else
 		{
 			rapidjson::Value jsonObject;
-			serializeTransaction(*transactionModel.getTransaction(i), jsonObject, allocator);
+			serializeTransaction(*transaction, jsonObject, allocator);
 			doc.PushBack(jsonObject, allocator);
 		}
 	}
