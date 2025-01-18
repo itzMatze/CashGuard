@@ -21,6 +21,7 @@ public:
 
 private slots:
   void openAddTransactionDialog();
+  void openAddTransactionGroupDialog();
   void openEditTransactionDialog();
   void openDeleteTransactionDialog();
 	void saveTransactions();
@@ -30,6 +31,8 @@ private:
 	TransactionModel transactionModel;
 	TransactionModel oldTransactionModel;
 	QString filePath;
+
+	void update();
 };
 
 #endif // MAINWINDOW_H

@@ -5,6 +5,7 @@
 #include "transaction_file_handler.hpp"
 #include "ui_mainwindow.h"
 #include "transaction_dialog.h"
+#include "transaction_group_dialog.h"
 #include <QFileDialog>
 #include <QTableWidget>
 #include <QPushButton>
@@ -24,6 +25,9 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	QShortcut* addShortcut = new QShortcut(QKeySequence("Ctrl+A"), this);
 	connect(addShortcut, &QShortcut::activated, this, &MainWindow::openAddTransactionDialog);
 	connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::openAddTransactionDialog);
+	QShortcut* addGroupShortcut = new QShortcut(QKeySequence("Ctrl+G"), this);
+	connect(addGroupShortcut, &QShortcut::activated, this, &MainWindow::openAddTransactionGroupDialog);
+	connect(ui->addGroupButton, &QPushButton::clicked, this, &MainWindow::openAddTransactionGroupDialog);
 	QShortcut* editShortcut = new QShortcut(QKeySequence("Ctrl+E"), this);
 	connect(editShortcut, &QShortcut::activated, this, &MainWindow::openEditTransactionDialog);
 	connect(ui->editButton, &QPushButton::clicked, this, &MainWindow::openEditTransactionDialog);
@@ -56,22 +60,42 @@ void MainWindow::openAddTransactionDialog()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		transactionModel.add(std::make_shared<Transaction>(dialog.getTransaction()));
-		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
-		saveTransactions();
+		update();
+	}
+}
+
+void MainWindow::openAddTransactionGroupDialog()
+{
+	TransactionGroupDialog dialog(this);
+
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		transactionModel.add(std::make_shared<TransactionGroup>(dialog.getTransactionGroup()));
+		update();
 	}
 }
 
 void MainWindow::openEditTransactionDialog()
 {
 	int32_t idx = ui->tableView->selectionModel()->currentIndex().row();
-	TransactionDialog dialog(*transactionModel.getTransaction(idx), this);
-
-	if (dialog.exec() == QDialog::Accepted)
+	std::shared_ptr<const Transaction> transaction = transactionModel.getTransaction(idx);
+	if (std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
 	{
-		transactionModel.setTransaction(idx, std::make_shared<Transaction>(dialog.getTransaction()));
-		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
-		saveTransactions();
+		TransactionGroupDialog dialog(*transaction_group, this);
+		if (dialog.exec() == QDialog::Accepted)
+		{
+			transactionModel.setTransaction(idx, std::make_shared<TransactionGroup>(dialog.getTransactionGroup()));
+		}
 	}
+	else
+	{
+		TransactionDialog dialog(*transaction, this);
+		if (dialog.exec() == QDialog::Accepted)
+		{
+			transactionModel.setTransaction(idx, std::make_shared<Transaction>(dialog.getTransaction()));
+		}
+	}
+	update();
 }
 
 void MainWindow::openDeleteTransactionDialog()
@@ -82,12 +106,17 @@ void MainWindow::openDeleteTransactionDialog()
 	if (reply == QMessageBox::Yes)
 	{
 		transactionModel.removeTransaction(idx);
-		ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
-		saveTransactions();
+		update();
 	}
 }
 
 void MainWindow::saveTransactions()
 {
 	if (!saveToFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
+}
+
+void MainWindow::update()
+{
+	ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
+	saveTransactions();
 }

@@ -21,7 +21,9 @@ set(SOURCE_FILES
 
 add_executable(CashGuard src/main.cpp ${SOURCE_FILES}
 	qt/mainwindow.h qt/mainwindow.cpp qt/mainwindow.ui
-	qt/transaction_dialog.h qt/transaction_dialog.cpp)
+	qt/transaction_dialog.h qt/transaction_dialog.cpp
+	qt/transaction_group_dialog.h qt/transaction_group_dialog.cpp qt/transaction_group_dialog.ui
+)
 
 target_include_directories(CashGuard PRIVATE
 	"${PROJECT_SOURCE_DIR}/include"

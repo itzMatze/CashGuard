@@ -73,7 +73,8 @@ class TransactionGroup : public Transaction
 {
 public:
 	TransactionGroup() = default;
+	TransactionGroup(const Transaction& transaction);
 	QString toString() const override;
 
-	std::vector<Transaction> transactions;
+	std::vector<std::shared_ptr<Transaction>> transactions;
 };

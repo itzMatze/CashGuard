@@ -47,18 +47,19 @@ bool loadFromFile(const QString& filePath, TransactionModel& transactionModel)
 	if (!loadFile(filePath.toStdString(), doc)) return false;
 	for (const auto& rj_transaction : doc.GetArray())
 	{
+		Transaction transaction = parseTransaction(rj_transaction);
 		if (rj_transaction.HasMember("Transactions"))
 		{
-			std::shared_ptr<TransactionGroup> transaction_group = std::make_shared<TransactionGroup>();
+			std::shared_ptr<TransactionGroup> transaction_group = std::make_shared<TransactionGroup>(transaction);
 			for (const auto& rj_sub_transaction : rj_transaction["Transactions"].GetArray())
 			{
-				transaction_group->transactions.push_back(parseTransaction(rj_sub_transaction));
+				transaction_group->transactions.push_back(std::make_shared<Transaction>(parseTransaction(rj_sub_transaction)));
 			}
 			transactionModel.add(transaction_group);
 		}
 		else
 		{
-			transactionModel.add(std::make_shared<Transaction>(parseTransaction(rj_transaction)));
+			transactionModel.add(std::make_shared<Transaction>(transaction));
 		}
 	}
 	return true;
@@ -89,10 +90,10 @@ bool saveToFile(const QString& filePath, const TransactionModel& transactionMode
 			serializeTransaction(*transaction, group, allocator);
 			rapidjson::Value json_sub_transactions;
 			json_sub_transactions.SetArray();
-			for (const Transaction& sub_transaction : transaction_group->transactions)
+			for (const std::shared_ptr<const Transaction> sub_transaction : transaction_group->transactions)
 			{
 				rapidjson::Value jsonObject;
-				serializeTransaction(sub_transaction, jsonObject, allocator);
+				serializeTransaction(*sub_transaction, jsonObject, allocator);
 				json_sub_transactions.PushBack(jsonObject, allocator);
 			}
 			group.AddMember("Transactions", json_sub_transactions, allocator);

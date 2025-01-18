@@ -121,6 +121,9 @@ bool operator<(const Transaction& a, const Transaction& b)
 	return a.date < b.date;
 }
 
+TransactionGroup::TransactionGroup(const Transaction& transaction) : Transaction(transaction)
+{}
+
 QString TransactionGroup::toString() const
 {
 	return Transaction::toString() + "Transaction Group";
