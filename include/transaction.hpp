@@ -52,6 +52,7 @@ namespace TransactionFieldNames
 class Transaction
 {
 public:
+	Transaction();
 	virtual ~Transaction() = default;
 	static QStringList getFieldNames();
 	QString getField(const QString& fieldName) const;

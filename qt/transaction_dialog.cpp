@@ -4,10 +4,6 @@
 
 TransactionDialog::TransactionDialog(QWidget *parent) : QDialog(parent)
 {
-	transaction.id = 0;
-	transaction.date = QDate::currentDate();
-	transaction.category = transactionCategories.back();
-	transaction.amount = 0;
 	init();
 }
 
@@ -18,7 +14,7 @@ TransactionDialog::TransactionDialog(const Transaction& transaction, QWidget *pa
 
 void TransactionDialog::init()
 {
-	setWindowTitle("Add Transaction");
+	setWindowTitle("Transaction Dialog");
 	resize(300, 150);
 
 	dateInput = new QDateEdit(this);

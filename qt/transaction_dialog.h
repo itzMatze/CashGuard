@@ -13,7 +13,7 @@
 
 class TransactionDialog : public QDialog
 {
-	Q_OBJECT
+	Q_OBJECT;
 
 public:
 	TransactionDialog(QWidget *parent = nullptr);

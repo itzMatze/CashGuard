@@ -61,6 +61,9 @@ bool Amount::isNegative() const
 	return value < 0;
 }
 
+Transaction::Transaction() : id(0), date(QDate::currentDate()), category(transactionCategories.back()), amount(0), description("")
+{}
+
 QStringList Transaction::getFieldNames()
 {
 	namespace tfn = TransactionFieldNames;
