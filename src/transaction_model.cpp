@@ -10,7 +10,7 @@ TransactionModel::TransactionModel(QObject* parent) : QAbstractTableModel(parent
 
 int TransactionModel::rowCount(const QModelIndex& parent) const
 {
-	return transactions.size();
+	return filtered_transactions.size();
 }
 
 int TransactionModel::columnCount(const QModelIndex& parent) const
@@ -24,15 +24,14 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
 	{
 		if (index.column() == Transaction::getFieldNames().size())
 		{
-			if (std::dynamic_pointer_cast<TransactionGroup>(transactions[index.row()])) return "×";
+			if (std::dynamic_pointer_cast<TransactionGroup>(getTransaction(index.row()))) return "×";
 			else return " ";
 		}
-		return transactions[index.row()]->getFieldView(Transaction::getFieldNames().at(index.column()));
+		return getTransaction(index.row())->getFieldView(Transaction::getFieldNames().at(index.column()));
 	}
 	if (role == Qt::BackgroundRole)
 	{
-		// Check the content of a specific column
-		if (transactions[index.row()]->amount.isNegative()) return QBrush(QColor(255, 0, 0, 100));
+		if (getTransaction(index.row())->amount.isNegative()) return QBrush(QColor(255, 0, 0, 100));
 		else return QBrush(QColor(0, 255, 0, 100));
 	}
 	if (role == Qt::TextAlignmentRole)
@@ -52,8 +51,9 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
 
 void TransactionModel::removeTransaction(uint32_t idx)
 {
+	transactions.erase(transactions.begin() + getTransactionIndex(filtered_transactions.at(idx)));
 	beginRemoveRows(QModelIndex(), idx, idx);
-	transactions.erase(transactions.begin() + idx);
+	filtered_transactions.erase(filtered_transactions.begin() + idx);
 	endRemoveRows();
 }
 
@@ -61,14 +61,18 @@ void TransactionModel::add(const std::shared_ptr<Transaction>& transaction)
 {
 	uint32_t idx = 0;
 	while (idx < transactions.size() && *transaction < *transactions[idx]) idx++;
-	beginInsertRows(QModelIndex(), idx, idx);
 	transactions.insert(transactions.begin() + idx, transaction);
+	if (!filter.check(*transaction)) return;
+	idx = 0;
+	while (idx < filtered_transactions.size() && *transaction < *filtered_transactions[idx]) idx++;
+	beginInsertRows(QModelIndex(), idx, idx);
+	filtered_transactions.insert(filtered_transactions.begin() + idx, transaction);
 	endInsertRows();
 }
 
-std::shared_ptr<const Transaction> TransactionModel::getTransaction(uint32_t idx) const
+std::shared_ptr<Transaction> TransactionModel::getTransaction(uint32_t idx) const
 {
-	return transactions.at(idx);
+	return filtered_transactions.at(idx);
 }
 
 void TransactionModel::setTransaction(uint32_t idx, const std::shared_ptr<Transaction>& transaction)
@@ -77,14 +81,37 @@ void TransactionModel::setTransaction(uint32_t idx, const std::shared_ptr<Transa
 	add(transaction);
 }
 
-const std::vector<std::shared_ptr<Transaction>>& TransactionModel::getTransactions() const
+const std::vector<std::shared_ptr<Transaction>>& TransactionModel::getUnfilteredTransactions() const
 {
 	return transactions;
 }
 
 void TransactionModel::clear()
 {
-	beginResetModel();
 	transactions.clear();
+	beginResetModel();
+	filtered_transactions.clear();
 	endResetModel();
+}
+
+void TransactionModel::setFilter(const TransactionFilter& filter)
+{
+	this->filter = filter;
+	std::vector<std::shared_ptr<Transaction>> transactions_copy(transactions);
+	clear();
+	for (std::shared_ptr<Transaction> transaction : transactions_copy)
+	{
+		add(transaction);
+	}
+}
+
+const TransactionFilter& TransactionModel::getFilter() const
+{
+	return filter;
+}
+
+uint32_t TransactionModel::getTransactionIndex(std::shared_ptr<Transaction> transaction)
+{
+	for (uint32_t i = 0; i < transactions.size(); i++) if (transactions.at(i) == transaction) return i;
+	return transactions.size();
 }

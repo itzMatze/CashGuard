@@ -83,7 +83,7 @@ TransactionGroup TransactionGroupDialog::getTransactionGroup()
 	transactionGroup.description = ui->descriptionInput->text();
 	// prevent overwriting of the id when a transaction is edited
 	if (transactionGroup.id == 0) transactionGroup.id = rng::random_int64();
-	for (std::shared_ptr<Transaction> transaction : transactionModel.getTransactions()) transactionGroup.transactions.push_back(transaction);
+	for (uint32_t i = 0; i < transactionModel.rowCount(); i++) transactionGroup.transactions.push_back(transactionModel.getTransaction(i));
 	transactionGroup.amount = getCurrentTotalAmount(transactionModel);
 	return transactionGroup;
 }

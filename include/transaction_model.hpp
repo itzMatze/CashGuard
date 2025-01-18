@@ -1,6 +1,7 @@
 #pragma once
 
 #include "transaction.hpp"
+#include "transaction_filter.hpp"
 #include <qabstractitemmodel.h>
 #include <QAbstractTableModel>
 #include <vector>
@@ -17,11 +18,17 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 	void add(const std::shared_ptr<Transaction>& transaction);
 	void removeTransaction(uint32_t idx);
-	std::shared_ptr<const Transaction> getTransaction(uint32_t idx) const;
+	std::shared_ptr<Transaction> getTransaction(uint32_t idx) const;
 	void setTransaction(uint32_t idx, const std::shared_ptr<Transaction>& transaction);
-	const std::vector<std::shared_ptr<Transaction>>& getTransactions() const;
+	const std::vector<std::shared_ptr<Transaction>>& getUnfilteredTransactions() const;
 	void clear();
+	void setFilter(const TransactionFilter& newFilter);
+	const TransactionFilter& getFilter() const;
 
 private:
 	std::vector<std::shared_ptr<Transaction>> transactions;
+	std::vector<std::shared_ptr<Transaction>> filtered_transactions;
+	TransactionFilter filter;
+
+	uint32_t getTransactionIndex(std::shared_ptr<Transaction> transaction);
 };

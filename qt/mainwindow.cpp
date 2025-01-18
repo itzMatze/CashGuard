@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "table_style_delegate.hpp"
 #include "total_amount.hpp"
+#include "transaction_filter_dialog.h"
 #include "transaction_model.hpp"
 #include "transaction_file_handler.hpp"
 #include "ui_mainwindow.h"
@@ -34,6 +35,8 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	QShortcut* removeShortcut = new QShortcut(QKeySequence("Ctrl+D"), this);
 	connect(removeShortcut, &QShortcut::activated, this, &MainWindow::openDeleteTransactionDialog);
 	connect(ui->removeButton, &QPushButton::clicked, this, &MainWindow::openDeleteTransactionDialog);
+	QShortcut* filterShortcut = new QShortcut(QKeySequence("Ctrl+F"), this);
+	connect(filterShortcut, &QShortcut::activated, this, &MainWindow::openFilterDialog);
 
 	if (!loadFromFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
 	if (!loadFromFile(filePath, oldTransactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
@@ -60,7 +63,8 @@ void MainWindow::openAddTransactionDialog()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		transactionModel.add(std::make_shared<Transaction>(dialog.getTransaction()));
-		update();
+		updateWindow();
+		saveTransactions();
 	}
 }
 
@@ -71,7 +75,8 @@ void MainWindow::openAddTransactionGroupDialog()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		transactionModel.add(std::make_shared<TransactionGroup>(dialog.getTransactionGroup()));
-		update();
+		updateWindow();
+		saveTransactions();
 	}
 }
 
@@ -95,7 +100,8 @@ void MainWindow::openEditTransactionDialog()
 			transactionModel.setTransaction(idx, std::make_shared<Transaction>(dialog.getTransaction()));
 		}
 	}
-	update();
+	updateWindow();
+	saveTransactions();
 }
 
 void MainWindow::openDeleteTransactionDialog()
@@ -106,7 +112,19 @@ void MainWindow::openDeleteTransactionDialog()
 	if (reply == QMessageBox::Yes)
 	{
 		transactionModel.removeTransaction(idx);
-		update();
+		updateWindow();
+		saveTransactions();
+	}
+}
+
+void MainWindow::openFilterDialog()
+{
+	TransactionFilterDialog dialog(transactionModel.getFilter(), this);
+
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		transactionModel.setFilter(dialog.getTransactionFilter());
+		updateWindow();
 	}
 }
 
@@ -115,8 +133,7 @@ void MainWindow::saveTransactions()
 	if (!saveToFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
 }
 
-void MainWindow::update()
+void MainWindow::updateWindow()
 {
 	ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
-	saveTransactions();
 }

@@ -15,14 +15,17 @@ set(SOURCE_FILES
 	include/transaction_model.hpp
 	src/transaction_model.cpp
 	src/transaction_file_handler.cpp
+	src/transaction_filter.cpp
 	include/table_style_delegate.hpp
 	src/table_style_delegate.cpp
-	src/total_amount.cpp)
+	src/total_amount.cpp
+)
 
 add_executable(CashGuard src/main.cpp ${SOURCE_FILES}
 	qt/mainwindow.h qt/mainwindow.cpp qt/mainwindow.ui
 	qt/transaction_dialog.h qt/transaction_dialog.cpp
 	qt/transaction_group_dialog.h qt/transaction_group_dialog.cpp qt/transaction_group_dialog.ui
+	qt/transaction_filter_dialog.h qt/transaction_filter_dialog.cpp
 )
 
 target_include_directories(CashGuard PRIVATE
