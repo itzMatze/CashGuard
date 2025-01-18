@@ -20,6 +20,7 @@ public:
 	TransactionFilterDialog(QWidget *parent = nullptr);
 	TransactionFilterDialog(const TransactionFilter& transactionFilter, QWidget *parent = nullptr);
 	TransactionFilter getTransactionFilter();
+	void resetFilter();
 
 private:
 	QLabel* dateMinLabel;
@@ -37,6 +38,7 @@ private:
 	TransactionFilter transactionFilter;
 
 	void init();
+	void updateWindow();
 };
 
 #endif // TRANSACTIONFILTERDIALOG_H
