@@ -53,7 +53,7 @@ Amount::Amount(QString stringValue)
 
 QString Amount::toString() const
 {
-	return (isNegative() ? "- " : "+ ") + QString::number(std::abs(value) / 100) + "." + QString::number(std::abs(value) % 100).rightJustified(2, '0');
+	return (isNegative() ? "-" : "+") + QString::number(std::abs(value) / 100) + "." + QString::number(std::abs(value) % 100).rightJustified(2, '0');
 }
 
 bool Amount::isNegative() const
