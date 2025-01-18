@@ -1,6 +1,7 @@
 #include "transaction_model.hpp"
 
 #include <QBrush>
+#include <memory>
 
 #include "transaction.hpp"
 
@@ -14,17 +15,30 @@ int TransactionModel::rowCount(const QModelIndex& parent) const
 
 int TransactionModel::columnCount(const QModelIndex& parent) const
 {
-	return Transaction::getFieldNames().size();
+	return Transaction::getFieldNames().size() + 1;
 }
 
 QVariant TransactionModel::data(const QModelIndex& index, int role) const
 {
-	if (role == Qt::DisplayRole) return transactions[index.row()]->getFieldView(Transaction::getFieldNames().at(index.column()));
+	if (role == Qt::DisplayRole)
+	{
+		if (index.column() == Transaction::getFieldNames().size())
+		{
+			if (std::dynamic_pointer_cast<TransactionGroup>(transactions[index.row()])) return "×";
+			else return " ";
+		}
+		return transactions[index.row()]->getFieldView(Transaction::getFieldNames().at(index.column()));
+	}
 	if (role == Qt::BackgroundRole)
 	{
 		// Check the content of a specific column
 		if (transactions[index.row()]->amount.isNegative()) return QBrush(QColor(255, 0, 0, 100));
 		else return QBrush(QColor(0, 255, 0, 100));
+	}
+	if (role == Qt::TextAlignmentRole)
+	{
+		if (index.column() == Transaction::getFieldNames().size()) return {Qt::AlignCenter | Qt::AlignVCenter};
+		else return {Qt::AlignLeft | Qt::AlignVCenter};
 	}
 	return QVariant();
 }
@@ -32,6 +46,7 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
 QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role != Qt::DisplayRole || orientation != Qt::Horizontal) return QVariant();
+	if (section == Transaction::getFieldNames().size()) return "Group";
 	return Transaction::getFieldNames().at(section);
 }
 
