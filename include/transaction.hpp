@@ -10,6 +10,7 @@ const QStringList transactionCategories {
 	"Education",
 	"Gaming",
 	"Groceries",
+	"Health",
 	"Internet",
 	"Leisure",
 	"Other Income",
