@@ -21,13 +21,13 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 {
 	ui->setupUi(this);
 
-	QShortcut* addShortcut = new QShortcut(QKeySequence("A"), this);
+	QShortcut* addShortcut = new QShortcut(QKeySequence("Ctrl+A"), this);
 	connect(addShortcut, &QShortcut::activated, this, &MainWindow::openAddTransactionDialog);
 	connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::openAddTransactionDialog);
-	QShortcut* editShortcut = new QShortcut(QKeySequence("E"), this);
+	QShortcut* editShortcut = new QShortcut(QKeySequence("Ctrl+E"), this);
 	connect(editShortcut, &QShortcut::activated, this, &MainWindow::openEditTransactionDialog);
 	connect(ui->editButton, &QPushButton::clicked, this, &MainWindow::openEditTransactionDialog);
-	QShortcut* removeShortcut = new QShortcut(QKeySequence("D"), this);
+	QShortcut* removeShortcut = new QShortcut(QKeySequence("Ctrl+D"), this);
 	connect(removeShortcut, &QShortcut::activated, this, &MainWindow::openDeleteTransactionDialog);
 	connect(ui->removeButton, &QPushButton::clicked, this, &MainWindow::openDeleteTransactionDialog);
 

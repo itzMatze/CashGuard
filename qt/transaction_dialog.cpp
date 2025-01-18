@@ -1,6 +1,7 @@
 #include "transaction_dialog.h"
 #include "transaction.hpp"
 #include "util/random_generator.hpp"
+#include <qshortcut.h>
 
 TransactionDialog::TransactionDialog(QWidget *parent) : QDialog(parent)
 {
@@ -47,7 +48,11 @@ void TransactionDialog::init()
 	mainLayout->addWidget(descriptionInput);
 	mainLayout->addLayout(buttonLayout);
 
+	QShortcut* okShortcut = new QShortcut(QKeySequence("Ctrl+O"), this);
+	connect(okShortcut, &QShortcut::activated, this, &QDialog::accept);
 	connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
+	QShortcut* cancelShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+	connect(cancelShortcut, &QShortcut::activated, this, &QDialog::reject);
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 }
 
