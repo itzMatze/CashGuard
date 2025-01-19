@@ -47,7 +47,10 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	ui->tableView->setItemDelegate(new TableStyleDelegate(ui->tableView));
-	ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString() + " €");
+
+	ui->totalAmountChart->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	ui->totalAmountChart->setRenderHint(QPainter::Antialiasing);
+	updateWindow();
 }
 
 MainWindow::~MainWindow()
@@ -135,5 +138,6 @@ void MainWindow::saveTransactions()
 
 void MainWindow::updateWindow()
 {
-	ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString());
+	ui->totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString() + " €");
+	ui->totalAmountChart->setChart(getSmallTotalAmountChart(transactionModel));
 }

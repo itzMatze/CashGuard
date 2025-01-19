@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(SPDLOG_DIR "${PROJECT_SOURCE_DIR}/dependencies/spdlog")
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui Charts)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -35,4 +35,4 @@ target_include_directories(CashGuard PRIVATE
 	"${SPDLOG_DIR}/include")
 
 add_subdirectory("${SPDLOG_DIR}")
-target_link_libraries(CashGuard Qt6::Core Qt6::Widgets Qt6::Gui spdlog::spdlog)
+target_link_libraries(CashGuard Qt6::Core Qt6::Widgets Qt6::Gui Qt6::Charts spdlog::spdlog)
