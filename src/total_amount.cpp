@@ -23,7 +23,7 @@ QDate roundDownMonth(const QDate& date)
 	return QDate(date.year(), date.month(), 1);
 }
 
-QChart* getSmallTotalAmountChart(const TransactionModel& transactionModel)
+std::pair<QChart*, QLineSeries*> getSmallTotalAmountChart(const TransactionModel& transactionModel)
 {
 	// show the last year rounded to always show full months
 	QLineSeries* series = new QLineSeries();
@@ -76,5 +76,5 @@ QChart* getSmallTotalAmountChart(const TransactionModel& transactionModel)
 	chart->addAxis(yAxis, Qt::AlignLeft);
 	series->attachAxis(yAxis);
 
-	return chart;
+	return {chart, series};
 }

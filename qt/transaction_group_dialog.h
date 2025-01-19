@@ -3,6 +3,7 @@
 
 #include "transaction.hpp"
 #include "transaction_model.hpp"
+#include "transaction_group_dialog_ui.hpp"
 #include <QDialog>
 
 namespace Ui {
@@ -26,12 +27,11 @@ private slots:
 	void openDeleteTransactionDialog();
 
 private:
-	Ui::TransactionGroupDialog *ui;
+	TransactionGroupDialogUI ui;
 	TransactionModel transactionModel;
 	TransactionGroup transactionGroup;
 
 	void init();
-	void update();
 };
 
 #endif // TRANSACTION_GROUP_DIALOG_H

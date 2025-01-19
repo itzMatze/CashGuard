@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "mainwindow_ui.hpp"
 #include "transaction_model.hpp"
 #include <QMainWindow>
 #include <qshortcut.h>
@@ -28,12 +29,10 @@ private slots:
 	void saveTransactions();
 
 private:
-	Ui::MainWindow *ui;
+	MainWindowUI ui;
 	TransactionModel transactionModel;
 	TransactionModel oldTransactionModel;
 	QString filePath;
-
-	void updateWindow();
 };
 
 #endif // MAINWINDOW_H

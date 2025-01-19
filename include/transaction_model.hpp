@@ -24,6 +24,8 @@ public:
 	void clear();
 	void setFilter(const TransactionFilter& newFilter);
 	const TransactionFilter& getFilter() const;
+	// use with caution, changes to the filter will not trigger a filter update
+	TransactionFilter& getFilter();
 
 private:
 	std::vector<std::shared_ptr<Transaction>> transactions;
