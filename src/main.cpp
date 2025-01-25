@@ -1,7 +1,7 @@
 #include <vector>
 #include "util/log.hpp"
 #include <QApplication>
-#include "mainwindow.h"
+#include "mainwindow.hpp"
 
 #include "argparse/argparse.hpp"
 

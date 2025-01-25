@@ -1,4 +1,4 @@
-#include "tooltip_chart_view.h"
+#include "tooltip_chart_view.hpp"
 #include <QChartView>
 #include <QValueAxis>
 #include <QLineSeries>

@@ -1,4 +1,4 @@
-#include "transaction_filter_dialog.h"
+#include "transaction_filter_dialog.hpp"
 #include <limits>
 #include <qshortcut.h>
 

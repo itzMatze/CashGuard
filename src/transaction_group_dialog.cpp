@@ -1,8 +1,8 @@
-#include "transaction_group_dialog.h"
+#include "transaction_group_dialog.hpp"
 #include "table_style_delegate.hpp"
 #include "total_amount.hpp"
 #include "transaction.hpp"
-#include "transaction_dialog.h"
+#include "transaction_dialog.hpp"
 #include "util/random_generator.hpp"
 #include "validation.hpp"
 #include <memory>

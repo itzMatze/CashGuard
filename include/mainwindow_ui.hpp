@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tooltip_chart_view.h"
+#include "tooltip_chart_view.hpp"
 #include "total_amount.hpp"
 #include "transaction_model.hpp"
 #include "qt_util.hpp"

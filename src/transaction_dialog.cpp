@@ -1,4 +1,4 @@
-#include "transaction_dialog.h"
+#include "transaction_dialog.hpp"
 #include "transaction.hpp"
 #include "util/random_generator.hpp"
 #include <qshortcut.h>
