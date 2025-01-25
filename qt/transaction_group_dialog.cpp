@@ -4,6 +4,7 @@
 #include "transaction.hpp"
 #include "transaction_dialog.h"
 #include "util/random_generator.hpp"
+#include "validation.hpp"
 #include <memory>
 #include <qmessagebox.h>
 #include <qshortcut.h>
@@ -103,6 +104,7 @@ void TransactionGroupDialog::openAddTransactionDialog()
 void TransactionGroupDialog::openEditTransactionDialog()
 {
 	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
+	if (!validateTransactionIndex(idx, transactionModel, this)) return;
 	TransactionDialog dialog(*transactionModel.getTransaction(idx), this);
 
 	if (dialog.exec() == QDialog::Accepted)
@@ -116,6 +118,7 @@ void TransactionGroupDialog::openEditTransactionDialog()
 void TransactionGroupDialog::openDeleteTransactionDialog()
 {
 	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
+	if (!validateTransactionIndex(idx, transactionModel, this)) return;
 	QString message(QString("Delete transaction %1?").arg(transactionModel.getTransaction(idx)->getField(TransactionFieldNames::ID)));
 	QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", message, QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes)

@@ -6,6 +6,7 @@
 #include "mainwindow_ui.hpp"
 #include "transaction_dialog.h"
 #include "transaction_group_dialog.h"
+#include "validation.hpp"
 #include <QFileDialog>
 #include <QTableWidget>
 #include <QPushButton>
@@ -84,6 +85,7 @@ void MainWindow::openAddTransactionGroupDialog()
 void MainWindow::openEditTransactionDialog()
 {
 	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
+	if (!validateTransactionIndex(idx, transactionModel, this)) return;
 	std::shared_ptr<const Transaction> transaction = transactionModel.getTransaction(idx);
 	if (std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
 	{
@@ -108,6 +110,7 @@ void MainWindow::openEditTransactionDialog()
 void MainWindow::openDeleteTransactionDialog()
 {
 	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
+	if (!validateTransactionIndex(idx, transactionModel, this)) return;
 	QString message(QString("Delete transaction %1?").arg(transactionModel.getTransaction(idx)->getField(TransactionFieldNames::ID)));
 	QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", message, QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes)

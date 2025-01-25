@@ -21,6 +21,7 @@ set(SOURCE_FILES
 	include/table_style_delegate.hpp
 	src/table_style_delegate.cpp
 	src/total_amount.cpp
+	src/validation.cpp
 )
 
 add_executable(CashGuard src/main.cpp ${SOURCE_FILES}
