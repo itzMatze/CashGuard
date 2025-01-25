@@ -4,6 +4,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QCategoryAxis>
+#include <limits>
 
 Amount getCurrentTotalAmount(const TransactionModel& transaction_model)
 {
@@ -21,6 +22,13 @@ QDate roundUpMonth(const QDate& date)
 QDate roundDownMonth(const QDate& date)
 {
 	return QDate(date.year(), date.month(), 1);
+}
+
+int32_t findMagnitude(int32_t value)
+{
+	int32_t magnitude = 10;
+	while (magnitude < value) magnitude *= 10;
+	return magnitude / 10;
 }
 
 std::pair<QChart*, QLineSeries*> getSmallTotalAmountChart(const TransactionModel& transactionModel)
@@ -75,6 +83,89 @@ std::pair<QChart*, QLineSeries*> getSmallTotalAmountChart(const TransactionModel
 	yAxis->setLabelsVisible(false);
 	chart->addAxis(yAxis, Qt::AlignLeft);
 	series->attachAxis(yAxis);
+
+	return {chart, series};
+}
+
+std::pair<QChart*, QLineSeries*> getTotalAmountChart(const TransactionModel& transactionModel)
+{
+	const QDate& dateMin = transactionModel.getFilter().dateMin;
+	const QDate& dateMax = transactionModel.getFilter().dateMax;
+	int32_t totalDays = dateMin.daysTo(dateMax);
+	QLineSeries* series = new QLineSeries();
+	int32_t previousAmount = 0;
+	int32_t amount = 0;
+	int32_t minAmount = std::numeric_limits<int32_t>::max();
+	int32_t maxAmount = std::numeric_limits<int32_t>::min();
+	for (int32_t i = transactionModel.rowCount() - 1; i >= 0; i--)
+	{
+		std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(i);
+		amount += transaction->amount.value;
+		if (transaction->date <= dateMax && transaction->date >= dateMin)
+		{
+			int32_t daysOld = transaction->date.daysTo(dateMax);
+			// draw line to old value to prevent diagonal lines
+			series->append(totalDays - daysOld, double(previousAmount) / 100.0);
+			series->append(totalDays - daysOld, double(amount) / 100.0);
+			minAmount = std::min(minAmount, amount);
+			maxAmount = std::max(maxAmount, amount);
+		}
+		previousAmount = amount;
+	}
+
+	QChart* chart = new QChart();
+	chart->legend()->hide();
+	chart->addSeries(series);
+	chart->setMargins(QMargins(0, 0, 0, 0));
+	chart->setBackgroundBrush(Qt::NoBrush);
+	chart->setBackgroundPen(Qt::NoPen);
+	chart->setPlotAreaBackgroundVisible(false);
+
+	// x axis
+	{
+		QCategoryAxis* axis = new QCategoryAxis();
+		axis->setLabelsColor(Qt::white);
+		QFont font = axis->labelsFont();
+		font.setPointSize(12);
+		axis->setLabelsFont(font);
+		QDate labelDate = dateMin;
+		int32_t labelDays = dateMin.daysInMonth() - dateMin.day();
+		while (labelDate < dateMax)
+		{
+			axis->append(labelDate.toString("MM.yy"), labelDays);
+			labelDate = labelDate.addMonths(1);
+			labelDays += labelDate.daysInMonth();
+		}
+		axis->setRange(0.0, totalDays);
+		QPen gridPen(Qt::darkGray);
+		gridPen.setStyle(Qt::DashLine);
+		gridPen.setWidth(1);
+		axis->setGridLinePen(gridPen);
+		chart->addAxis(axis, Qt::AlignBottom);
+		series->attachAxis(axis);
+	}
+
+	// y axis
+	{
+		QValueAxis* axis = new QValueAxis();
+		axis->setLabelsColor(Qt::white);
+		QFont font = axis->labelsFont();
+		font.setPointSize(12);
+		axis->setLabelsFont(font);
+
+		int32_t magnitude = findMagnitude(std::max(std::abs(minAmount), std::abs(maxAmount)));
+		minAmount = (minAmount / magnitude) * magnitude - magnitude;
+		maxAmount = (maxAmount / magnitude) * magnitude + magnitude;
+		axis->setRange(double(minAmount) / 100.0, double(maxAmount) / 100.0);
+
+		QPen gridPen(Qt::darkGray);
+		gridPen.setStyle(Qt::DashLine);
+		gridPen.setWidth(1);
+		axis->setGridLinePen(gridPen);
+		axis->setLabelsVisible(true);
+		chart->addAxis(axis, Qt::AlignLeft);
+		series->attachAxis(axis);
+	}
 
 	return {chart, series};
 }

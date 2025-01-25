@@ -10,6 +10,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 
 set(SOURCE_FILES
+	include/tooltip_chart_view.h
+	src/tooltip_chart_view.cpp
 	src/util/random_generator.cpp
 	src/transaction.cpp
 	include/transaction_model.hpp

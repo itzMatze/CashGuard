@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tooltip_chart_view.h"
 #include "total_amount.hpp"
 #include "transaction_model.hpp"
 #include "qt_util.hpp"
@@ -32,7 +33,8 @@ public:
 		editButton(new QPushButton(parent)),
 		removeButton(new QPushButton(parent)),
 		tabTotalAmountGraph(new QWidget(parent)),
-		tab1RootLayout(new QVBoxLayout(parent))
+		tab1RootLayout(new QVBoxLayout(parent)),
+		totalAmountChart(new TooltipChartView(parent))
 	{
 		centralWidget->setLayout(rootLayout);
 		rootLayout->addWidget(tabWidget);
@@ -70,12 +72,17 @@ public:
 		// tab 1
 		tabWidget->addTab(tabTotalAmountGraph, "Total Amount Graph");
 		tabTotalAmountGraph->setLayout(tab1RootLayout);
+		totalAmountChart->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		totalAmountChart->setRenderHint(QPainter::Antialiasing);
+		tab1RootLayout->addWidget(totalAmountChart);
 	}
 
 	void update(const TransactionModel& transactionModel)
 	{
 		totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString() + " €");
 		totalAmountSmallChart->setChart(getSmallTotalAmountChart(transactionModel).first);
+		std::pair<QChart*, QLineSeries*> totalAmountData = getTotalAmountChart(transactionModel);
+		totalAmountChart->updateChart(totalAmountData.first, totalAmountData.second, transactionModel.getFilter().dateMin);
 	}
 
 	QWidget* centralWidget;
@@ -96,4 +103,5 @@ public:
 
 	QWidget* tabTotalAmountGraph;
 	QVBoxLayout* tab1RootLayout;
+	TooltipChartView* totalAmountChart;
 };
