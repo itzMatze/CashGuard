@@ -2,12 +2,7 @@
 #include <limits>
 #include <qshortcut.h>
 
-TransactionFilterDialog::TransactionFilterDialog(QWidget *parent) : QDialog(parent)
-{
-	init();
-}
-
-TransactionFilterDialog::TransactionFilterDialog(const TransactionFilter& transactionFilter, QWidget *parent) : transactionFilter(transactionFilter)
+TransactionFilterDialog::TransactionFilterDialog(const TransactionModel& transactionModel, QWidget *parent) : transactionModel(transactionModel), transactionFilter(transactionModel.getFilter())
 {
 	init();
 }
@@ -118,5 +113,7 @@ TransactionFilter TransactionFilterDialog::getTransactionFilter()
 void TransactionFilterDialog::resetFilter()
 {
 	transactionFilter = TransactionFilter();
+	transactionFilter.dateMax = transactionModel.getUnfilteredTransactions().at(0)->date;
+	transactionFilter.dateMin = transactionModel.getUnfilteredTransactions().back()->date;
 	updateWindow();
 }

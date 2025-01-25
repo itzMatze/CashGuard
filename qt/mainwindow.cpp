@@ -39,8 +39,8 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 
 	if (!loadFromFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
 	if (!loadFromFile(filePath, oldTransactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
-	transactionModel.getFilter().dateMax = transactionModel.getTransaction(0)->date;
-	transactionModel.getFilter().dateMin = transactionModel.getTransaction(transactionModel.rowCount() - 1)->date;
+	transactionModel.getFilter().dateMax = transactionModel.getUnfilteredTransactions().at(0)->date;
+	transactionModel.getFilter().dateMin = transactionModel.getUnfilteredTransactions().back()->date;
 	ui.tableView->setModel(&transactionModel);
 	ui.tableView->resizeColumnsToContents();
 	ui.tableView->resizeRowsToContents();
@@ -120,7 +120,7 @@ void MainWindow::openDeleteTransactionDialog()
 
 void MainWindow::openFilterDialog()
 {
-	TransactionFilterDialog dialog(transactionModel.getFilter(), this);
+	TransactionFilterDialog dialog(transactionModel, this);
 
 	if (dialog.exec() == QDialog::Accepted)
 	{

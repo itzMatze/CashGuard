@@ -2,6 +2,7 @@
 #define TRANSACTIONFILTERDIALOG_H
 
 #include "transaction_filter.hpp"
+#include "transaction_model.hpp"
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDialog>
@@ -17,8 +18,7 @@ class TransactionFilterDialog : public QDialog
 	Q_OBJECT;
 
 public:
-	TransactionFilterDialog(QWidget *parent = nullptr);
-	TransactionFilterDialog(const TransactionFilter& transactionFilter, QWidget *parent = nullptr);
+	TransactionFilterDialog(const TransactionModel& transactionModel, QWidget *parent);
 	TransactionFilter getTransactionFilter();
 	void resetFilter();
 
@@ -36,6 +36,7 @@ private:
 	QLabel* descriptionLabel;
 	QLineEdit* descriptionInput;
 	TransactionFilter transactionFilter;
+	const TransactionModel& transactionModel;
 
 	void init();
 	void updateWindow();
