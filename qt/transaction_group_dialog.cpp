@@ -85,16 +85,6 @@ TransactionGroup TransactionGroupDialog::getTransactionGroup()
 	return transactionGroup;
 }
 
-void TransactionGroupDialog::openEditGroupAttributesDialog()
-{
-	TransactionDialog dialog(transactionGroup, this);
-	if (dialog.exec() == QDialog::Accepted)
-	{
-		Transaction transaction = dialog.getTransaction();
-		for (const QString& fieldName : Transaction::getFieldNames()) transactionGroup.setField(fieldName, transaction.getField(fieldName));
-	}
-}
-
 void TransactionGroupDialog::openAddTransactionDialog()
 {
 	Transaction transaction;

@@ -21,7 +21,6 @@ public:
 	TransactionGroup getTransactionGroup();
 
 private slots:
-	void openEditGroupAttributesDialog();
 	void openAddTransactionDialog();
 	void openEditTransactionDialog();
 	void openDeleteTransactionDialog();
