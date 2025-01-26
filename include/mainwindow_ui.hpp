@@ -1,5 +1,6 @@
 #pragma once
 
+#include "table_style_delegate.hpp"
 #include "tooltip_chart_view.hpp"
 #include "total_amount.hpp"
 #include "transaction_model.hpp"
@@ -54,6 +55,9 @@ public:
 		// transaction table
 		tableView->setFont(setFontSize(12, false, tableView->font()));
 		tab0RootLayout->addWidget(tableView);
+		tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+		tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+		tableView->setItemDelegate(new TableStyleDelegate(tableView));
 		// buttons
 		addButton->setFont(setFontSize(12, false, addButton->font()));
 		addButton->setText("Add");

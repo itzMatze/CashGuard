@@ -1,5 +1,4 @@
 #include "mainwindow.hpp"
-#include "table_style_delegate.hpp"
 #include "transaction_filter_dialog.hpp"
 #include "transaction_model.hpp"
 #include "transaction_file_handler.hpp"
@@ -44,11 +43,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	transactionModel.getFilter().dateMin = transactionModel.getUnfilteredTransactions().back()->date;
 	ui.tableView->setModel(&transactionModel);
 	ui.tableView->resizeColumnsToContents();
-	ui.tableView->resizeRowsToContents();
 	if (ui.tableView->columnWidth(4) > 800) ui.tableView->setColumnWidth(4, 800);
-	ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	ui.tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-	ui.tableView->setItemDelegate(new TableStyleDelegate(ui.tableView));
 
 	ui.update(transactionModel);
 }
