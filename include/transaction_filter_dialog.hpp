@@ -3,6 +3,7 @@
 
 #include "transaction_filter.hpp"
 #include "transaction_model.hpp"
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDialog>
@@ -12,6 +13,7 @@
 #include <QHBoxLayout>
 #include <qlabel.h>
 #include <qlineedit.h>
+#include <qmessagebox.h>
 
 class TransactionFilterDialog : public QDialog
 {
@@ -35,6 +37,7 @@ private:
 	QLineEdit* amountMaxInput;
 	QLabel* descriptionLabel;
 	QLineEdit* descriptionInput;
+	QCheckBox* filterActiveCheckBox;
 	TransactionFilter transactionFilter;
 	const TransactionModel& transactionModel;
 

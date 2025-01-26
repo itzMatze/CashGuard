@@ -15,4 +15,5 @@ public:
 	Amount amountMin = std::numeric_limits<int32_t>::min();
 	Amount amountMax = std::numeric_limits<int32_t>::max();
 	QString searchPhrase = "";
+	bool active = false;
 };

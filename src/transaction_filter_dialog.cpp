@@ -42,6 +42,9 @@ void TransactionFilterDialog::init()
 	descriptionInput = new QLineEdit(this);
 	descriptionInput->setPlaceholderText("Enter phrase...");
 
+	filterActiveCheckBox = new QCheckBox(this);
+	filterActiveCheckBox->setText("Filter Active");
+
 	QPushButton* okButton = new QPushButton("OK", this);
 	QPushButton* cancelButton = new QPushButton("Cancel", this);
 	QPushButton* resetButton = new QPushButton("Reset", this);
@@ -66,6 +69,7 @@ void TransactionFilterDialog::init()
 	amountLayout->addWidget(amountMaxInput);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
+	mainLayout->addWidget(filterActiveCheckBox);
 	mainLayout->addLayout(dateLabelLayout);
 	mainLayout->addLayout(dateLayout);
 	mainLayout->addWidget(categoryLabel);
@@ -91,6 +95,7 @@ void TransactionFilterDialog::init()
 
 void TransactionFilterDialog::updateWindow()
 {
+	filterActiveCheckBox->setChecked(transactionFilter.active);
 	dateMinInput->setDate(transactionFilter.dateMin);
 	dateMaxInput->setDate(transactionFilter.dateMax);
 	categoryInput->setCurrentIndex(getTransactionCategoryIndex(transactionFilter.category));
@@ -101,6 +106,7 @@ void TransactionFilterDialog::updateWindow()
 
 TransactionFilter TransactionFilterDialog::getTransactionFilter()
 {
+	transactionFilter.active = filterActiveCheckBox->isChecked();
 	transactionFilter.dateMin = dateMinInput->date();
 	transactionFilter.dateMax = dateMaxInput->date();
 	transactionFilter.category = categoryInput->currentText();

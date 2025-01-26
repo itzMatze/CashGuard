@@ -10,7 +10,7 @@ TransactionModel::TransactionModel(QObject* parent) : QAbstractTableModel(parent
 
 int TransactionModel::rowCount(const QModelIndex& parent) const
 {
-	return filtered_transactions.size();
+	return (filter.active ? filtered_transactions.size() : transactions.size());
 }
 
 int TransactionModel::columnCount(const QModelIndex& parent) const
@@ -72,7 +72,7 @@ void TransactionModel::add(const std::shared_ptr<Transaction>& transaction)
 
 std::shared_ptr<Transaction> TransactionModel::getTransaction(uint32_t idx) const
 {
-	return filtered_transactions.at(idx);
+	return (filter.active ? filtered_transactions.at(idx) : transactions.at(idx));
 }
 
 void TransactionModel::setTransaction(uint32_t idx, const std::shared_ptr<Transaction>& transaction)
@@ -92,6 +92,11 @@ void TransactionModel::clear()
 	beginResetModel();
 	filtered_transactions.clear();
 	endResetModel();
+}
+
+void TransactionModel::setFilterActive(bool active)
+{
+	filter.active = active;
 }
 
 void TransactionModel::setFilter(const TransactionFilter& filter)

@@ -22,6 +22,7 @@ public:
 	void setTransaction(uint32_t idx, const std::shared_ptr<Transaction>& transaction);
 	const std::vector<std::shared_ptr<Transaction>>& getUnfilteredTransactions() const;
 	void clear();
+	void setFilterActive(bool active);
 	void setFilter(const TransactionFilter& newFilter);
 	const TransactionFilter& getFilter() const;
 	// use with caution, changes to the filter will not trigger a filter update
