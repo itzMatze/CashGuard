@@ -34,4 +34,5 @@ private:
 	TransactionFilter filter;
 
 	uint32_t getTransactionIndex(std::shared_ptr<Transaction> transaction);
+	void reset();
 };

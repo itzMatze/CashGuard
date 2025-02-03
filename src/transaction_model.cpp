@@ -10,7 +10,7 @@ TransactionModel::TransactionModel(QObject* parent) : QAbstractTableModel(parent
 
 int TransactionModel::rowCount(const QModelIndex& parent) const
 {
-	return (filter.active ? filtered_transactions.size() : transactions.size());
+	return filtered_transactions.size();
 }
 
 int TransactionModel::columnCount(const QModelIndex& parent) const
@@ -72,7 +72,7 @@ void TransactionModel::add(const std::shared_ptr<Transaction>& transaction)
 
 std::shared_ptr<Transaction> TransactionModel::getTransaction(uint32_t idx) const
 {
-	return (filter.active ? filtered_transactions.at(idx) : transactions.at(idx));
+	return filtered_transactions.at(idx);
 }
 
 void TransactionModel::setTransaction(uint32_t idx, const std::shared_ptr<Transaction>& transaction)
@@ -97,17 +97,13 @@ void TransactionModel::clear()
 void TransactionModel::setFilterActive(bool active)
 {
 	filter.active = active;
+	reset();
 }
 
 void TransactionModel::setFilter(const TransactionFilter& filter)
 {
 	this->filter = filter;
-	std::vector<std::shared_ptr<Transaction>> transactions_copy(transactions);
-	clear();
-	for (std::shared_ptr<Transaction> transaction : transactions_copy)
-	{
-		add(transaction);
-	}
+	reset();
 }
 
 const TransactionFilter& TransactionModel::getFilter() const
@@ -124,4 +120,14 @@ uint32_t TransactionModel::getTransactionIndex(std::shared_ptr<Transaction> tran
 {
 	for (uint32_t i = 0; i < transactions.size(); i++) if (transactions.at(i) == transaction) return i;
 	return transactions.size();
+}
+
+void TransactionModel::reset()
+{
+	std::vector<std::shared_ptr<Transaction>> transactions_copy(transactions);
+	clear();
+	for (std::shared_ptr<Transaction> transaction : transactions_copy)
+	{
+		add(transaction);
+	}
 }
