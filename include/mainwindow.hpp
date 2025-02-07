@@ -31,7 +31,6 @@ private slots:
 private:
 	MainWindowUI ui;
 	TransactionModel transactionModel;
-	TransactionModel oldTransactionModel;
 	QString filePath;
 };
 

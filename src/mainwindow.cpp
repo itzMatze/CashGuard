@@ -39,7 +39,6 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	connect(filterShortcut, &QShortcut::activated, this, &MainWindow::openFilterDialog);
 
 	if (!loadFromFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
-	if (!loadFromFile(filePath, oldTransactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
 	transactionModel.getFilter().dateMax = transactionModel.getUnfilteredTransactions().at(0)->date;
 	transactionModel.getFilter().dateMin = transactionModel.getUnfilteredTransactions().back()->date;
 	ui.tableView->setModel(&transactionModel);
@@ -50,9 +49,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 }
 
 MainWindow::~MainWindow()
-{
-	if (!saveToFile(filePath + ".old", oldTransactionModel)) QMessageBox::warning(this, "Error", "Failed to save backup data!");
-}
+{}
 
 void MainWindow::openAddTransactionDialog()
 {
