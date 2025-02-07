@@ -96,6 +96,8 @@ void TransactionGroupDialog::openAddTransactionDialog()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		std::shared_ptr<Transaction> transaction = std::make_shared<Transaction>(dialog.getTransaction());
+		transaction->added = QDateTime::currentDateTime();
+		transaction->edited = QDateTime::currentDateTime();
 		transactionModel.add(transaction);
 		ui.update(transactionModel);
 	}
@@ -105,12 +107,15 @@ void TransactionGroupDialog::openEditTransactionDialog()
 {
 	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
 	if (!validateTransactionIndex(idx, transactionModel, this)) return;
-	TransactionDialog dialog(*transactionModel.getTransaction(idx), this);
+	std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(idx);
+	TransactionDialog dialog(*transaction, this);
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		std::shared_ptr<Transaction> transaction = std::make_shared<Transaction>(dialog.getTransaction());
-		transactionModel.setTransaction(idx, transaction);
+		std::shared_ptr<Transaction> newTransaction = std::make_shared<Transaction>(dialog.getTransaction());
+		if (*transaction == *newTransaction) return;
+		newTransaction->edited = QDateTime::currentDateTime();
+		transactionModel.setTransaction(idx, newTransaction);
 		ui.update(transactionModel);
 	}
 }

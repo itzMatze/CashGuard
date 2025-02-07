@@ -61,7 +61,14 @@ bool Amount::isNegative() const
 	return value < 0;
 }
 
-Transaction::Transaction() : id(0), date(QDate::currentDate()), category(transactionCategories.back()), amount(0), description("")
+Transaction::Transaction() :
+	id(0),
+	date(QDate::currentDate()),
+	category(transactionCategories.back()),
+	amount(0),
+	description(""),
+	added(QDateTime::currentDateTime()),
+	edited(QDateTime::currentDateTime())
 {}
 
 QStringList Transaction::getFieldNames()
@@ -72,7 +79,9 @@ QStringList Transaction::getFieldNames()
 		tfn::Date,
 		tfn::Category,
 		tfn::Amount,
-		tfn::Description});
+		tfn::Description,
+		tfn::Added,
+		tfn::Edited});
 }
 
 QString Transaction::getField(const QString& fieldName) const
@@ -83,6 +92,8 @@ QString Transaction::getField(const QString& fieldName) const
 	else if (fieldName == tfn::Category) return category;
 	else if (fieldName == tfn::Amount) return amount.toString();
 	else if (fieldName == tfn::Description) return description;
+	else if (fieldName == tfn::Added) return added.toString("dd.MM.yyyy HH:mm:ss");
+	else if (fieldName == tfn::Edited) return edited.toString("dd.MM.yyyy HH:mm:ss");
 	else CG_THROW("Invalid transaction field name!");
 }
 
@@ -102,6 +113,8 @@ void Transaction::setField(const QString& fieldName, const QString& value)
 	else if (fieldName == tfn::Category) category = value;
 	else if (fieldName == tfn::Amount) amount = Amount(value);
 	else if (fieldName == tfn::Description) description = value;
+	else if (fieldName == tfn::Added) added = QDateTime::fromString(value, "dd.MM.yyyy HH:mm:ss");
+	else if (fieldName == tfn::Edited) edited = QDateTime::fromString(value, "dd.MM.yyyy HH:mm:ss");
 	else CG_THROW("Invalid transaction field name!");
 }
 
@@ -121,10 +134,35 @@ bool operator<(const Transaction& a, const Transaction& b)
 	return a.date < b.date;
 }
 
+bool operator==(const Transaction& a, const Transaction& b)
+{
+	QStringList fields = Transaction::getFieldNames();
+	for (const QString& field : fields)
+	{
+		if (a.getField(field) != b.getField(field)) return false;
+	}
+	return true;
+}
+
 TransactionGroup::TransactionGroup(const Transaction& transaction) : Transaction(transaction)
 {}
 
 QString TransactionGroup::toString() const
 {
 	return Transaction::toString() + "Transaction Group";
+}
+
+bool operator==(const TransactionGroup& a, const TransactionGroup& b)
+{
+	QStringList fields = Transaction::getFieldNames();
+	for (const QString& field : fields)
+	{
+		if (a.getField(field) != b.getField(field)) return false;
+	}
+	if (a.transactions.size() != b.transactions.size()) return false;
+	for (int32_t i = 0; i < a.transactions.size(); i++)
+	{
+		if (*a.transactions[i] != *b.transactions[i]) return false;
+	}
+	return true;
 }

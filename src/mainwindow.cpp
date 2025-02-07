@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QShortcut>
 #include <QTextStream>
+#include <memory>
 #include <qtablewidget.h>
 
 MainWindow::MainWindow(const QString& filePath, QWidget *parent)
@@ -59,7 +60,10 @@ void MainWindow::openAddTransactionDialog()
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		transactionModel.add(std::make_shared<Transaction>(dialog.getTransaction()));
+		std::shared_ptr<Transaction> transaction = std::make_shared<Transaction>(dialog.getTransaction());
+		transaction->added = QDateTime::currentDateTime();
+		transaction->edited = QDateTime::currentDateTime();
+		transactionModel.add(transaction);
 		ui.update(transactionModel);
 		saveTransactions();
 	}
@@ -71,7 +75,10 @@ void MainWindow::openAddTransactionGroupDialog()
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		transactionModel.add(std::make_shared<TransactionGroup>(dialog.getTransactionGroup()));
+		std::shared_ptr<TransactionGroup> transaction = std::make_shared<TransactionGroup>(dialog.getTransactionGroup());
+		transaction->added = QDateTime::currentDateTime();
+		transaction->edited = QDateTime::currentDateTime();
+		transactionModel.add(transaction);
 		ui.update(transactionModel);
 		saveTransactions();
 	}
@@ -81,13 +88,16 @@ void MainWindow::openEditTransactionDialog()
 {
 	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
 	if (!validateTransactionIndex(idx, transactionModel, this)) return;
-	std::shared_ptr<const Transaction> transaction = transactionModel.getTransaction(idx);
-	if (std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
+	std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(idx);
+	if (std::shared_ptr<TransactionGroup> transactionGroup = std::dynamic_pointer_cast<TransactionGroup>(transaction))
 	{
-		TransactionGroupDialog dialog(*transaction_group, this);
+		TransactionGroupDialog dialog(*transactionGroup, this);
 		if (dialog.exec() == QDialog::Accepted)
 		{
-			transactionModel.setTransaction(idx, std::make_shared<TransactionGroup>(dialog.getTransactionGroup()));
+			std::shared_ptr<TransactionGroup> newTransactionGroup = std::make_shared<TransactionGroup>(dialog.getTransactionGroup());
+			if (*transactionGroup == *newTransactionGroup) return;
+			newTransactionGroup->edited = QDateTime::currentDateTime();
+			transactionModel.setTransaction(idx, newTransactionGroup);
 		}
 	}
 	else
@@ -95,7 +105,10 @@ void MainWindow::openEditTransactionDialog()
 		TransactionDialog dialog(*transaction, this);
 		if (dialog.exec() == QDialog::Accepted)
 		{
-			transactionModel.setTransaction(idx, std::make_shared<Transaction>(dialog.getTransaction()));
+			std::shared_ptr<Transaction> newTransaction = std::make_shared<Transaction>(dialog.getTransaction());
+			if (*transaction == *newTransaction) return;
+			newTransaction->edited = QDateTime::currentDateTime();
+			transactionModel.setTransaction(idx, newTransaction);
 		}
 	}
 	ui.update(transactionModel);

@@ -48,6 +48,8 @@ namespace TransactionFieldNames
 	const QString Category = "Category";
 	const QString Amount = "Amount";
 	const QString Description = "Description";
+	const QString Added = "Added";
+	const QString Edited = "Edited";
 }
 
 class Transaction
@@ -66,9 +68,12 @@ public:
 	QString category;
 	Amount amount;
 	QString description;
+	QDateTime added;
+	QDateTime edited;
 };
 
 bool operator<(const Transaction& a, const Transaction& b);
+bool operator==(const Transaction& a, const Transaction& b);
 
 class TransactionGroup : public Transaction
 {
@@ -79,3 +84,5 @@ public:
 
 	std::vector<std::shared_ptr<Transaction>> transactions;
 };
+
+bool operator==(const TransactionGroup& a, const TransactionGroup& b);
