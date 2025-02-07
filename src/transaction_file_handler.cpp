@@ -1,4 +1,5 @@
 #include "transaction_file_handler.hpp"
+#include <set>
 #include <fstream>
 #include <QFile>
 #include <QMessageBox>
@@ -35,6 +36,7 @@ Transaction parseTransaction(const auto& rj_transaction)
 	Transaction transaction;
 	for (const QString& field : fields)
 	{
+		if (!rj_transaction.HasMember(field.toStdString().c_str())) continue;
 		transaction.setField(field, rj_transaction[field.toStdString().c_str()].GetString());
 	}
 	return transaction;
@@ -45,9 +47,14 @@ bool loadFromFile(const QString& filePath, TransactionModel& transactionModel)
 	transactionModel.clear();
 	rapidjson::Document doc;
 	if (!loadFile(filePath.toStdString(), doc)) return false;
+	std::set<uint64_t> ids;
 	for (const auto& rj_transaction : doc.GetArray())
 	{
 		Transaction transaction = parseTransaction(rj_transaction);
+		if (!ids.emplace(transaction.id).second)
+		{
+			CG_THROW("Duplicate ID: {}", transaction.getField(TransactionFieldNames::ID).toStdString());
+		}
 		if (rj_transaction.HasMember("Transactions"))
 		{
 			std::shared_ptr<TransactionGroup> transaction_group = std::make_shared<TransactionGroup>(transaction);
