@@ -100,7 +100,9 @@ void TransactionFilterDialog::updateWindow()
 	dateMaxInput->setDate(transactionFilter.dateMax);
 	categoryInput->setCurrentIndex(getTransactionCategoryIndex(transactionFilter.category));
 	if (transactionFilter.amountMin.value != std::numeric_limits<int32_t>::min()) amountMinInput->setText(transactionFilter.amountMin.toString());
+	else amountMinInput->setText("");
 	if (transactionFilter.amountMax.value != std::numeric_limits<int32_t>::max()) amountMaxInput->setText(transactionFilter.amountMax.toString());
+	else amountMaxInput->setText("");
 	descriptionInput->setText(transactionFilter.searchPhrase);
 }
 
