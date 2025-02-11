@@ -5,6 +5,7 @@
 #include <QDate>
 
 const QStringList transactionCategories {
+	"Cosmetics",
 	"Cash",
 	"Clothing",
 	"Education",
@@ -13,6 +14,7 @@ const QStringList transactionCategories {
 	"Health",
 	"Internet",
 	"Leisure",
+	"Living",
 	"Other Income",
 	"Other Outgoing",
 	"Present",
