@@ -23,6 +23,7 @@ public:
 	TransactionFilterDialog(const TransactionModel& transactionModel, QWidget *parent);
 	TransactionFilter getTransactionFilter();
 	void resetFilter();
+	void accept() override;
 
 private:
 	QLabel* dateMinLabel;
@@ -43,6 +44,7 @@ private:
 
 	void init();
 	void updateWindow();
+	bool validateInputs();
 };
 
 #endif // TRANSACTIONFILTERDIALOG_H

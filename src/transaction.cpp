@@ -61,6 +61,16 @@ bool Amount::isNegative() const
 	return value < 0;
 }
 
+bool operator<(const Amount& a, const Amount& b)
+{
+	return a.value < b.value;
+}
+
+bool operator>(const Amount& a, const Amount& b)
+{
+	return a.value > b.value;
+}
+
 Transaction::Transaction() :
 	id(0),
 	date(QDate::currentDate()),

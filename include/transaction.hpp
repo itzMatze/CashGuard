@@ -43,6 +43,9 @@ struct Amount
 	int32_t value;
 };
 
+bool operator<(const Amount& a, const Amount& b);
+bool operator>(const Amount& a, const Amount& b);
+
 namespace TransactionFieldNames
 {
 	const QString ID = "ID";

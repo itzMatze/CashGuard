@@ -90,6 +90,9 @@ void TransactionFilterDialog::init()
 	connect(resetShortcut, &QShortcut::activated, this, &TransactionFilterDialog::resetFilter);
 	connect(resetButton, &QPushButton::clicked, this, &TransactionFilterDialog::resetFilter);
 
+	QShortcut* activateShortcut = new QShortcut(QKeySequence("Ctrl+T"), this);
+	connect(activateShortcut, &QShortcut::activated, this, [this]() { filterActiveCheckBox->toggle(); });
+
 	updateWindow();
 }
 
@@ -104,6 +107,13 @@ void TransactionFilterDialog::updateWindow()
 	if (transactionFilter.amountMax.value != std::numeric_limits<int32_t>::max()) amountMaxInput->setText(transactionFilter.amountMax.toString());
 	else amountMaxInput->setText("");
 	descriptionInput->setText(transactionFilter.searchPhrase);
+}
+
+bool TransactionFilterDialog::validateInputs()
+{
+	if (dateMinInput->date() > dateMaxInput->date()) return false;
+	if (Amount{amountMinInput->text()} > Amount{amountMaxInput->text()}) return false;
+	return true;
 }
 
 TransactionFilter TransactionFilterDialog::getTransactionFilter()
@@ -124,4 +134,10 @@ void TransactionFilterDialog::resetFilter()
 	transactionFilter.dateMax = transactionModel.getUnfilteredTransactions().at(0)->date;
 	transactionFilter.dateMin = transactionModel.getUnfilteredTransactions().back()->date;
 	updateWindow();
+}
+
+void TransactionFilterDialog::accept()
+{
+	if (validateInputs()) QDialog::accept();
+	else QMessageBox::warning(this, "Invalid Input", "Please correct the inputs.");
 }
