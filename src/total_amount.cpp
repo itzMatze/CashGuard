@@ -24,9 +24,9 @@ QDate roundDownMonth(const QDate& date)
 	return QDate(date.year(), date.month(), 1);
 }
 
-int32_t findMagnitude(int32_t value)
+int64_t findMagnitude(int32_t value)
 {
-	int32_t magnitude = 10;
+	int64_t magnitude = 10;
 	while (magnitude < value) magnitude *= 10;
 	return magnitude / 10;
 }

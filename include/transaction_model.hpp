@@ -27,6 +27,7 @@ public:
 	const TransactionFilter& getFilter() const;
 	// use with caution, changes to the filter will not trigger a filter update
 	TransactionFilter& getFilter();
+	bool isEmpty() const;
 
 private:
 	std::vector<std::shared_ptr<Transaction>> transactions;

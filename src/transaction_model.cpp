@@ -116,6 +116,11 @@ TransactionFilter& TransactionModel::getFilter()
 	return filter;
 }
 
+bool TransactionModel::isEmpty() const
+{
+	return transactions.size() == 0;
+}
+
 uint32_t TransactionModel::getTransactionIndex(std::shared_ptr<Transaction> transaction)
 {
 	for (uint32_t i = 0; i < transactions.size(); i++) if (transactions.at(i) == transaction) return i;

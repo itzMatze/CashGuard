@@ -13,7 +13,9 @@
 #include <QShortcut>
 #include <QTextStream>
 #include <memory>
+#include <qmessagebox.h>
 #include <qtablewidget.h>
+#include "util/log.hpp"
 
 MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	: QMainWindow(parent)
@@ -38,9 +40,24 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	QShortcut* filterShortcut = new QShortcut(QKeySequence("Ctrl+F"), this);
 	connect(filterShortcut, &QShortcut::activated, this, &MainWindow::openFilterDialog);
 
-	if (!loadFromFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to load data!");
-	transactionModel.getFilter().dateMax = transactionModel.getUnfilteredTransactions().at(0)->date;
-	transactionModel.getFilter().dateMin = transactionModel.getUnfilteredTransactions().back()->date;
+	if (!QFile::exists(filePath))
+	{
+		QMessageBox::warning(this, "Warning", QString("Failed to find file \"%1\". Creating new file.").arg(filePath));
+		QFile file(filePath);
+		QDir dir;
+		bool success = dir.mkpath(QFileInfo(filePath).absolutePath());
+		CG_ASSERT(success, "Failed to create directories!");
+		success = file.open(QIODevice::ReadWrite | QIODevice::Text);
+		CG_ASSERT(success, "Failed to open file!");
+		file.close();
+	}
+
+	if (!loadFromFile(filePath, transactionModel)) CG_THROW("Failed to load transactions file!");
+	if (!transactionModel.isEmpty())
+	{
+		transactionModel.getFilter().dateMax = transactionModel.getUnfilteredTransactions().at(0)->date;
+		transactionModel.getFilter().dateMin = transactionModel.getUnfilteredTransactions().back()->date;
+	}
 	ui.tableView->setModel(&transactionModel);
 	ui.tableView->resizeColumnsToContents();
 	if (ui.tableView->columnWidth(4) > 800) ui.tableView->setColumnWidth(4, 800);

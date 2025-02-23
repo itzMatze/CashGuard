@@ -1,6 +1,5 @@
 #include "transaction_file_handler.hpp"
 #include <set>
-#include <fstream>
 #include <QFile>
 #include <QMessageBox>
 #include "transaction_model.hpp"
@@ -8,27 +7,6 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 #include "util/log.hpp"
-
-bool loadFile(const std::string& path, rapidjson::Document& document)
-{
-  std::ifstream file(path, std::ios::binary);
-  if (!file.is_open())
-  {
-    cglog::error("Failed to open file \"{}\"", path);
-    return false;
-  };
-  std::stringstream file_stream;
-  file_stream << file.rdbuf();
-  std::string file_content = file_stream.str();
-
-  document.Parse(file_content.c_str());
-  if (document.HasParseError())
-  {
-    cglog::error("Failed to parse file \"{}\"", path);
-    return false;
-  }
-  return true;
-}
 
 Transaction parseTransaction(const auto& rj_transaction)
 {
@@ -44,9 +22,26 @@ Transaction parseTransaction(const auto& rj_transaction)
 
 bool loadFromFile(const QString& filePath, TransactionModel& transactionModel)
 {
+	cglog::debug("Loading file");
 	transactionModel.clear();
+	QFile file(filePath);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+  {
+    cglog::error("Failed to open file \"{}\"", filePath.toStdString());
+    return false;
+  };
+	if (file.size() == 0) return true;
+  QTextStream in(&file);
+	QString fileContent = in.readAll();
+
 	rapidjson::Document doc;
-	if (!loadFile(filePath.toStdString(), doc)) return false;
+  doc.Parse(fileContent.toStdString().c_str());
+  if (doc.HasParseError())
+  {
+    cglog::error("Failed to parse file \"{}\"", filePath.toStdString());
+    return false;
+  }
+
 	std::set<uint64_t> ids;
 	for (const auto& rj_transaction : doc.GetArray())
 	{

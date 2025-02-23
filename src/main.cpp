@@ -7,7 +7,7 @@
 
 int parse_args(int argc, char** argv, argparse::ArgumentParser& program)
 {
-  program.add_argument("--file").nargs(1).help("Override the .json file that is loaded on startup and saved to on shutdown");
+  program.add_argument("--file").nargs(1).help("Override the .json file that is used by the application.");
 
   try
 	{
