@@ -55,7 +55,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	if (!loadFromFile(filePath, transactionModel)) CG_THROW("Failed to load transactions file!");
 	if (!transactionModel.isEmpty())
 	{
-		transactionModel.getFilter().dateMax = transactionModel.getUnfilteredTransactions().at(0)->date;
+		transactionModel.getFilter().dateMax = transactionModel.getUnfilteredTransactions().at(0)->date.addDays(28);
 		transactionModel.getFilter().dateMin = transactionModel.getUnfilteredTransactions().back()->date;
 	}
 	ui.tableView->setModel(&transactionModel);
