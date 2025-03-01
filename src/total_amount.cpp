@@ -153,8 +153,8 @@ std::pair<QChart*, QLineSeries*> getTotalAmountChart(const TransactionModel& tra
 		font.setPointSize(12);
 		axis->setLabelsFont(font);
 
-		int32_t magnitude = findMagnitude(std::max(std::abs(minAmount), std::abs(maxAmount)));
-		minAmount = (minAmount / magnitude) * magnitude - magnitude;
+		int32_t magnitude = findMagnitude(std::max(std::abs(minAmount), std::abs(maxAmount))) / 10;
+		minAmount = (minAmount / magnitude) * magnitude;
 		maxAmount = (maxAmount / magnitude) * magnitude + magnitude;
 		axis->setRange(double(minAmount) / 100.0, double(maxAmount) / 100.0);
 
