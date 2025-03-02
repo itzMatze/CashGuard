@@ -28,6 +28,7 @@ public:
 	// use with caution, changes to the filter will not trigger a filter update
 	TransactionFilter& getFilter();
 	bool isEmpty() const;
+	QStringList getUniqueValueList(const QString& fieldName) const;
 
 private:
 	std::vector<std::shared_ptr<Transaction>> transactions;

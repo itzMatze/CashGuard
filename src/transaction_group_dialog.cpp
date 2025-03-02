@@ -6,6 +6,7 @@
 #include "util/random_generator.hpp"
 #include "validation.hpp"
 #include <memory>
+#include <qcompleter.h>
 #include <qmessagebox.h>
 #include <qshortcut.h>
 
@@ -73,6 +74,14 @@ void TransactionGroupDialog::init()
 	ui.totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString() + " €");
 }
 
+void TransactionGroupDialog::setRecommender(const QStringList& recommendations)
+{
+	QCompleter* completer = new QCompleter(recommendations, this);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setFilterMode(Qt::MatchContains);
+	ui.descriptionInput->setCompleter(completer);
+}
+
 TransactionGroup TransactionGroupDialog::getTransactionGroup()
 {
 	transactionGroup.transactions.clear();
@@ -92,6 +101,7 @@ void TransactionGroupDialog::openAddTransactionDialog()
 	transaction.date = ui.dateInput->date();
 	transaction.category = ui.categoryInput->currentText();
 	TransactionDialog dialog(transaction, this);
+	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
@@ -109,6 +119,7 @@ void TransactionGroupDialog::openEditTransactionDialog()
 	if (!validateTransactionIndex(idx, transactionModel, this)) return;
 	std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(idx);
 	TransactionDialog dialog(*transaction, this);
+	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
 	{

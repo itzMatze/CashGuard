@@ -1,4 +1,5 @@
 #include "mainwindow.hpp"
+#include "transaction.hpp"
 #include "transaction_filter_dialog.hpp"
 #include "transaction_model.hpp"
 #include "transaction_file_handler.hpp"
@@ -71,6 +72,7 @@ MainWindow::~MainWindow()
 void MainWindow::openAddTransactionDialog()
 {
 	TransactionDialog dialog(this);
+	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
@@ -86,6 +88,7 @@ void MainWindow::openAddTransactionDialog()
 void MainWindow::openAddTransactionGroupDialog()
 {
 	TransactionGroupDialog dialog(this);
+	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
@@ -106,6 +109,7 @@ void MainWindow::openEditTransactionDialog()
 	if (std::shared_ptr<TransactionGroup> transactionGroup = std::dynamic_pointer_cast<TransactionGroup>(transaction))
 	{
 		TransactionGroupDialog dialog(*transactionGroup, this);
+		dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 		if (dialog.exec() == QDialog::Accepted)
 		{
 			std::shared_ptr<TransactionGroup> newTransactionGroup = std::make_shared<TransactionGroup>(dialog.getTransactionGroup());
@@ -117,6 +121,7 @@ void MainWindow::openEditTransactionDialog()
 	else
 	{
 		TransactionDialog dialog(*transaction, this);
+		dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 		if (dialog.exec() == QDialog::Accepted)
 		{
 			std::shared_ptr<Transaction> newTransaction = std::make_shared<Transaction>(dialog.getTransaction());

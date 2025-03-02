@@ -2,6 +2,7 @@
 
 #include <QBrush>
 #include <memory>
+#include <set>
 
 #include "transaction.hpp"
 
@@ -119,6 +120,15 @@ TransactionFilter& TransactionModel::getFilter()
 bool TransactionModel::isEmpty() const
 {
 	return transactions.size() == 0;
+}
+
+QStringList TransactionModel::getUniqueValueList(const QString& fieldName) const
+{
+	std::set<QString> uniqueValues;
+	for (const std::shared_ptr<Transaction> transaction : transactions) uniqueValues.emplace(transaction->getField(fieldName));
+	QStringList values;
+	for (const QString& value : uniqueValues) values.push_back(value);
+	return values;
 }
 
 uint32_t TransactionModel::getTransactionIndex(std::shared_ptr<Transaction> transaction)

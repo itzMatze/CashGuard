@@ -24,6 +24,7 @@ public:
 	TransactionFilter getTransactionFilter();
 	void resetFilter();
 	void accept() override;
+	void setRecommender(const QStringList& recommendations);
 
 private:
 	QLabel* dateMinLabel;

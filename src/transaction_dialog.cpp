@@ -1,6 +1,7 @@
 #include "transaction_dialog.hpp"
 #include "transaction.hpp"
 #include "util/random_generator.hpp"
+#include <qcompleter.h>
 #include <qshortcut.h>
 
 TransactionDialog::TransactionDialog(QWidget *parent) : QDialog(parent)
@@ -54,6 +55,14 @@ void TransactionDialog::init()
 	QShortcut* cancelShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
 	connect(cancelShortcut, &QShortcut::activated, this, &QDialog::reject);
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+}
+
+void TransactionDialog::setRecommender(const QStringList& recommendations)
+{
+	QCompleter* completer = new QCompleter(recommendations, this);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setFilterMode(Qt::MatchContains);
+	descriptionInput->setCompleter(completer);
 }
 
 Transaction TransactionDialog::getTransaction()

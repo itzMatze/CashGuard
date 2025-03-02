@@ -18,6 +18,7 @@ class TransactionDialog : public QDialog
 public:
 	TransactionDialog(QWidget *parent = nullptr);
 	TransactionDialog(const Transaction& transaction, QWidget *parent = nullptr);
+	void setRecommender(const QStringList& recommendations);
 	Transaction getTransaction();
 
 private:

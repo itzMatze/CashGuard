@@ -1,5 +1,6 @@
 #include "transaction_filter_dialog.hpp"
 #include <limits>
+#include <qcompleter.h>
 #include <qshortcut.h>
 
 TransactionFilterDialog::TransactionFilterDialog(const TransactionModel& transactionModel, QWidget *parent) : transactionModel(transactionModel), transactionFilter(transactionModel.getFilter())
@@ -140,4 +141,12 @@ void TransactionFilterDialog::accept()
 {
 	if (validateInputs()) QDialog::accept();
 	else QMessageBox::warning(this, "Invalid Input", "Please correct the inputs.");
+}
+
+void TransactionFilterDialog::setRecommender(const QStringList& recommendations)
+{
+	QCompleter* completer = new QCompleter(recommendations, this);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setFilterMode(Qt::MatchContains);
+	descriptionInput->setCompleter(completer);
 }
