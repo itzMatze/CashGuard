@@ -140,8 +140,12 @@ QString Transaction::toString() const
 
 bool operator<(const Transaction& a, const Transaction& b)
 {
-	if (a.date == b.date) return a.id < b.id;
-	return a.date < b.date;
+	if (a.date == b.date)
+	{
+		if (a.added == b.added) return a.id < b.id;
+		else return a.added < b.added;
+	}
+	else return a.date < b.date;
 }
 
 bool operator==(const Transaction& a, const Transaction& b)
