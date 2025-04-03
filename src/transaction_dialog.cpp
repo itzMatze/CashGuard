@@ -24,8 +24,8 @@ void TransactionDialog::init()
 	dateInput->setDate(transaction.date);
 
 	categoryInput = new QComboBox(this);
-	categoryInput->addItems(transactionCategories);
-	categoryInput->setCurrentIndex(getTransactionCategoryIndex(transaction.getField(TransactionFieldNames::Category)));
+	categoryInput->addItems(Category::getCategoryNames());
+	categoryInput->setCurrentIndex(transaction.category.getType());
 
 	amountInput = new QLineEdit(this);
 	amountInput->setPlaceholderText("Enter amount...");

@@ -1,35 +1,56 @@
 #pragma once
 
 #include <cstdint>
+#include <qcolor.h>
 #include <qobject.h>
 #include <QDate>
 
-const QStringList transactionCategories {
-	"Cosmetics",
-	"Cash",
-	"Clothing",
-	"Education",
-	"Gaming",
-	"Groceries",
-	"Health",
-	"Internet",
-	"Leisure",
-	"Living",
-	"Other Income",
-	"Other Outgoing",
-	"Present",
-	"Public Transport",
-	"Restaurant",
-	"Salary",
-	"Saving",
-	"Sport",
-	"Transport",
-	"Vacation",
-	"None"
+struct Category
+{
+public:
+	enum CategoryEnum : int
+	{
+		Cosmetics = 0,
+		Cash = 1,
+		Clothing = 2,
+		Education = 3,
+		Gaming = 4,
+		Groceries = 5,
+		Health = 6,
+		Internet = 7,
+		Leisure = 8,
+		Living = 9,
+		Other_Income = 10,
+		Other_Outgoing = 11,
+		Present = 12,
+		Public_Transport = 13,
+		Restaurant = 14,
+		Salary = 15,
+		Saving = 16,
+		Sport = 17,
+		Transport = 18,
+		Vacation = 19,
+		None = 20
+	};
+
+	static QStringList getCategoryNames();
+	Category(const QString& name);
+	Category(CategoryEnum value);
+
+	CategoryEnum getType() const;
+	QString getName() const;
+	QColor getColor() const;
+
+private:
+	static QColor getColor(CategoryEnum value);
+	static CategoryEnum getTypeFromName(const QString& name);
+
+	CategoryEnum type;
+	QString name;
+	QColor color;
 };
 
-int32_t getTransactionCategoryIndex(const QString& category);
-bool validateTransactionCategory(const QString& name);
+bool operator==(const Category& a, const Category& b);
 
 struct Amount
 {
@@ -70,7 +91,7 @@ public:
 
 	size_t id;
 	QDate date;
-	QString category;
+	Category category;
 	Amount amount;
 	QString description;
 	QDateTime added;

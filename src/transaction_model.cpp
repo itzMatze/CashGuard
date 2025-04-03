@@ -32,8 +32,16 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
 	}
 	if (role == Qt::BackgroundRole)
 	{
-		if (getTransaction(index.row())->amount.isNegative()) return QBrush(QColor(255, 0, 0, 100));
-		else return QBrush(QColor(0, 255, 0, 100));
+		if (index.column() < Transaction::getFieldNames().size() && Transaction::getFieldNames().at(index.column()) == TransactionFieldNames::Category)
+		{
+			return QBrush(getTransaction(index.row())->category.getColor());
+		}
+		else
+		{
+			const int intensity = std::min((std::abs(getTransaction(index.row())->amount.value)) / 40 + 20, 255);
+			if (getTransaction(index.row())->amount.isNegative()) return QBrush(QColor(intensity, 0, 0, 150));
+			else return QBrush(QColor(0, intensity, 0, 150));
+		}
 	}
 	if (role == Qt::TextAlignmentRole)
 	{

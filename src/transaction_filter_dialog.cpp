@@ -26,7 +26,7 @@ void TransactionFilterDialog::init()
 	categoryLabel = new QLabel(this);
 	categoryLabel->setText("Category (None to disable filtering)");
 	categoryInput = new QComboBox(this);
-	categoryInput->addItems(transactionCategories);
+	categoryInput->addItems(Category::getCategoryNames());
 
 	amountMinLabel = new QLabel(this);
 	amountMinLabel->setText("Min Amount");
@@ -102,7 +102,7 @@ void TransactionFilterDialog::updateWindow()
 	filterActiveCheckBox->setChecked(transactionFilter.active);
 	dateMinInput->setDate(transactionFilter.dateMin);
 	dateMaxInput->setDate(transactionFilter.dateMax);
-	categoryInput->setCurrentIndex(getTransactionCategoryIndex(transactionFilter.category));
+	categoryInput->setCurrentIndex(transactionFilter.category.getType());
 	if (transactionFilter.amountMin.value != std::numeric_limits<int32_t>::min()) amountMinInput->setText(transactionFilter.amountMin.toString());
 	else amountMinInput->setText("");
 	if (transactionFilter.amountMax.value != std::numeric_limits<int32_t>::max()) amountMaxInput->setText(transactionFilter.amountMax.toString());

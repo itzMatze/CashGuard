@@ -1,27 +1,100 @@
 #include "transaction.hpp"
 #include <cstdint>
+#include <qcolor.h>
 #include <qobject.h>
 #include <QDate>
 #include <qregularexpression.h>
 #include <qvalidator.h>
 #include "util/log.hpp"
 
-int32_t getTransactionCategoryIndex(const QString& category)
+Category::Category(CategoryEnum value) : type(value), name(getCategoryNames()[value]), color(getColor(value))
+{}
+
+
+Category::Category(const QString& name) : type(getTypeFromName(name)), name(name), color(getColor(type))
+{}
+
+Category::CategoryEnum Category::getTypeFromName(const QString& name)
 {
-	for (int32_t i = 0; i < transactionCategories.size(); i++)
+	const QStringList categoryNames = getCategoryNames();
+	for (int i = 0; i < categoryNames.size(); i++)
 	{
-		if (transactionCategories[i] == category) return i;
+		if (categoryNames.at(i) == name) return CategoryEnum(i);
 	}
-	return -1;
+	return CategoryEnum::None;
 }
 
-bool validateTransactionCategory(const QString& name)
+Category::CategoryEnum Category::getType() const
 {
-	for (const QString& category : transactionCategories)
-	{
-		if (category == name) return true;
-	}
-	return false;
+	return type;
+}
+
+QString Category::getName() const
+{
+	return name;
+}
+
+QColor Category::getColor() const
+{
+	return color;
+}
+
+QColor Category::getColor(CategoryEnum value)
+{
+	if (Cosmetics == value) return QColor(128, 0, 128, 128);
+	else if (Cash == value) return QColor(0, 255, 0, 128);
+	else if (Clothing == value) return QColor(0, 0, 255, 128);
+	else if (Education == value) return QColor(0, 255, 255, 128);
+	else if (Gaming == value) return QColor(255, 0, 100, 128);
+	else if (Groceries == value) return QColor(255, 255, 0, 128);
+	else if (Health == value) return QColor(128, 0, 0, 128);
+	else if (Internet == value) return QColor(0, 128, 0, 128);
+	else if (Leisure == value) return QColor(0, 128, 128, 128);
+	else if (Living == value) return QColor(0, 128, 0, 128);
+	else if (Other_Income == value) return QColor(0, 255, 0, 128);
+	else if (Other_Outgoing == value) return QColor(255, 0, 0, 128);
+	else if (Present == value) return QColor(128, 0, 255, 128);
+	else if (Public_Transport == value) return QColor(255, 0, 0, 128);
+	else if (Restaurant == value) return QColor(0, 0, 128, 128);
+	else if (Salary == value) return QColor(0, 255, 0, 128);
+	else if (Saving == value) return QColor(0, 0, 255, 128);
+	else if (Sport == value) return QColor(128, 0, 0, 128);
+	else if (Transport == value) return QColor(255, 0, 0, 128);
+	else if (Vacation == value) return QColor(255, 0, 255, 128);
+	else if (None == value) return QColor();
+	return QColor();
+}
+
+QStringList Category::getCategoryNames()
+{
+	static QStringList categoryNames(None+1);
+	categoryNames[Cosmetics] = "Cosmetics";
+	categoryNames[Cash] = "Cash";
+	categoryNames[Clothing] = "Clothing";
+	categoryNames[Education] = "Education";
+	categoryNames[Gaming] = "Gaming";
+	categoryNames[Groceries] = "Groceries";
+	categoryNames[Health] = "Health";
+	categoryNames[Internet] = "Internet";
+	categoryNames[Leisure] = "Leisure";
+	categoryNames[Living] = "Living";
+	categoryNames[Other_Income] = "Other Income";
+	categoryNames[Other_Outgoing] = "Other Outgoing";
+	categoryNames[Present] = "Present";
+	categoryNames[Public_Transport] = "Public Transport";
+	categoryNames[Restaurant] = "Restaurant";
+	categoryNames[Salary] = "Salary";
+	categoryNames[Saving] = "Saving";
+	categoryNames[Sport] = "Sport";
+	categoryNames[Transport] = "Transport";
+	categoryNames[Vacation] = "Vacation";
+	categoryNames[None] = "None";
+	return categoryNames;
+}
+
+bool operator==(const Category& a, const Category& b)
+{
+	return a.getType() == b.getType();
 }
 
 Amount::Amount(int32_t value) : value(value)
@@ -74,7 +147,7 @@ bool operator>(const Amount& a, const Amount& b)
 Transaction::Transaction() :
 	id(0),
 	date(QDate::currentDate()),
-	category(transactionCategories.back()),
+	category(Category::None),
 	amount(0),
 	description(""),
 	added(QDateTime::currentDateTime()),
@@ -99,7 +172,7 @@ QString Transaction::getField(const QString& fieldName) const
 	namespace tfn = TransactionFieldNames;
 	if (fieldName == tfn::ID) return QString::number(id);
 	else if (fieldName == tfn::Date) return date.toString("dd.MM.yyyy");
-	else if (fieldName == tfn::Category) return category;
+	else if (fieldName == tfn::Category) return category.getName();
 	else if (fieldName == tfn::Amount) return amount.toString();
 	else if (fieldName == tfn::Description) return description;
 	else if (fieldName == tfn::Added) return added.toString("dd.MM.yyyy HH:mm:ss");

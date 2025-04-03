@@ -17,7 +17,7 @@ TransactionGroupDialog::TransactionGroupDialog(QWidget *parent)
 {
 	transactionGroup.id = 0;
 	transactionGroup.date = QDate::currentDate();
-	transactionGroup.category = transactionCategories.back();
+	transactionGroup.category = Category(Category::None);
 	transactionGroup.amount = 0;
 	init();
 }
@@ -41,8 +41,8 @@ void TransactionGroupDialog::init()
 	ui.dateInput->setDisplayFormat("dd.MM.yyyy");
 	ui.dateInput->setDate(transactionGroup.date);
 
-	ui.categoryInput->addItems(transactionCategories);
-	ui.categoryInput->setCurrentIndex(getTransactionCategoryIndex(transactionGroup.getField(TransactionFieldNames::Category)));
+	ui.categoryInput->addItems(Category::getCategoryNames());
+	ui.categoryInput->setCurrentIndex(transactionGroup.category.getType());
 
 	ui.descriptionInput->setPlaceholderText("Enter description...");
 	ui.descriptionInput->setText(transactionGroup.getField(TransactionFieldNames::Description));
