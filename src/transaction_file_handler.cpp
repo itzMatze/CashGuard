@@ -8,6 +8,8 @@
 #include "rapidjson/prettywriter.h"
 #include "util/log.hpp"
 
+const char* version_string = "0.1.0";
+
 Transaction parseTransaction(const auto& rj_transaction)
 {
 	QStringList fields = Transaction::getFieldNames();
@@ -42,8 +44,14 @@ bool loadFromFile(const QString& filePath, TransactionModel& transactionModel)
     return false;
   }
 
+	if (std::string(doc["Version"].GetString()) != std::string(version_string))
+	{
+    cglog::error("Unsupported version in file \"{}\"", filePath.toStdString());
+		return false;
+	}
+
 	std::set<uint64_t> ids;
-	for (const auto& rj_transaction : doc.GetArray())
+	for (const auto& rj_transaction : doc["Transactions"].GetArray())
 	{
 		Transaction transaction = parseTransaction(rj_transaction);
 		if (!ids.emplace(transaction.id).second)
@@ -82,8 +90,12 @@ void serializeTransaction(const Transaction& transaction, rapidjson::Value& json
 bool saveToFile(const QString& filePath, const TransactionModel& transactionModel)
 {
 	rapidjson::Document doc;
-	doc.SetArray();
+	doc.SetObject();
   auto& allocator = doc.GetAllocator();
+	rapidjson::Value value(version_string, allocator);
+	doc.AddMember("Version", value, allocator);
+	rapidjson::Value json_transactions;
+	json_transactions.SetArray();
 	for (std::shared_ptr<Transaction> transaction : transactionModel.getUnfilteredTransactions())
 	{
 		if (std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
@@ -99,15 +111,16 @@ bool saveToFile(const QString& filePath, const TransactionModel& transactionMode
 				json_sub_transactions.PushBack(jsonObject, allocator);
 			}
 			group.AddMember("Transactions", json_sub_transactions, allocator);
-			doc.PushBack(group, allocator);
+			json_transactions.PushBack(group, allocator);
 		}
 		else
 		{
 			rapidjson::Value jsonObject;
 			serializeTransaction(*transaction, jsonObject, allocator);
-			doc.PushBack(jsonObject, allocator);
+			json_transactions.PushBack(jsonObject, allocator);
 		}
 	}
+	doc.AddMember("Transactions", json_transactions, allocator);
 
 	rapidjson::StringBuffer buffer;
 	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
