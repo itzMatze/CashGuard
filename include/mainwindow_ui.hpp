@@ -33,6 +33,7 @@ public:
 		addGroupButton(new QPushButton(parent)),
 		editButton(new QPushButton(parent)),
 		removeButton(new QPushButton(parent)),
+		filterButton(new QPushButton(parent)),
 		tabTotalAmountGraph(new QWidget(parent)),
 		tab1RootLayout(new QVBoxLayout(parent)),
 		totalAmountChart(new TooltipChartView(parent))
@@ -67,10 +68,13 @@ public:
 		editButton->setText("Edit");
 		removeButton->setFont(setFontSize(12, false, removeButton->font()));
 		removeButton->setText("Remove");
+		filterButton->setFont(setFontSize(12, false, filterButton->font()));
+		filterButton->setText("Filter");
 		buttonLayout->addWidget(addButton);
 		buttonLayout->addWidget(addGroupButton);
 		buttonLayout->addWidget(editButton);
 		buttonLayout->addWidget(removeButton);
+		buttonLayout->addWidget(filterButton);
 		tab0RootLayout->addLayout(buttonLayout);
 
 		// tab 1
@@ -104,6 +108,7 @@ public:
 	QPushButton* addGroupButton;
 	QPushButton* editButton;
 	QPushButton* removeButton;
+	QPushButton* filterButton;
 
 	QWidget* tabTotalAmountGraph;
 	QVBoxLayout* tab1RootLayout;

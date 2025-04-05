@@ -1,7 +1,7 @@
 #pragma once
 
 #include "transaction.hpp"
-#include "transaction_filter.hpp"
+#include "transaction_filter_ui/transaction_filter.hpp"
 #include <qabstractitemmodel.h>
 #include <QAbstractTableModel>
 #include <unordered_map>

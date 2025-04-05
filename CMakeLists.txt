@@ -16,17 +16,17 @@ set(SOURCE_FILES
 	src/mainwindow.cpp
 	include/tooltip_chart_view.hpp
 	src/tooltip_chart_view.cpp
-	include/transaction_dialog.hpp
-	src/transaction_dialog.cpp
-	include/transaction_filter_dialog.hpp
-	src/transaction_filter_dialog.cpp
-	include/transaction_group_dialog.hpp
-	src/transaction_group_dialog.cpp
+	include/transaction_ui/transaction_dialog.hpp
+	src/transaction_ui/transaction_dialog.cpp
+	include/transaction_filter_ui/transaction_filter_window.hpp
+	src/transaction_filter_ui/transaction_filter_window.cpp
+	src/transaction_filter_ui/transaction_filter.cpp
+	include/transaction_ui/transaction_group_dialog.hpp
+	src/transaction_ui/transaction_group_dialog.cpp
 	include/transaction_model.hpp
 	src/transaction_model.cpp
 	src/transaction.cpp
 	src/transaction_file_handler.cpp
-	src/transaction_filter.cpp
 	src/table_style_delegate.cpp
 	src/total_amount.cpp
 	src/validation.cpp

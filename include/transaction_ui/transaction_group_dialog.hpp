@@ -18,7 +18,6 @@ public:
 	explicit TransactionGroupDialog(const TransactionModel& transactionModel, QWidget *parent = nullptr);
 	TransactionGroupDialog(const TransactionModel& transactionModel, const TransactionGroup& transactionGroup, QWidget *parent = nullptr);
 	~TransactionGroupDialog();
-	void setRecommender(const QStringList& recommendations);
 	TransactionGroup getTransactionGroup();
 
 private slots:

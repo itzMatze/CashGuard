@@ -50,6 +50,7 @@ bool loadFromFile(const QString& filePath, TransactionModel& transactionModel)
 		return false;
 	}
 
+	transactionModel.addCategory("None", QColor());
 	for (const auto& rj_category : doc["Categories"].GetArray()) transactionModel.addCategory(rj_category["Name"].GetString(), QColor(rj_category["Color"].GetString()));
 	std::set<uint64_t> ids;
 	for (const auto& rj_transaction : doc["Transactions"].GetArray())
@@ -100,6 +101,7 @@ bool saveToFile(const QString& filePath, const TransactionModel& transactionMode
 	json_categories.SetArray();
 	for (const QString& category : transactionModel.getCategoryNames())
 	{
+		if (category == "None") continue;
 		rapidjson::Value jsonObject;
 		jsonObject.SetObject();
 		{

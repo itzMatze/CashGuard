@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "mainwindow_ui.hpp"
+#include "transaction_filter_ui/transaction_filter_window.hpp"
 #include "transaction_model.hpp"
 #include <QMainWindow>
 #include <qshortcut.h>
@@ -25,13 +26,14 @@ private slots:
   void openAddTransactionGroupDialog();
   void openEditTransactionDialog();
   void openDeleteTransactionDialog();
-  void openFilterDialog();
+  void toggleFilterWindow();
 	void saveTransactions();
 
 private:
 	MainWindowUI ui;
 	TransactionModel transactionModel;
 	QString filePath;
+	TransactionFilterWindow* transactionFilterWindow;
 };
 
 #endif // MAINWINDOW_H

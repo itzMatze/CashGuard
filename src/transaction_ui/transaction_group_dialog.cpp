@@ -1,8 +1,8 @@
-#include "transaction_group_dialog.hpp"
+#include "transaction_ui/transaction_group_dialog.hpp"
 #include "table_style_delegate.hpp"
 #include "total_amount.hpp"
 #include "transaction.hpp"
-#include "transaction_dialog.hpp"
+#include "transaction_ui/transaction_dialog.hpp"
 #include "util/random_generator.hpp"
 #include "validation.hpp"
 #include <memory>
@@ -38,6 +38,10 @@ TransactionGroupDialog::~TransactionGroupDialog()
 
 void TransactionGroupDialog::init()
 {
+	QCompleter* completer = new QCompleter(globalTransactionModel.getUniqueValueList(TransactionFieldNames::Description), this);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setFilterMode(Qt::MatchContains);
+	ui.descriptionInput->setCompleter(completer);
 	transactionModel.setCategories(globalTransactionModel.getCategoryNames(), globalTransactionModel.getCategoryColors());
 	this->setLayout(ui.rootLayout);
 	this->setGeometry(QRect(QPoint(0, 0), QPoint(1400, 800)));
@@ -77,14 +81,6 @@ void TransactionGroupDialog::init()
 	ui.totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString() + " €");
 }
 
-void TransactionGroupDialog::setRecommender(const QStringList& recommendations)
-{
-	QCompleter* completer = new QCompleter(recommendations, this);
-	completer->setCaseSensitivity(Qt::CaseInsensitive);
-	completer->setFilterMode(Qt::MatchContains);
-	ui.descriptionInput->setCompleter(completer);
-}
-
 TransactionGroup TransactionGroupDialog::getTransactionGroup()
 {
 	transactionGroup.transactions.clear();
@@ -104,7 +100,6 @@ void TransactionGroupDialog::openAddTransactionDialog()
 	transaction.date = ui.dateInput->date();
 	transaction.category = ui.categoryInput->currentText();
 	TransactionDialog dialog(globalTransactionModel, transaction, this);
-	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
@@ -122,7 +117,6 @@ void TransactionGroupDialog::openEditTransactionDialog()
 	if (!validateTransactionIndex(idx, transactionModel, this)) return;
 	std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(idx);
 	TransactionDialog dialog(globalTransactionModel, *transaction, this);
-	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
 	{

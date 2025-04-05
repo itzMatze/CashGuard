@@ -1,11 +1,11 @@
 #include "mainwindow.hpp"
 #include "transaction.hpp"
-#include "transaction_filter_dialog.hpp"
+#include "transaction_filter_ui/transaction_filter_window.hpp"
 #include "transaction_model.hpp"
 #include "transaction_file_handler.hpp"
 #include "mainwindow_ui.hpp"
-#include "transaction_dialog.hpp"
-#include "transaction_group_dialog.hpp"
+#include "transaction_ui/transaction_dialog.hpp"
+#include "transaction_ui/transaction_group_dialog.hpp"
 #include "validation.hpp"
 #include <QFileDialog>
 #include <QTableWidget>
@@ -23,6 +23,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	, ui(MainWindowUI())
 	, transactionModel()
 	, filePath(filePath)
+	, transactionFilterWindow(nullptr)
 {
 	setWindowTitle("Cash Guard");
 	setCentralWidget(ui.centralWidget);
@@ -39,7 +40,8 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	connect(removeShortcut, &QShortcut::activated, this, &MainWindow::openDeleteTransactionDialog);
 	connect(ui.removeButton, &QPushButton::clicked, this, &MainWindow::openDeleteTransactionDialog);
 	QShortcut* filterShortcut = new QShortcut(QKeySequence("Ctrl+F"), this);
-	connect(filterShortcut, &QShortcut::activated, this, &MainWindow::openFilterDialog);
+	connect(filterShortcut, &QShortcut::activated, this, &MainWindow::toggleFilterWindow);
+	connect(ui.filterButton, &QPushButton::clicked, this, &MainWindow::toggleFilterWindow);
 
 	if (!QFile::exists(filePath))
 	{
@@ -53,7 +55,6 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 		file.close();
 	}
 
-	transactionModel.addCategory("None", QColor());
 	if (!loadFromFile(filePath, transactionModel)) CG_THROW("Failed to load transactions file!");
 	if (!transactionModel.isEmpty())
 	{
@@ -73,7 +74,6 @@ MainWindow::~MainWindow()
 void MainWindow::openAddTransactionDialog()
 {
 	TransactionDialog dialog(transactionModel, this);
-	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
@@ -89,7 +89,6 @@ void MainWindow::openAddTransactionDialog()
 void MainWindow::openAddTransactionGroupDialog()
 {
 	TransactionGroupDialog dialog(transactionModel, this);
-	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
@@ -110,7 +109,6 @@ void MainWindow::openEditTransactionDialog()
 	if (std::shared_ptr<TransactionGroup> transactionGroup = std::dynamic_pointer_cast<TransactionGroup>(transaction))
 	{
 		TransactionGroupDialog dialog(transactionModel, *transactionGroup, this);
-		dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 		if (dialog.exec() == QDialog::Accepted)
 		{
 			std::shared_ptr<TransactionGroup> newTransactionGroup = std::make_shared<TransactionGroup>(dialog.getTransactionGroup());
@@ -122,7 +120,6 @@ void MainWindow::openEditTransactionDialog()
 	else
 	{
 		TransactionDialog dialog(transactionModel, *transaction, this);
-		dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 		if (dialog.exec() == QDialog::Accepted)
 		{
 			std::shared_ptr<Transaction> newTransaction = std::make_shared<Transaction>(dialog.getTransaction());
@@ -149,14 +146,23 @@ void MainWindow::openDeleteTransactionDialog()
 	}
 }
 
-void MainWindow::openFilterDialog()
+void MainWindow::toggleFilterWindow()
 {
-	TransactionFilterDialog dialog(transactionModel, this);
-
-	if (dialog.exec() == QDialog::Accepted)
+	if (!transactionFilterWindow)
 	{
-		transactionModel.setFilter(dialog.getTransactionFilter());
-		ui.update(transactionModel);
+		transactionFilterWindow = new TransactionFilterWindow(transactionModel, this);
+		transactionFilterWindow->setWindowFlag(Qt::Window);
+		connect(transactionFilterWindow, &TransactionFilterWindow::updateMainUI, this, [this](){ ui.update(transactionModel); });
+	}
+	if (transactionFilterWindow->isHidden())
+	{
+		transactionFilterWindow->show();
+		transactionModel.setFilterActive(true);
+	}
+	else
+	{
+		transactionFilterWindow->hide();
+		transactionModel.setFilterActive(false);
 	}
 }
 

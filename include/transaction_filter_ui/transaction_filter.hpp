@@ -16,4 +16,5 @@ public:
 	Amount amountMax = std::numeric_limits<int32_t>::max();
 	QString searchPhrase = "";
 	bool active = false;
+	bool negated = false;
 };
