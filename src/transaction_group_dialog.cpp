@@ -10,22 +10,24 @@
 #include <qmessagebox.h>
 #include <qshortcut.h>
 
-TransactionGroupDialog::TransactionGroupDialog(QWidget *parent)
+TransactionGroupDialog::TransactionGroupDialog(const TransactionModel& globalTransactionModel, QWidget *parent)
 	: QDialog(parent)
 	, ui(TransactionGroupDialogUI())
 	, transactionModel()
+	, globalTransactionModel(globalTransactionModel)
 {
 	transactionGroup.id = 0;
 	transactionGroup.date = QDate::currentDate();
-	transactionGroup.category = Category(Category::None);
+	transactionGroup.category = "";
 	transactionGroup.amount = 0;
 	init();
 }
 
-TransactionGroupDialog::TransactionGroupDialog(const TransactionGroup& transactionGroup, QWidget *parent)
+TransactionGroupDialog::TransactionGroupDialog(const TransactionModel& globalTransactionModel, const TransactionGroup& transactionGroup, QWidget *parent)
 	: QDialog(parent)
 	, ui(TransactionGroupDialogUI())
 	, transactionModel()
+	, globalTransactionModel(globalTransactionModel)
 	, transactionGroup(transactionGroup)
 {
 	init();
@@ -36,13 +38,14 @@ TransactionGroupDialog::~TransactionGroupDialog()
 
 void TransactionGroupDialog::init()
 {
+	transactionModel.setCategories(globalTransactionModel.getCategoryNames(), globalTransactionModel.getCategoryColors());
 	this->setLayout(ui.rootLayout);
 	this->setGeometry(QRect(QPoint(0, 0), QPoint(1400, 800)));
 	ui.dateInput->setDisplayFormat("dd.MM.yyyy");
 	ui.dateInput->setDate(transactionGroup.date);
 
-	ui.categoryInput->addItems(Category::getCategoryNames());
-	ui.categoryInput->setCurrentIndex(transactionGroup.category.getType());
+	ui.categoryInput->addItems(globalTransactionModel.getCategoryNames());
+	ui.categoryInput->setCurrentText(transactionGroup.category);
 
 	ui.descriptionInput->setPlaceholderText("Enter description...");
 	ui.descriptionInput->setText(transactionGroup.getField(TransactionFieldNames::Description));
@@ -100,7 +103,7 @@ void TransactionGroupDialog::openAddTransactionDialog()
 	Transaction transaction;
 	transaction.date = ui.dateInput->date();
 	transaction.category = ui.categoryInput->currentText();
-	TransactionDialog dialog(transaction, this);
+	TransactionDialog dialog(globalTransactionModel, transaction, this);
 	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
@@ -118,7 +121,7 @@ void TransactionGroupDialog::openEditTransactionDialog()
 	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
 	if (!validateTransactionIndex(idx, transactionModel, this)) return;
 	std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(idx);
-	TransactionDialog dialog(*transaction, this);
+	TransactionDialog dialog(globalTransactionModel, *transaction, this);
 	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)

@@ -41,7 +41,7 @@ private:
 	QLineEdit* descriptionInput;
 	QCheckBox* filterActiveCheckBox;
 	TransactionFilter transactionFilter;
-	const TransactionModel& transactionModel;
+	const TransactionModel& globalTransactionModel;
 
 	void init();
 	void updateWindow();

@@ -34,7 +34,7 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
 	{
 		if (index.column() < Transaction::getFieldNames().size() && Transaction::getFieldNames().at(index.column()) == TransactionFieldNames::Category)
 		{
-			return QBrush(getTransaction(index.row())->category.getColor());
+			return QBrush(categoryColors.at(getTransaction(index.row())->category));
 		}
 		else
 		{
@@ -137,6 +137,28 @@ QStringList TransactionModel::getUniqueValueList(const QString& fieldName) const
 	QStringList values;
 	for (const QString& value : uniqueValues) values.push_back(value);
 	return values;
+}
+
+void TransactionModel::addCategory(const QString& name, const QColor& color)
+{
+	categoryNames.push_back(name);
+	categoryColors.emplace(name, color);
+}
+
+const QStringList& TransactionModel::getCategoryNames() const
+{
+	return categoryNames;
+}
+
+const std::unordered_map<QString, QColor>& TransactionModel::getCategoryColors() const
+{
+	return categoryColors;
+}
+
+void TransactionModel::setCategories(const QStringList& categoryNames, const std::unordered_map<QString, QColor>& categoryColors)
+{
+	this->categoryNames = categoryNames;
+	this->categoryColors = categoryColors;
 }
 
 uint32_t TransactionModel::getTransactionIndex(std::shared_ptr<Transaction> transaction)

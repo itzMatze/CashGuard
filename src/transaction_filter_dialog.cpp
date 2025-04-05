@@ -3,7 +3,7 @@
 #include <qcompleter.h>
 #include <qshortcut.h>
 
-TransactionFilterDialog::TransactionFilterDialog(const TransactionModel& transactionModel, QWidget *parent) : transactionModel(transactionModel), transactionFilter(transactionModel.getFilter())
+TransactionFilterDialog::TransactionFilterDialog(const TransactionModel& globalTransactionModel, QWidget *parent) : globalTransactionModel(globalTransactionModel), transactionFilter(globalTransactionModel.getFilter())
 {
 	init();
 }
@@ -26,7 +26,7 @@ void TransactionFilterDialog::init()
 	categoryLabel = new QLabel(this);
 	categoryLabel->setText("Category (None to disable filtering)");
 	categoryInput = new QComboBox(this);
-	categoryInput->addItems(Category::getCategoryNames());
+	categoryInput->addItems(globalTransactionModel.getCategoryNames());
 
 	amountMinLabel = new QLabel(this);
 	amountMinLabel->setText("Min Amount");
@@ -102,7 +102,7 @@ void TransactionFilterDialog::updateWindow()
 	filterActiveCheckBox->setChecked(transactionFilter.active);
 	dateMinInput->setDate(transactionFilter.dateMin);
 	dateMaxInput->setDate(transactionFilter.dateMax);
-	categoryInput->setCurrentIndex(transactionFilter.category.getType());
+	categoryInput->setCurrentText(transactionFilter.category);
 	if (transactionFilter.amountMin.value != std::numeric_limits<int32_t>::min()) amountMinInput->setText(transactionFilter.amountMin.toString());
 	else amountMinInput->setText("");
 	if (transactionFilter.amountMax.value != std::numeric_limits<int32_t>::max()) amountMaxInput->setText(transactionFilter.amountMax.toString());
@@ -132,8 +132,8 @@ TransactionFilter TransactionFilterDialog::getTransactionFilter()
 void TransactionFilterDialog::resetFilter()
 {
 	transactionFilter = TransactionFilter();
-	transactionFilter.dateMax = transactionModel.getUnfilteredTransactions().at(0)->date;
-	transactionFilter.dateMin = transactionModel.getUnfilteredTransactions().back()->date;
+	transactionFilter.dateMax = globalTransactionModel.getUnfilteredTransactions().at(0)->date;
+	transactionFilter.dateMin = globalTransactionModel.getUnfilteredTransactions().back()->date;
 	updateWindow();
 }
 

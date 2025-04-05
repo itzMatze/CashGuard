@@ -4,12 +4,12 @@
 #include <qcompleter.h>
 #include <qshortcut.h>
 
-TransactionDialog::TransactionDialog(QWidget *parent) : QDialog(parent)
+TransactionDialog::TransactionDialog(const TransactionModel& globalTransactionModel, QWidget *parent) : QDialog(parent), globalTransactionModel(globalTransactionModel)
 {
 	init();
 }
 
-TransactionDialog::TransactionDialog(const Transaction& transaction, QWidget *parent) : transaction(transaction)
+TransactionDialog::TransactionDialog(const TransactionModel& globalTransactionModel, const Transaction& transaction, QWidget *parent) : QDialog(parent), globalTransactionModel(globalTransactionModel), transaction(transaction)
 {
 	init();
 }
@@ -24,8 +24,8 @@ void TransactionDialog::init()
 	dateInput->setDate(transaction.date);
 
 	categoryInput = new QComboBox(this);
-	categoryInput->addItems(Category::getCategoryNames());
-	categoryInput->setCurrentIndex(transaction.category.getType());
+	categoryInput->addItems(globalTransactionModel.getCategoryNames());
+	categoryInput->setCurrentText(transaction.category);
 
 	amountInput = new QLineEdit(this);
 	amountInput->setPlaceholderText("Enter amount...");

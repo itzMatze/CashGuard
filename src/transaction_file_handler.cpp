@@ -50,6 +50,7 @@ bool loadFromFile(const QString& filePath, TransactionModel& transactionModel)
 		return false;
 	}
 
+	for (const auto& rj_category : doc["Categories"].GetArray()) transactionModel.addCategory(rj_category["Name"].GetString(), QColor(rj_category["Color"].GetString()));
 	std::set<uint64_t> ids;
 	for (const auto& rj_transaction : doc["Transactions"].GetArray())
 	{
@@ -94,6 +95,25 @@ bool saveToFile(const QString& filePath, const TransactionModel& transactionMode
   auto& allocator = doc.GetAllocator();
 	rapidjson::Value value(version_string, allocator);
 	doc.AddMember("Version", value, allocator);
+
+	rapidjson::Value json_categories;
+	json_categories.SetArray();
+	for (const QString& category : transactionModel.getCategoryNames())
+	{
+		rapidjson::Value jsonObject;
+		jsonObject.SetObject();
+		{
+			rapidjson::Value value(category.toStdString().c_str(), allocator);
+			jsonObject.AddMember("Name", value, allocator);
+		}
+		{
+			rapidjson::Value value(transactionModel.getCategoryColors().at(category).name(QColor::NameFormat::HexArgb).toStdString().c_str(), allocator);
+			jsonObject.AddMember("Color", value, allocator);
+		}
+		json_categories.PushBack(jsonObject, allocator);
+	}
+	doc.AddMember("Categories", json_categories, allocator);
+
 	rapidjson::Value json_transactions;
 	json_transactions.SetArray();
 	for (std::shared_ptr<Transaction> transaction : transactionModel.getUnfilteredTransactions())

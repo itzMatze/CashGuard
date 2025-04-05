@@ -2,6 +2,7 @@
 #define TRANSACTIONDIALOG_H
 
 #include "transaction.hpp"
+#include "transaction_model.hpp"
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDialog>
@@ -16,8 +17,8 @@ class TransactionDialog : public QDialog
 	Q_OBJECT;
 
 public:
-	TransactionDialog(QWidget *parent = nullptr);
-	TransactionDialog(const Transaction& transaction, QWidget *parent = nullptr);
+	TransactionDialog(const TransactionModel& globalTransactionModel, QWidget *parent = nullptr);
+	TransactionDialog(const TransactionModel& globalTransactionModel, const Transaction& transaction, QWidget *parent = nullptr);
 	void setRecommender(const QStringList& recommendations);
 	Transaction getTransaction();
 
@@ -26,6 +27,7 @@ private:
 	QComboBox* categoryInput;
 	QLineEdit* amountInput;
 	QLineEdit* descriptionInput;
+	const TransactionModel& globalTransactionModel;
 	Transaction transaction;
 
 	void init();

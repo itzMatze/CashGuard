@@ -11,7 +11,7 @@ public:
 
 	QDate dateMin = QDate::currentDate().addYears(-80);
 	QDate dateMax = QDate::currentDate().addMonths(1);
-	Category category = Category::None;
+	QString category = "";
 	Amount amountMin = std::numeric_limits<int32_t>::min();
 	Amount amountMax = std::numeric_limits<int32_t>::max();
 	QString searchPhrase = "";

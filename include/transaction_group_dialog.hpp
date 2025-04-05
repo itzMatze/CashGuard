@@ -15,8 +15,8 @@ class TransactionGroupDialog : public QDialog
 	Q_OBJECT;
 
 public:
-	explicit TransactionGroupDialog(QWidget *parent = nullptr);
-	TransactionGroupDialog(const TransactionGroup& transactionGroup, QWidget *parent = nullptr);
+	explicit TransactionGroupDialog(const TransactionModel& transactionModel, QWidget *parent = nullptr);
+	TransactionGroupDialog(const TransactionModel& transactionModel, const TransactionGroup& transactionGroup, QWidget *parent = nullptr);
 	~TransactionGroupDialog();
 	void setRecommender(const QStringList& recommendations);
 	TransactionGroup getTransactionGroup();
@@ -29,6 +29,7 @@ private slots:
 private:
 	TransactionGroupDialogUI ui;
 	TransactionModel transactionModel;
+	const TransactionModel& globalTransactionModel;
 	TransactionGroup transactionGroup;
 
 	void init();

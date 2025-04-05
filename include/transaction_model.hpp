@@ -4,6 +4,7 @@
 #include "transaction_filter.hpp"
 #include <qabstractitemmodel.h>
 #include <QAbstractTableModel>
+#include <unordered_map>
 #include <vector>
 
 class TransactionModel : public QAbstractTableModel
@@ -29,8 +30,14 @@ public:
 	TransactionFilter& getFilter();
 	bool isEmpty() const;
 	QStringList getUniqueValueList(const QString& fieldName) const;
+	void addCategory(const QString& name, const QColor& color);
+	const QStringList& getCategoryNames() const;
+	const std::unordered_map<QString, QColor>& getCategoryColors() const;
+	void setCategories(const QStringList& categoryNames, const std::unordered_map<QString, QColor>& categoryColors);
 
 private:
+	QStringList categoryNames;
+	std::unordered_map<QString, QColor> categoryColors;
 	std::vector<std::shared_ptr<Transaction>> transactions;
 	std::vector<std::shared_ptr<Transaction>> filtered_transactions;
 	TransactionFilter filter;

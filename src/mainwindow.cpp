@@ -53,6 +53,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 		file.close();
 	}
 
+	transactionModel.addCategory("None", QColor());
 	if (!loadFromFile(filePath, transactionModel)) CG_THROW("Failed to load transactions file!");
 	if (!transactionModel.isEmpty())
 	{
@@ -71,7 +72,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::openAddTransactionDialog()
 {
-	TransactionDialog dialog(this);
+	TransactionDialog dialog(transactionModel, this);
 	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
@@ -87,7 +88,7 @@ void MainWindow::openAddTransactionDialog()
 
 void MainWindow::openAddTransactionGroupDialog()
 {
-	TransactionGroupDialog dialog(this);
+	TransactionGroupDialog dialog(transactionModel, this);
 	dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 
 	if (dialog.exec() == QDialog::Accepted)
@@ -108,7 +109,7 @@ void MainWindow::openEditTransactionDialog()
 	std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(idx);
 	if (std::shared_ptr<TransactionGroup> transactionGroup = std::dynamic_pointer_cast<TransactionGroup>(transaction))
 	{
-		TransactionGroupDialog dialog(*transactionGroup, this);
+		TransactionGroupDialog dialog(transactionModel, *transactionGroup, this);
 		dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 		if (dialog.exec() == QDialog::Accepted)
 		{
@@ -120,7 +121,7 @@ void MainWindow::openEditTransactionDialog()
 	}
 	else
 	{
-		TransactionDialog dialog(*transaction, this);
+		TransactionDialog dialog(transactionModel, *transaction, this);
 		dialog.setRecommender(transactionModel.getUniqueValueList(TransactionFieldNames::Description));
 		if (dialog.exec() == QDialog::Accepted)
 		{
