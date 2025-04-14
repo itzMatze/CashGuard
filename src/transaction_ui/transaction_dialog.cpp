@@ -31,7 +31,11 @@ void TransactionDialog::init()
 	amountInput->setPlaceholderText("Enter amount...");
 	amountInput->setText(transaction.getField(TransactionFieldNames::Amount));
 
+	QCompleter* completer = new QCompleter(globalTransactionModel.getUniqueValueList(TransactionFieldNames::Description), this);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setFilterMode(Qt::MatchContains);
 	descriptionInput = new QLineEdit(this);
+	descriptionInput->setCompleter(completer);
 	descriptionInput->setPlaceholderText("Enter description...");
 	descriptionInput->setText(transaction.getField(TransactionFieldNames::Description));
 
