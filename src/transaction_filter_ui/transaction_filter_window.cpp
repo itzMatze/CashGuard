@@ -24,7 +24,7 @@ TransactionFilterWindow::TransactionFilterWindow(TransactionModel& globalTransac
 	completer->setFilterMode(Qt::MatchContains);
 	ui.descriptionInput->setCompleter(completer);
 
-	ui.update(transactionFilter);
+	reset();
 }
 
 void TransactionFilterWindow::apply()
@@ -52,8 +52,11 @@ void TransactionFilterWindow::apply()
 void TransactionFilterWindow::reset()
 {
 	transactionFilter = TransactionFilter();
-	transactionFilter.dateMax = globalTransactionModel.getUnfilteredTransactions().at(0)->date;
-	transactionFilter.dateMin = globalTransactionModel.getUnfilteredTransactions().back()->date;
+	if (!globalTransactionModel.isEmpty())
+	{
+		transactionFilter.dateMax = globalTransactionModel.getUnfilteredTransactions().at(0)->date;
+		transactionFilter.dateMin = globalTransactionModel.getUnfilteredTransactions().back()->date;
+	}
 	ui.update(transactionFilter);
 	emit updateMainUI();
 }
