@@ -33,6 +33,7 @@ void TransactionDialog::init()
 	descriptionInput->setCompleter(completer);
 	descriptionInput->setPlaceholderText("Enter description...");
 	descriptionInput->setText(transaction.getField(TransactionFieldNames::Description));
+	connect(descriptionInput, &QLineEdit::editingFinished, this, &TransactionDialog::autoCompleteFromDescription);
 
 	amountInput = new QLineEdit(this);
 	amountInput->setPlaceholderText("Enter amount...");
@@ -62,6 +63,16 @@ void TransactionDialog::init()
 	QShortcut* cancelShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
 	connect(cancelShortcut, &QShortcut::activated, this, &QDialog::reject);
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+}
+
+void TransactionDialog::autoCompleteFromDescription()
+{
+	std::shared_ptr<const Transaction> completedTransaction;
+	if (globalTransactionModel.getAutoCompleteTransaction(descriptionInput->text(), completedTransaction))
+	{
+		categoryInput->setCurrentText(completedTransaction->category);
+		amountInput->setText(completedTransaction->getField(TransactionFieldNames::Amount));
+	}
 }
 
 bool TransactionDialog::eventFilter(QObject* obj, QEvent* event)

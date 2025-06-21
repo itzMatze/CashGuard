@@ -33,6 +33,7 @@ private:
 	Transaction transaction;
 
 	void init();
+	void autoCompleteFromDescription();
 };
 
 #endif // TRANSACTIONDIALOG_H

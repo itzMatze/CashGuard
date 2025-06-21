@@ -139,6 +139,20 @@ QStringList TransactionModel::getUniqueValueList(const QString& fieldName) const
 	return values;
 }
 
+bool TransactionModel::getAutoCompleteTransaction(const QString& description, std::shared_ptr<const Transaction>& completedTransaction) const
+{
+	completedTransaction = nullptr;
+	for (const std::shared_ptr<const Transaction> transaction : transactions)
+	{
+		if (transaction->getField(TransactionFieldNames::Description) == description)
+		{
+			completedTransaction = transaction;
+			return true;
+		}
+	}
+	return false;
+}
+
 void TransactionModel::addCategory(const QString& name, const QColor& color)
 {
 	categoryNames.push_back(name);

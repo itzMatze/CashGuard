@@ -30,6 +30,7 @@ public:
 	TransactionFilter& getFilter();
 	bool isEmpty() const;
 	QStringList getUniqueValueList(const QString& fieldName) const;
+	bool getAutoCompleteTransaction(const QString& description, std::shared_ptr<const Transaction>& completedTransaction) const;
 	void addCategory(const QString& name, const QColor& color);
 	const QStringList& getCategoryNames() const;
 	const std::unordered_map<QString, QColor>& getCategoryColors() const;
