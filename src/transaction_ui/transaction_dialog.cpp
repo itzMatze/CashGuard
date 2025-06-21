@@ -2,6 +2,8 @@
 #include "transaction.hpp"
 #include "util/random_generator.hpp"
 #include <qcompleter.h>
+#include <qcoreevent.h>
+#include <qevent.h>
 #include <qshortcut.h>
 
 TransactionDialog::TransactionDialog(const TransactionModel& globalTransactionModel, QWidget *parent) : QDialog(parent), globalTransactionModel(globalTransactionModel)
@@ -22,14 +24,7 @@ void TransactionDialog::init()
 	dateInput = new QDateEdit(this);
 	dateInput->setDisplayFormat("dd.MM.yyyy");
 	dateInput->setDate(transaction.date);
-
-	categoryInput = new QComboBox(this);
-	categoryInput->addItems(globalTransactionModel.getCategoryNames());
-	categoryInput->setCurrentText(transaction.category);
-
-	amountInput = new QLineEdit(this);
-	amountInput->setPlaceholderText("Enter amount...");
-	amountInput->setText(transaction.getField(TransactionFieldNames::Amount));
+	dateInput->installEventFilter(this);
 
 	QCompleter* completer = new QCompleter(globalTransactionModel.getUniqueValueList(TransactionFieldNames::Description), this);
 	completer->setCaseSensitivity(Qt::CaseInsensitive);
@@ -38,6 +33,14 @@ void TransactionDialog::init()
 	descriptionInput->setCompleter(completer);
 	descriptionInput->setPlaceholderText("Enter description...");
 	descriptionInput->setText(transaction.getField(TransactionFieldNames::Description));
+
+	amountInput = new QLineEdit(this);
+	amountInput->setPlaceholderText("Enter amount...");
+	amountInput->setText(transaction.getField(TransactionFieldNames::Amount));
+
+	categoryInput = new QComboBox(this);
+	categoryInput->addItems(globalTransactionModel.getCategoryNames());
+	categoryInput->setCurrentText(transaction.category);
 
 	QPushButton *okButton = new QPushButton("OK", this);
 	QPushButton *cancelButton = new QPushButton("Cancel", this);
@@ -48,9 +51,9 @@ void TransactionDialog::init()
 
 	QVBoxLayout *mainLayout = new QVBoxLayout(this);
 	mainLayout->addWidget(dateInput);
-	mainLayout->addWidget(categoryInput);
-	mainLayout->addWidget(amountInput);
 	mainLayout->addWidget(descriptionInput);
+	mainLayout->addWidget(amountInput);
+	mainLayout->addWidget(categoryInput);
 	mainLayout->addLayout(buttonLayout);
 
 	QShortcut* okShortcut = new QShortcut(QKeySequence("Ctrl+O"), this);
@@ -59,6 +62,32 @@ void TransactionDialog::init()
 	QShortcut* cancelShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
 	connect(cancelShortcut, &QShortcut::activated, this, &QDialog::reject);
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+}
+
+bool TransactionDialog::eventFilter(QObject* obj, QEvent* event)
+{
+	if (obj == dateInput && event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+		if (keyEvent->key() == Qt::Key_Tab)
+		{
+			QWidget::focusNextChild();
+			return true;
+		}
+		else if (keyEvent->key() == Qt::Key_L)
+		{
+			QKeyEvent rightArrowEvent(QEvent::KeyPress, Qt::Key_Right, Qt::ControlModifier);
+			QCoreApplication::sendEvent(dateInput, &rightArrowEvent);
+			return true;
+		}
+		else if (keyEvent->key() == Qt::Key_H)
+		{
+			QKeyEvent rightArrowEvent(QEvent::KeyPress, Qt::Key_Left, Qt::ControlModifier);
+			QCoreApplication::sendEvent(dateInput, &rightArrowEvent);
+			return true;
+		}
+	}
+	return QObject::eventFilter(obj, event);
 }
 
 Transaction TransactionDialog::getTransaction()

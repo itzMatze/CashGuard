@@ -21,6 +21,9 @@ public:
 	TransactionDialog(const TransactionModel& globalTransactionModel, const Transaction& transaction, QWidget *parent = nullptr);
 	Transaction getTransaction();
 
+protected:
+	bool eventFilter(QObject* obj, QEvent* event) override;
+
 private:
 	QDateEdit* dateInput;
 	QComboBox* categoryInput;
