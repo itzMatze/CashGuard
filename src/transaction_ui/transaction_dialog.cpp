@@ -67,6 +67,7 @@ void TransactionDialog::init()
 
 void TransactionDialog::autoCompleteFromDescription()
 {
+	if (!amountInput->text().isEmpty() && Amount(amountInput->text()).value != 0) return;
 	std::shared_ptr<const Transaction> completedTransaction;
 	if (globalTransactionModel.getAutoCompleteTransaction(descriptionInput->text(), completedTransaction))
 	{
