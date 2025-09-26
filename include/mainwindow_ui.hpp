@@ -1,5 +1,6 @@
 #pragma once
 
+#include "account_model.hpp"
 #include "table_style_delegate.hpp"
 #include "tooltip_chart_view.hpp"
 #include "total_amount.hpp"
@@ -34,6 +35,7 @@ public:
 		editButton(new QPushButton(parent)),
 		removeButton(new QPushButton(parent)),
 		filterButton(new QPushButton(parent)),
+		accountButton(new QPushButton(parent)),
 		tabTotalAmountGraph(new QWidget(parent)),
 		tab1RootLayout(new QVBoxLayout(parent)),
 		totalAmountChart(new TooltipChartView(parent))
@@ -70,11 +72,14 @@ public:
 		removeButton->setText("Remove");
 		filterButton->setFont(setFontSize(12, false, filterButton->font()));
 		filterButton->setText("Filter");
+		accountButton->setFont(setFontSize(12, false, accountButton->font()));
+		accountButton->setText("Accounts");
 		buttonLayout->addWidget(addButton);
 		buttonLayout->addWidget(addGroupButton);
 		buttonLayout->addWidget(editButton);
 		buttonLayout->addWidget(removeButton);
 		buttonLayout->addWidget(filterButton);
+		buttonLayout->addWidget(accountButton);
 		tab0RootLayout->addLayout(buttonLayout);
 
 		// tab 1
@@ -85,12 +90,20 @@ public:
 		tab1RootLayout->addWidget(totalAmountChart);
 	}
 
-	void update(const TransactionModel& transactionModel)
+	void update(const TransactionModel& transactionModel, const AccountModel& accountModel, const Amount& filteredTotalAmount, const Amount& globalTotalAmount)
 	{
-		totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString() + " €");
+		totalAmountLabel->setText(filteredTotalAmount.toString() + " €");
 		totalAmountSmallChart->setChart(getSmallTotalAmountChart(transactionModel).first);
 		std::pair<QChart*, QLineSeries*> totalAmountData = getTotalAmountChart(transactionModel);
 		totalAmountChart->updateChart(totalAmountData.first, totalAmountData.second, transactionModel.getFilter().dateMin);
+		if (accountModel.getTotalAmount().value == globalTotalAmount.value)
+		{
+			accountButton->setStyleSheet("QPushButton { color: #00ff00; }");
+		}
+		else
+		{
+			accountButton->setStyleSheet("QPushButton { color: #ff0000; }");
+		}
 	}
 
 	QWidget* centralWidget;
@@ -109,6 +122,7 @@ public:
 	QPushButton* editButton;
 	QPushButton* removeButton;
 	QPushButton* filterButton;
+	QPushButton* accountButton;
 
 	QWidget* tabTotalAmountGraph;
 	QVBoxLayout* tab1RootLayout;

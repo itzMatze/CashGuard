@@ -16,6 +16,10 @@ set(SOURCE_FILES
 	src/mainwindow.cpp
 	include/tooltip_chart_view.hpp
 	src/tooltip_chart_view.cpp
+	include/account_dialog.hpp
+	src/account_dialog.cpp
+	include/account_model.hpp
+	src/account_model.cpp
 	include/transaction_ui/transaction_dialog.hpp
 	src/transaction_ui/transaction_dialog.cpp
 	include/transaction_filter_ui/transaction_filter_window.hpp

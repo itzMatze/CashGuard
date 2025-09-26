@@ -78,7 +78,7 @@ void TransactionGroupDialog::init()
 	ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui.tableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	ui.tableView->setItemDelegate(new TableStyleDelegate(ui.tableView));
-	ui.totalAmountLabel->setText(getCurrentTotalAmount(transactionModel).toString() + " €");
+	ui.totalAmountLabel->setText(getFilteredTotalAmount(transactionModel).toString() + " €");
 }
 
 TransactionGroup TransactionGroupDialog::getTransactionGroup()
@@ -90,7 +90,7 @@ TransactionGroup TransactionGroupDialog::getTransactionGroup()
 	// prevent overwriting of the id when a transaction is edited
 	if (transactionGroup.id == 0) transactionGroup.id = rng::random_int64();
 	for (uint32_t i = 0; i < transactionModel.rowCount(); i++) transactionGroup.transactions.push_back(transactionModel.getTransaction(i));
-	transactionGroup.amount = getCurrentTotalAmount(transactionModel);
+	transactionGroup.amount = getFilteredTotalAmount(transactionModel);
 	return transactionGroup;
 }
 

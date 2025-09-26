@@ -1,4 +1,5 @@
 #include "mainwindow.hpp"
+#include "account_dialog.hpp"
 #include "transaction.hpp"
 #include "transaction_filter_ui/transaction_filter_window.hpp"
 #include "transaction_model.hpp"
@@ -22,12 +23,13 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	: QMainWindow(parent)
 	, ui(MainWindowUI())
 	, transactionModel()
+	, accountModel()
 	, filePath(filePath)
 	, transactionFilterWindow(nullptr)
 {
 	setWindowTitle("Cash Guard");
 	setCentralWidget(ui.centralWidget);
-	QShortcut* addShortcut = new QShortcut(QKeySequence("Ctrl+A"), this);
+	QShortcut* addShortcut = new QShortcut(QKeySequence("Ctrl+N"), this);
 	connect(addShortcut, &QShortcut::activated, this, &MainWindow::openAddTransactionDialog);
 	connect(ui.addButton, &QPushButton::clicked, this, &MainWindow::openAddTransactionDialog);
 	QShortcut* addGroupShortcut = new QShortcut(QKeySequence("Ctrl+G"), this);
@@ -42,6 +44,9 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	QShortcut* filterShortcut = new QShortcut(QKeySequence("Ctrl+F"), this);
 	connect(filterShortcut, &QShortcut::activated, this, &MainWindow::toggleFilterWindow);
 	connect(ui.filterButton, &QPushButton::clicked, this, &MainWindow::toggleFilterWindow);
+	QShortcut* accountShortcut = new QShortcut(QKeySequence("Ctrl+A"), this);
+	connect(accountShortcut, &QShortcut::activated, this, &MainWindow::openAccountsDialog);
+	connect(ui.accountButton, &QPushButton::clicked, this, &MainWindow::openAccountsDialog);
 
 	if (!QFile::exists(filePath))
 	{
@@ -55,7 +60,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 		file.close();
 	}
 
-	if (!loadFromFile(filePath, transactionModel)) CG_THROW("Failed to load transactions file!");
+	if (!loadFromFile(filePath, transactionModel, accountModel)) CG_THROW("Failed to load transactions file!");
 	if (!transactionModel.isEmpty())
 	{
 		transactionModel.getFilter().dateMax = transactionModel.getUnfilteredTransactions().at(0)->date.addDays(28);
@@ -65,11 +70,18 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 	ui.tableView->resizeColumnsToContents();
 	if (ui.tableView->columnWidth(4) > 800) ui.tableView->setColumnWidth(4, 800);
 
-	ui.update(transactionModel);
+	update();
 }
 
 MainWindow::~MainWindow()
 {}
+
+void MainWindow::update()
+{
+	filteredTotalAmount = getFilteredTotalAmount(transactionModel);
+	globalTotalAmount = getGlobalTotalAmount(transactionModel);
+	ui.update(transactionModel, accountModel, filteredTotalAmount, globalTotalAmount);
+}
 
 void MainWindow::openAddTransactionDialog()
 {
@@ -81,7 +93,7 @@ void MainWindow::openAddTransactionDialog()
 		transaction->added = QDateTime::currentDateTime();
 		transaction->edited = QDateTime::currentDateTime();
 		transactionModel.add(transaction);
-		ui.update(transactionModel);
+		update();
 		saveTransactions();
 	}
 }
@@ -96,7 +108,7 @@ void MainWindow::openAddTransactionGroupDialog()
 		transaction->added = QDateTime::currentDateTime();
 		transaction->edited = QDateTime::currentDateTime();
 		transactionModel.add(transaction);
-		ui.update(transactionModel);
+		update();
 		saveTransactions();
 	}
 }
@@ -128,7 +140,7 @@ void MainWindow::openEditTransactionDialog()
 			transactionModel.setTransaction(idx, newTransaction);
 		}
 	}
-	ui.update(transactionModel);
+	update();
 	saveTransactions();
 }
 
@@ -141,7 +153,7 @@ void MainWindow::openDeleteTransactionDialog()
 	if (reply == QMessageBox::Yes)
 	{
 		transactionModel.removeTransaction(idx);
-		ui.update(transactionModel);
+		update();
 		saveTransactions();
 	}
 }
@@ -152,7 +164,7 @@ void MainWindow::toggleFilterWindow()
 	{
 		transactionFilterWindow = new TransactionFilterWindow(transactionModel, this);
 		transactionFilterWindow->setWindowFlag(Qt::Window);
-		connect(transactionFilterWindow, &TransactionFilterWindow::updateMainUI, this, [this](){ ui.update(transactionModel); });
+		connect(transactionFilterWindow, &TransactionFilterWindow::updateMainUI, this, [this](){ update(); });
 	}
 	if (transactionFilterWindow->isHidden())
 	{
@@ -166,7 +178,15 @@ void MainWindow::toggleFilterWindow()
 	}
 }
 
+void MainWindow::openAccountsDialog()
+{
+	AccountDialog accountDialog(accountModel, globalTotalAmount);
+	accountDialog.exec();
+	update();
+	saveTransactions();
+}
+
 void MainWindow::saveTransactions()
 {
-	if (!saveToFile(filePath, transactionModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
+	if (!saveToFile(filePath, transactionModel, accountModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
 }

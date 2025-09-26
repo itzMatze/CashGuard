@@ -8,7 +8,7 @@
 #include "rapidjson/prettywriter.h"
 #include "util/log.hpp"
 
-const char* version_string = "0.1.0";
+const char* version_string = "0.2.0";
 
 Transaction parseTransaction(const auto& rj_transaction)
 {
@@ -22,7 +22,7 @@ Transaction parseTransaction(const auto& rj_transaction)
 	return transaction;
 }
 
-bool loadFromFile(const QString& filePath, TransactionModel& transactionModel)
+bool loadFromFile(const QString& filePath, TransactionModel& transactionModel, AccountModel& accountModel)
 {
 	cglog::debug("Loading file");
 	transactionModel.clear();
@@ -52,6 +52,7 @@ bool loadFromFile(const QString& filePath, TransactionModel& transactionModel)
 
 	transactionModel.addCategory("None", QColor());
 	for (const auto& rj_category : doc["Categories"].GetArray()) transactionModel.addCategory(rj_category["Name"].GetString(), QColor(rj_category["Color"].GetString()));
+	for (const auto& rj_account : doc["Accounts"].GetArray()) accountModel.add(Account{.name = rj_account["Name"].GetString(), .amount = Amount(rj_account["Amount"].GetString())});
 	std::set<uint64_t> ids;
 	for (const auto& rj_transaction : doc["Transactions"].GetArray())
 	{
@@ -89,7 +90,7 @@ void serializeTransaction(const Transaction& transaction, rapidjson::Value& json
 	}
 }
 
-bool saveToFile(const QString& filePath, const TransactionModel& transactionModel)
+bool saveToFile(const QString& filePath, const TransactionModel& transactionModel, const AccountModel& accountModel)
 {
 	rapidjson::Document doc;
 	doc.SetObject();
@@ -115,6 +116,24 @@ bool saveToFile(const QString& filePath, const TransactionModel& transactionMode
 		json_categories.PushBack(jsonObject, allocator);
 	}
 	doc.AddMember("Categories", json_categories, allocator);
+
+	rapidjson::Value json_accounts;
+	json_accounts.SetArray();
+	for (const Account& account : accountModel.getData())
+	{
+		rapidjson::Value jsonObject;
+		jsonObject.SetObject();
+		{
+			rapidjson::Value value(account.name.toStdString().c_str(), allocator);
+			jsonObject.AddMember("Name", value, allocator);
+		}
+		{
+			rapidjson::Value value(account.amount.toString().toStdString().c_str(), allocator);
+			jsonObject.AddMember("Amount", value, allocator);
+		}
+		json_accounts.PushBack(jsonObject, allocator);
+	}
+	doc.AddMember("Accounts", json_accounts, allocator);
 
 	rapidjson::Value json_transactions;
 	json_transactions.SetArray();

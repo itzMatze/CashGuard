@@ -59,7 +59,7 @@ public:
 
 	void update(const TransactionModel& transactionModel)
 	{
-		Amount totalAmount = getCurrentTotalAmount(transactionModel);
+		Amount totalAmount = getFilteredTotalAmount(transactionModel);
 		totalAmountLabel->setText(totalAmount.toString());
 	}
 

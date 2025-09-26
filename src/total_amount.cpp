@@ -6,10 +6,17 @@
 #include <QtCharts/QCategoryAxis>
 #include <limits>
 
-Amount getCurrentTotalAmount(const TransactionModel& transaction_model)
+Amount getFilteredTotalAmount(const TransactionModel& transaction_model)
 {
 	int32_t total_amount = 0;
 	for (uint32_t i = 0; i < transaction_model.rowCount(); i++) total_amount += transaction_model.getTransaction(i)->amount.value;
+	return Amount(total_amount);
+}
+
+Amount getGlobalTotalAmount(const TransactionModel& transaction_model)
+{
+	int32_t total_amount = 0;
+	for (std::shared_ptr<const Transaction> t : transaction_model.getUnfilteredTransactions()) total_amount += t->amount.value;
 	return Amount(total_amount);
 }
 
