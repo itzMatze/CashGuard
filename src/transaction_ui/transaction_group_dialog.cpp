@@ -54,7 +54,7 @@ void TransactionGroupDialog::init()
 	ui.descriptionInput->setPlaceholderText("Enter description...");
 	ui.descriptionInput->setText(transactionGroup.getField(TransactionFieldNames::Description));
 
-	QShortcut* addShortcut = new QShortcut(QKeySequence("Ctrl+A"), this);
+	QShortcut* addShortcut = new QShortcut(QKeySequence("Ctrl+N"), this);
 	connect(addShortcut, &QShortcut::activated, this, &TransactionGroupDialog::openAddTransactionDialog);
 	connect(ui.addButton, &QPushButton::clicked, this, &TransactionGroupDialog::openAddTransactionDialog);
 	QShortcut* editShortcut = new QShortcut(QKeySequence("Ctrl+E"), this);
