@@ -2,10 +2,10 @@
 #include "transaction.hpp"
 #include <qcompleter.h>
 
-TransactionFilterWindow::TransactionFilterWindow(TransactionModel& global_transaction_model, QWidget* parent) :
-	QWidget(parent),
-	ui(global_transaction_model, this),
-	global_transaction_model(global_transaction_model)
+TransactionFilterWindow::TransactionFilterWindow(TransactionModel& global_transaction_model, QWidget* parent)
+	: QWidget(parent)
+	, ui(global_transaction_model, this)
+	, global_transaction_model(global_transaction_model)
 {
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->addWidget(ui.central_widget);

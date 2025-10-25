@@ -14,13 +14,13 @@
 class AccountDialogUI
 {
 public:
-	explicit AccountDialogUI(const AccountModel& account_model, const Amount& total_amount, QWidget* parent) :
-		root_layout(new QVBoxLayout(parent)),
-		table_view(new QTableView(parent)),
-		add_button(new QPushButton(parent)),
-		remove_button(new QPushButton(parent)),
-		quit_button(new QPushButton(parent)),
-		match_label(new QLabel(parent))
+	explicit AccountDialogUI(const AccountModel& account_model, const Amount& total_amount, QWidget* parent)
+		: root_layout(new QVBoxLayout(parent))
+		, table_view(new QTableView(parent))
+		, add_button(new QPushButton(parent))
+		, remove_button(new QPushButton(parent))
+		, quit_button(new QPushButton(parent))
+		, match_label(new QLabel(parent))
 	{
 		add_button->setFont(set_font_size(12, false, add_button->font()));
 		add_button->setText("Add");

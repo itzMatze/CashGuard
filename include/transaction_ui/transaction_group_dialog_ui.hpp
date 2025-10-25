@@ -15,18 +15,18 @@
 class TransactionGroupDialogUI
 {
 public:
-	explicit TransactionGroupDialogUI(QWidget* parent) :
-		root_layout(new QVBoxLayout(parent)),
-		total_amount_label(new QLabel(parent)),
-		date_input(new QDateEdit(parent)),
-		category_input(new QComboBox(parent)),
-		description_input(new QLineEdit(parent)),
-		table_view(new QTableView(parent)),
-		add_button(new QPushButton(parent)),
-		edit_button(new QPushButton(parent)),
-		remove_button(new QPushButton(parent)),
-		ok_button(new QPushButton(parent)),
-		cancel_button(new QPushButton(parent))
+	explicit TransactionGroupDialogUI(QWidget* parent)
+		: root_layout(new QVBoxLayout(parent))
+		, total_amount_label(new QLabel(parent))
+		, date_input(new QDateEdit(parent))
+		, category_input(new QComboBox(parent))
+		, description_input(new QLineEdit(parent))
+		, table_view(new QTableView(parent))
+		, add_button(new QPushButton(parent))
+		, edit_button(new QPushButton(parent))
+		, remove_button(new QPushButton(parent))
+		, ok_button(new QPushButton(parent))
+		, cancel_button(new QPushButton(parent))
 	{
 		total_amount_label->setFont(set_font_size(20, true, total_amount_label->font()));
 		root_layout->addWidget(total_amount_label);

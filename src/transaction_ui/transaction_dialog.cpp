@@ -6,12 +6,17 @@
 #include <qevent.h>
 #include <qshortcut.h>
 
-TransactionDialog::TransactionDialog(const TransactionModel& global_transaction_model, QWidget* parent) : QDialog(parent), global_transaction_model(global_transaction_model)
+TransactionDialog::TransactionDialog(const TransactionModel& global_transaction_model, QWidget* parent)
+	: QDialog(parent)
+	, global_transaction_model(global_transaction_model)
 {
 	init();
 }
 
-TransactionDialog::TransactionDialog(const TransactionModel& global_transaction_model, const Transaction& transaction, QWidget* parent) : QDialog(parent), global_transaction_model(global_transaction_model), transaction(transaction)
+TransactionDialog::TransactionDialog(const TransactionModel& global_transaction_model, const Transaction& transaction, QWidget* parent)
+	: QDialog(parent)
+	, global_transaction_model(global_transaction_model)
+	, transaction(transaction)
 {
 	init();
 }

@@ -19,23 +19,23 @@
 class TransactionFilterUI
 {
 public:
-	TransactionFilterUI(const TransactionModel& global_transaction_model, QWidget* parent) :
-		central_widget(new QWidget(parent)),
-		negated_check_box(new QCheckBox(parent)),
-		date_min_label(new QLabel(parent)),
-		date_min_input(new QDateEdit(parent)),
-		date_max_label(new QLabel(parent)),
-		date_max_input(new QDateEdit(parent)),
-		category_label(new QLabel(parent)),
-		category_lnput(new QComboBox(parent)),
-		amount_min_label(new QLabel(parent)),
-		amount_min_input(new QLineEdit(parent)),
-		amount_max_label(new QLabel(parent)),
-		amount_max_input(new QLineEdit(parent)),
-		description_label(new QLabel(parent)),
-		description_input(new QLineEdit(parent)),
-		ok_button(new QPushButton(parent)),
-		reset_button(new QPushButton(parent))
+	TransactionFilterUI(const TransactionModel& global_transaction_model, QWidget* parent)
+		: central_widget(new QWidget(parent))
+		, negated_check_box(new QCheckBox(parent))
+		, date_min_label(new QLabel(parent))
+		, date_min_input(new QDateEdit(parent))
+		, date_max_label(new QLabel(parent))
+		, date_max_input(new QDateEdit(parent))
+		, category_label(new QLabel(parent))
+		, category_lnput(new QComboBox(parent))
+		, amount_min_label(new QLabel(parent))
+		, amount_min_input(new QLineEdit(parent))
+		, amount_max_label(new QLabel(parent))
+		, amount_max_input(new QLineEdit(parent))
+		, description_label(new QLabel(parent))
+		, description_input(new QLineEdit(parent))
+		, ok_button(new QPushButton(parent))
+		, reset_button(new QPushButton(parent))
 	{
 		date_min_label->setText("Min Date");
 		date_min_input->setDisplayFormat("dd.MM.yyyy");

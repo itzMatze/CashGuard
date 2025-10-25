@@ -19,24 +19,24 @@
 class MainWindowUI
 {
 public:
-	explicit MainWindowUI(QWidget* parent) :
-		central_widget(new QWidget(parent)),
-		root_layout(new QVBoxLayout(central_widget)),
-		tab_widget(new QTabWidget(central_widget)),
-		tab_transaction_table(new QWidget(tab_widget)),
-		tab0_root_layout(new QVBoxLayout(tab_transaction_table)),
-		total_amount_label(new QLabel(tab_transaction_table)),
-		total_amount_small_chart(new QChartView(tab_transaction_table)),
-		table_view(new QTableView(tab_transaction_table)),
-		add_button(new QPushButton(tab_transaction_table)),
-		add_group_button(new QPushButton(tab_transaction_table)),
-		edit_button(new QPushButton(tab_transaction_table)),
-		remove_button(new QPushButton(tab_transaction_table)),
-		filter_button(new QPushButton(tab_transaction_table)),
-		account_button(new QPushButton(tab_transaction_table)),
-		tab_total_amount_graph(new QWidget(tab_widget)),
-		tab1_root_layout(new QVBoxLayout(tab_total_amount_graph)),
-		total_amount_chart(new TooltipChartView(tab_total_amount_graph))
+	explicit MainWindowUI(QWidget* parent)
+		: central_widget(new QWidget(parent))
+		, root_layout(new QVBoxLayout(central_widget))
+		, tab_widget(new QTabWidget(central_widget))
+		, tab_transaction_table(new QWidget(tab_widget))
+		, tab0_root_layout(new QVBoxLayout(tab_transaction_table))
+		, total_amount_label(new QLabel(tab_transaction_table))
+		, total_amount_small_chart(new QChartView(tab_transaction_table))
+		, table_view(new QTableView(tab_transaction_table))
+		, add_button(new QPushButton(tab_transaction_table))
+		, add_group_button(new QPushButton(tab_transaction_table))
+		, edit_button(new QPushButton(tab_transaction_table))
+		, remove_button(new QPushButton(tab_transaction_table))
+		, filter_button(new QPushButton(tab_transaction_table))
+		, account_button(new QPushButton(tab_transaction_table))
+		, tab_total_amount_graph(new QWidget(tab_widget))
+		, tab1_root_layout(new QVBoxLayout(tab_total_amount_graph))
+		, total_amount_chart(new TooltipChartView(tab_total_amount_graph))
 	{
 		central_widget->setLayout(root_layout);
 		root_layout->addWidget(tab_widget);

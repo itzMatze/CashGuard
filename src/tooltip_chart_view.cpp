@@ -5,7 +5,10 @@
 #include <QMouseEvent>
 #include <QToolTip>
 
-TooltipChartView::TooltipChartView(QWidget* parent) : QChartView(parent), series(nullptr), marker(new QScatterSeries(parent))
+TooltipChartView::TooltipChartView(QWidget* parent)
+	: QChartView(parent)
+	, series(nullptr)
+	, marker(new QScatterSeries(parent))
 {}
 
 void TooltipChartView::update(QChart* new_chart, QLineSeries* series, const QDate& starting_date)
