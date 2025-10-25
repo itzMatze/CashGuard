@@ -5,36 +5,36 @@
 #include <QMouseEvent>
 #include <QToolTip>
 
-TooltipChartView::TooltipChartView(QWidget *parent) : QChartView(parent), series(nullptr), marker(new QScatterSeries(parent))
+TooltipChartView::TooltipChartView(QWidget* parent) : QChartView(parent), series(nullptr), marker(new QScatterSeries(parent))
 {}
 
-void TooltipChartView::updateChart(QChart* newChart, QLineSeries* series, const QDate& startingDate)
+void TooltipChartView::update(QChart* new_chart, QLineSeries* series, const QDate& starting_date)
 {
-	this->startingDate = startingDate;
-	newChart->addSeries(marker);
+	this->starting_date = starting_date;
+	new_chart->addSeries(marker);
 	marker->setMarkerSize(8);
 	marker->setColor(Qt::red);
 	marker->setBorderColor(Qt::red);
-	marker->attachAxis(newChart->axes().at(0));
-	marker->attachAxis(newChart->axes().at(1));
-	setChart(newChart);
+	marker->attachAxis(new_chart->axes().at(0));
+	marker->attachAxis(new_chart->axes().at(1));
+	setChart(new_chart);
 	this->series = series;
 }
 
-void TooltipChartView::mouseMoveEvent(QMouseEvent *event)
+void TooltipChartView::mouseMoveEvent(QMouseEvent* event)
 {
-	QPointF chartPos = chart()->mapToValue(event->pos());
-	float x = chartPos.x();
-	float y = findYValueFromX(x);
-	QPoint tooltipPos(event->globalPosition().x(), event->globalPosition().y());
-	QToolTip::showText(tooltipPos, QString("%1: %2").arg(QDate(startingDate.addDays(x)).toString("dd.MM.yyyy")).arg(y));
+	QPointF chart_pos = chart()->mapToValue(event->pos());
+	float x = chart_pos.x();
+	float y = find_y_value_from_x(x);
+	QPoint tooltip_pos(event->globalPosition().x(), event->globalPosition().y());
+	QToolTip::showText(tooltip_pos, QString("%1: %2").arg(QDate(starting_date.addDays(x)).toString("dd.MM.yyyy")).arg(y));
 	marker->clear();
 	marker->append(x, y);
 
 	QChartView::mouseMoveEvent(event);
 }
 
-float TooltipChartView::findYValueFromX(float x) const
+float TooltipChartView::find_y_value_from_x(float x) const
 {
 	if (series->count() == 0) return 0;
 	if (series->count() == 1) return series->at(0).y();

@@ -9,9 +9,9 @@ struct Amount
 {
 	Amount() = default;
 	Amount(int32_t value);
-	Amount(QString stringValue);
-	QString toString() const;
-	bool isNegative() const;
+	Amount(QString string_value);
+	QString to_string() const;
+	bool is_negative() const;
 
 	// amount in cents
 	int32_t value;
@@ -36,11 +36,11 @@ class Transaction
 public:
 	Transaction();
 	virtual ~Transaction() = default;
-	static QStringList getFieldNames();
-	QString getField(const QString& fieldName) const;
-	QString getFieldView(const QString& fieldName) const;
-	void setField(const QString& fieldName, const QString& value);
-	virtual QString toString() const;
+	static QStringList get_field_names();
+	QString get_field(const QString& field_name) const;
+	QString get_field_view(const QString& field_name) const;
+	void set_field(const QString& field_name, const QString& value);
+	virtual QString to_string() const;
 
 	size_t id;
 	QDate date;
@@ -59,7 +59,7 @@ class TransactionGroup : public Transaction
 public:
 	TransactionGroup() = default;
 	TransactionGroup(const Transaction& transaction);
-	QString toString() const override;
+	QString to_string() const override;
 
 	std::vector<std::shared_ptr<Transaction>> transactions;
 };

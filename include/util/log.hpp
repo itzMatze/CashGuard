@@ -6,13 +6,13 @@
 
 #define CG_ASSERTIONS
 
-#define CG_THROW(...)                   \
-{                                       \
-  spdlog::critical(__VA_ARGS__);        \
-  std::string s(__FILE__);              \
-  s.append(": ");                       \
-  s.append(std::to_string(__LINE__));   \
-  spdlog::throw_spdlog_ex(s);           \
+#define CG_THROW(...) \
+{ \
+	spdlog::critical(__VA_ARGS__); \
+	std::string s(__FILE__); \
+	s.append(": "); \
+	s.append(std::to_string(__LINE__)); \
+	spdlog::throw_spdlog_ex(s); \
 }
 
 #if defined(CG_ASSERTIONS)

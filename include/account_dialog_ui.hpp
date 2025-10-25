@@ -14,51 +14,50 @@
 class AccountDialogUI
 {
 public:
-	explicit AccountDialogUI(const AccountModel& accountModel, const Amount& totalAmount, QWidget* parent = nullptr) :
-		rootLayout(new QVBoxLayout(parent)),
-		tableView(new QTableView(parent)),
-		addButton(new QPushButton(parent)),
-		removeButton(new QPushButton(parent)),
-		quitButton(new QPushButton(parent)),
-		buttonLayout(new QHBoxLayout(parent)),
-		matchLabel(new QLabel(parent))
+	explicit AccountDialogUI(const AccountModel& account_model, const Amount& total_amount, QWidget* parent) :
+		root_layout(new QVBoxLayout(parent)),
+		table_view(new QTableView(parent)),
+		add_button(new QPushButton(parent)),
+		remove_button(new QPushButton(parent)),
+		quit_button(new QPushButton(parent)),
+		match_label(new QLabel(parent))
 	{
-		addButton->setFont(setFontSize(12, false, addButton->font()));
-		addButton->setText("Add");
-		removeButton->setFont(setFontSize(12, false, removeButton->font()));
-		removeButton->setText("Remove");
-		quitButton->setFont(setFontSize(12, false, quitButton->font()));
-		quitButton->setText("Quit");
-		buttonLayout->addWidget(addButton);
-		buttonLayout->addWidget(removeButton);
-		buttonLayout->addWidget(quitButton);
-		matchLabel->setFont(setFontSize(20, true, matchLabel->font()));
-		rootLayout->addWidget(matchLabel);
-		rootLayout->addWidget(tableView);
-		rootLayout->addLayout(buttonLayout);
-		update(accountModel, totalAmount);
+		add_button->setFont(set_font_size(12, false, add_button->font()));
+		add_button->setText("Add");
+		remove_button->setFont(set_font_size(12, false, remove_button->font()));
+		remove_button->setText("Remove");
+		quit_button->setFont(set_font_size(12, false, quit_button->font()));
+		quit_button->setText("Quit");
+		QHBoxLayout* button_layout = new QHBoxLayout;
+		button_layout->addWidget(add_button);
+		button_layout->addWidget(remove_button);
+		button_layout->addWidget(quit_button);
+		match_label->setFont(set_font_size(20, true, match_label->font()));
+		root_layout->addWidget(match_label);
+		root_layout->addWidget(table_view);
+		root_layout->addLayout(button_layout);
+		update(account_model, total_amount);
 	}
 
-	void update(const AccountModel& accountModel, const Amount& totalAmount)
+	void update(const AccountModel& account_model, const Amount& total_amount)
 	{
-		Amount accountTotalAmount = accountModel.getTotalAmount();
-		if (accountTotalAmount.value == totalAmount.value)
+		Amount account_total_amount = account_model.get_total_amount();
+		if (account_total_amount.value == total_amount.value)
 		{
-			matchLabel->setText("Amounts match!");
-			matchLabel->setStyleSheet("QLabel { color: #00ff00; }");
+			match_label->setText("Amounts match!");
+			match_label->setStyleSheet("QLabel { color: #00ff00; }");
 		}
 		else
 		{
-			matchLabel->setText("Amounts don't match! Accounts: " + accountTotalAmount.toString() + " €, Difference: " + Amount(accountTotalAmount.value - totalAmount.value).toString() + " €");
-			matchLabel->setStyleSheet("QLabel { color: #ff0000; }");
+			match_label->setText("Amounts don't match! Accounts: " + account_total_amount.to_string() + " €, Difference: " + Amount(account_total_amount.value - total_amount.value).to_string() + " €");
+			match_label->setStyleSheet("QLabel { color: #ff0000; }");
 		}
 	}
 
-	QVBoxLayout* rootLayout;
-	QTableView* tableView;
-	QHBoxLayout* buttonLayout;
-	QPushButton* addButton;
-	QPushButton* removeButton;
-	QPushButton* quitButton;
-	QLabel* matchLabel;
+	QVBoxLayout* root_layout;
+	QTableView* table_view;
+	QPushButton* add_button;
+	QPushButton* remove_button;
+	QPushButton* quit_button;
+	QLabel* match_label;
 };

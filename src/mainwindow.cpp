@@ -19,34 +19,34 @@
 #include <qtablewidget.h>
 #include "util/log.hpp"
 
-MainWindow::MainWindow(const QString& filePath, QWidget *parent)
+MainWindow::MainWindow(const QString& filePath, QWidget* parent)
 	: QMainWindow(parent)
-	, ui(MainWindowUI())
-	, transactionModel()
-	, accountModel()
-	, filePath(filePath)
-	, transactionFilterWindow(nullptr)
+	, ui(this)
+	, transaction_model(this)
+	, account_model(this)
+	, file_path(filePath)
+	, transaction_filter_window(nullptr)
 {
 	setWindowTitle("Cash Guard");
-	setCentralWidget(ui.centralWidget);
-	QShortcut* addShortcut = new QShortcut(QKeySequence("Ctrl+N"), this);
-	connect(addShortcut, &QShortcut::activated, this, &MainWindow::openAddTransactionDialog);
-	connect(ui.addButton, &QPushButton::clicked, this, &MainWindow::openAddTransactionDialog);
-	QShortcut* addGroupShortcut = new QShortcut(QKeySequence("Ctrl+G"), this);
-	connect(addGroupShortcut, &QShortcut::activated, this, &MainWindow::openAddTransactionGroupDialog);
-	connect(ui.addGroupButton, &QPushButton::clicked, this, &MainWindow::openAddTransactionGroupDialog);
-	QShortcut* editShortcut = new QShortcut(QKeySequence("Ctrl+E"), this);
-	connect(editShortcut, &QShortcut::activated, this, &MainWindow::openEditTransactionDialog);
-	connect(ui.editButton, &QPushButton::clicked, this, &MainWindow::openEditTransactionDialog);
-	QShortcut* removeShortcut = new QShortcut(QKeySequence("Ctrl+D"), this);
-	connect(removeShortcut, &QShortcut::activated, this, &MainWindow::openDeleteTransactionDialog);
-	connect(ui.removeButton, &QPushButton::clicked, this, &MainWindow::openDeleteTransactionDialog);
-	QShortcut* filterShortcut = new QShortcut(QKeySequence("Ctrl+F"), this);
-	connect(filterShortcut, &QShortcut::activated, this, &MainWindow::toggleFilterWindow);
-	connect(ui.filterButton, &QPushButton::clicked, this, &MainWindow::toggleFilterWindow);
-	QShortcut* accountShortcut = new QShortcut(QKeySequence("Ctrl+A"), this);
-	connect(accountShortcut, &QShortcut::activated, this, &MainWindow::openAccountsDialog);
-	connect(ui.accountButton, &QPushButton::clicked, this, &MainWindow::openAccountsDialog);
+	setCentralWidget(ui.central_widget);
+	QShortcut* add_shortcut = new QShortcut(QKeySequence("Ctrl+N"), this);
+	connect(add_shortcut, &QShortcut::activated, this, &MainWindow::open_add_transaction_dialog);
+	connect(ui.add_button, &QPushButton::clicked, this, &MainWindow::open_add_transaction_dialog);
+	QShortcut* add_group_shortcut = new QShortcut(QKeySequence("Ctrl+G"), this);
+	connect(add_group_shortcut, &QShortcut::activated, this, &MainWindow::open_add_transaction_group_dialog);
+	connect(ui.add_group_button, &QPushButton::clicked, this, &MainWindow::open_add_transaction_group_dialog);
+	QShortcut* edit_shortcut = new QShortcut(QKeySequence("Ctrl+E"), this);
+	connect(edit_shortcut, &QShortcut::activated, this, &MainWindow::open_edit_transaction_dialog);
+	connect(ui.edit_button, &QPushButton::clicked, this, &MainWindow::open_edit_transaction_dialog);
+	QShortcut* remove_shortcut = new QShortcut(QKeySequence("Ctrl+D"), this);
+	connect(remove_shortcut, &QShortcut::activated, this, &MainWindow::open_delete_transaction_dialog);
+	connect(ui.remove_button, &QPushButton::clicked, this, &MainWindow::open_delete_transaction_dialog);
+	QShortcut* filter_shortcut = new QShortcut(QKeySequence("Ctrl+F"), this);
+	connect(filter_shortcut, &QShortcut::activated, this, &MainWindow::toggle_filter_window);
+	connect(ui.filter_button, &QPushButton::clicked, this, &MainWindow::toggle_filter_window);
+	QShortcut* account_shortcut = new QShortcut(QKeySequence("Ctrl+A"), this);
+	connect(account_shortcut, &QShortcut::activated, this, &MainWindow::open_accounts_dialog);
+	connect(ui.account_button, &QPushButton::clicked, this, &MainWindow::open_accounts_dialog);
 
 	if (!QFile::exists(filePath))
 	{
@@ -60,15 +60,15 @@ MainWindow::MainWindow(const QString& filePath, QWidget *parent)
 		file.close();
 	}
 
-	if (!loadFromFile(filePath, transactionModel, accountModel)) CG_THROW("Failed to load transactions file!");
-	if (!transactionModel.isEmpty())
+	if (!load_from_file(filePath, transaction_model, account_model)) CG_THROW("Failed to load transactions file!");
+	if (!transaction_model.is_empty())
 	{
-		transactionModel.getFilter().dateMax = transactionModel.getUnfilteredTransactions().at(0)->date.addDays(28);
-		transactionModel.getFilter().dateMin = transactionModel.getUnfilteredTransactions().back()->date;
+		transaction_model.get_filter().date_max = transaction_model.get_unfiltered_transactions().at(0)->date.addDays(28);
+		transaction_model.get_filter().date_min = transaction_model.get_unfiltered_transactions().back()->date;
 	}
-	ui.tableView->setModel(&transactionModel);
-	ui.tableView->resizeColumnsToContents();
-	if (ui.tableView->columnWidth(4) > 800) ui.tableView->setColumnWidth(4, 800);
+	ui.table_view->setModel(&transaction_model);
+	ui.table_view->resizeColumnsToContents();
+	if (ui.table_view->columnWidth(4) > 800) ui.table_view->setColumnWidth(4, 800);
 
 	update();
 }
@@ -78,115 +78,115 @@ MainWindow::~MainWindow()
 
 void MainWindow::update()
 {
-	filteredTotalAmount = getFilteredTotalAmount(transactionModel);
-	globalTotalAmount = getGlobalTotalAmount(transactionModel);
-	ui.update(transactionModel, accountModel, filteredTotalAmount, globalTotalAmount);
+	filtered_total_amount = get_filtered_total_amount(transaction_model);
+	global_total_amount = get_global_total_amount(transaction_model);
+	ui.update(transaction_model, account_model, filtered_total_amount, global_total_amount);
 }
 
-void MainWindow::openAddTransactionDialog()
+void MainWindow::open_add_transaction_dialog()
 {
-	TransactionDialog dialog(transactionModel, this);
+	TransactionDialog dialog(transaction_model, this);
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		std::shared_ptr<Transaction> transaction = std::make_shared<Transaction>(dialog.getTransaction());
+		std::shared_ptr<Transaction> transaction = std::make_shared<Transaction>(dialog.get_transaction());
 		transaction->added = QDateTime::currentDateTime();
 		transaction->edited = QDateTime::currentDateTime();
-		transactionModel.add(transaction);
+		transaction_model.add(transaction);
 		update();
-		saveTransactions();
+		save_transactions();
 	}
 }
 
-void MainWindow::openAddTransactionGroupDialog()
+void MainWindow::open_add_transaction_group_dialog()
 {
-	TransactionGroupDialog dialog(transactionModel, this);
+	TransactionGroupDialog dialog(transaction_model, this);
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		std::shared_ptr<TransactionGroup> transaction = std::make_shared<TransactionGroup>(dialog.getTransactionGroup());
+		std::shared_ptr<TransactionGroup> transaction = std::make_shared<TransactionGroup>(dialog.get_transaction_group());
 		transaction->added = QDateTime::currentDateTime();
 		transaction->edited = QDateTime::currentDateTime();
-		transactionModel.add(transaction);
+		transaction_model.add(transaction);
 		update();
-		saveTransactions();
+		save_transactions();
 	}
 }
 
-void MainWindow::openEditTransactionDialog()
+void MainWindow::open_edit_transaction_dialog()
 {
-	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
-	if (!validateTransactionIndex(idx, transactionModel, this)) return;
-	std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(idx);
-	if (std::shared_ptr<TransactionGroup> transactionGroup = std::dynamic_pointer_cast<TransactionGroup>(transaction))
+	int32_t idx = ui.table_view->selectionModel()->currentIndex().row();
+	if (!validate_transaction_index(idx, transaction_model)) return;
+	std::shared_ptr<Transaction> transaction = transaction_model.get_transaction(idx);
+	if (std::shared_ptr<TransactionGroup> transaction_group = std::dynamic_pointer_cast<TransactionGroup>(transaction))
 	{
-		TransactionGroupDialog dialog(transactionModel, *transactionGroup, this);
+		TransactionGroupDialog dialog(transaction_model, *transaction_group, this);
 		if (dialog.exec() == QDialog::Accepted)
 		{
-			std::shared_ptr<TransactionGroup> newTransactionGroup = std::make_shared<TransactionGroup>(dialog.getTransactionGroup());
-			if (*transactionGroup == *newTransactionGroup) return;
-			newTransactionGroup->edited = QDateTime::currentDateTime();
-			transactionModel.setTransaction(idx, newTransactionGroup);
+			std::shared_ptr<TransactionGroup> new_transaction_group = std::make_shared<TransactionGroup>(dialog.get_transaction_group());
+			if (*transaction_group == *new_transaction_group) return;
+			new_transaction_group->edited = QDateTime::currentDateTime();
+			transaction_model.set_transaction(idx, new_transaction_group);
 		}
 	}
 	else
 	{
-		TransactionDialog dialog(transactionModel, *transaction, this);
+		TransactionDialog dialog(transaction_model, *transaction, this);
 		if (dialog.exec() == QDialog::Accepted)
 		{
-			std::shared_ptr<Transaction> newTransaction = std::make_shared<Transaction>(dialog.getTransaction());
-			if (*transaction == *newTransaction) return;
-			newTransaction->edited = QDateTime::currentDateTime();
-			transactionModel.setTransaction(idx, newTransaction);
+			std::shared_ptr<Transaction> new_transaction = std::make_shared<Transaction>(dialog.get_transaction());
+			if (*transaction == *new_transaction) return;
+			new_transaction->edited = QDateTime::currentDateTime();
+			transaction_model.set_transaction(idx, new_transaction);
 		}
 	}
 	update();
-	saveTransactions();
+	save_transactions();
 }
 
-void MainWindow::openDeleteTransactionDialog()
+void MainWindow::open_delete_transaction_dialog()
 {
-	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
-	if (!validateTransactionIndex(idx, transactionModel, this)) return;
-	QString message(QString("Delete transaction %1?").arg(transactionModel.getTransaction(idx)->getField(TransactionFieldNames::ID)));
+	int32_t idx = ui.table_view->selectionModel()->currentIndex().row();
+	if (!validate_transaction_index(idx, transaction_model)) return;
+	QString message(QString("Delete transaction %1?").arg(transaction_model.get_transaction(idx)->get_field(TransactionFieldNames::ID)));
 	QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", message, QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes)
 	{
-		transactionModel.removeTransaction(idx);
+		transaction_model.remove_transaction(idx);
 		update();
-		saveTransactions();
+		save_transactions();
 	}
 }
 
-void MainWindow::toggleFilterWindow()
+void MainWindow::toggle_filter_window()
 {
-	if (!transactionFilterWindow)
+	if (!transaction_filter_window)
 	{
-		transactionFilterWindow = new TransactionFilterWindow(transactionModel, this);
-		transactionFilterWindow->setWindowFlag(Qt::Window);
-		connect(transactionFilterWindow, &TransactionFilterWindow::updateMainUI, this, [this](){ update(); });
+		transaction_filter_window = new TransactionFilterWindow(transaction_model, this);
+		transaction_filter_window->setWindowFlag(Qt::Window);
+		connect(transaction_filter_window, &TransactionFilterWindow::update_main_ui, this, [this](){ update(); });
 	}
-	if (transactionFilterWindow->isHidden())
+	if (transaction_filter_window->isHidden())
 	{
-		transactionFilterWindow->show();
-		transactionModel.setFilterActive(true);
+		transaction_filter_window->show();
+		transaction_model.set_filter_active(true);
 	}
 	else
 	{
-		transactionFilterWindow->hide();
-		transactionModel.setFilterActive(false);
+		transaction_filter_window->hide();
+		transaction_model.set_filter_active(false);
 	}
 }
 
-void MainWindow::openAccountsDialog()
+void MainWindow::open_accounts_dialog()
 {
-	AccountDialog accountDialog(accountModel, globalTotalAmount);
-	accountDialog.exec();
+	AccountDialog account_dialog(account_model, global_total_amount, this);
+	account_dialog.exec();
 	update();
-	saveTransactions();
+	save_transactions();
 }
 
-void MainWindow::saveTransactions()
+void MainWindow::save_transactions()
 {
-	if (!saveToFile(filePath, transactionModel, accountModel)) QMessageBox::warning(this, "Error", "Failed to save data!");
+	if (!save_to_file(file_path, transaction_model, account_model)) QMessageBox::warning(this, "Error", "Failed to save data!");
 }

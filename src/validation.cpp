@@ -1,9 +1,8 @@
 #include "validation.hpp"
 #include <qmessagebox.h>
 
-bool validateTransactionIndex(uint32_t index, const TransactionModel& transaction_model, QWidget* parent)
+bool validate_transaction_index(uint32_t index, const TransactionModel& transaction_model)
 {
 	if (index >= 0 && index < transaction_model.rowCount()) return true;
-	if (parent) QMessageBox::warning(parent, "Error", "Invalid transaction index!");
 	return false;
 }

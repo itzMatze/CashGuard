@@ -1,9 +1,9 @@
 #include "table_style_delegate.hpp"
 
-TableStyleDelegate::TableStyleDelegate(QObject *parent) : QStyledItemDelegate(parent)
+TableStyleDelegate::TableStyleDelegate(QObject* parent) : QStyledItemDelegate(parent)
 {}
 
-void TableStyleDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void TableStyleDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	QStyleOptionViewItem opt = option;
 	// disable hover highlighting

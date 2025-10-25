@@ -15,67 +15,65 @@
 class TransactionGroupDialogUI
 {
 public:
-	explicit TransactionGroupDialogUI(QWidget* parent = nullptr) :
-		rootLayout(new QVBoxLayout(parent)),
-		totalAmountLabel(new QLabel(parent)),
-		dateInput(new QDateEdit(parent)),
-		categoryInput(new QComboBox(parent)),
-		descriptionInput(new QLineEdit(parent)),
-		tableView(new QTableView(parent)),
-		transactionButtonLayout(new QHBoxLayout(parent)),
-		addButton(new QPushButton(parent)),
-		editButton(new QPushButton(parent)),
-		removeButton(new QPushButton(parent)),
-		confirmationButtonLayout(new QHBoxLayout(parent)),
-		okButton(new QPushButton(parent)),
-		cancelButton(new QPushButton(parent))
+	explicit TransactionGroupDialogUI(QWidget* parent) :
+		root_layout(new QVBoxLayout(parent)),
+		total_amount_label(new QLabel(parent)),
+		date_input(new QDateEdit(parent)),
+		category_input(new QComboBox(parent)),
+		description_input(new QLineEdit(parent)),
+		table_view(new QTableView(parent)),
+		add_button(new QPushButton(parent)),
+		edit_button(new QPushButton(parent)),
+		remove_button(new QPushButton(parent)),
+		ok_button(new QPushButton(parent)),
+		cancel_button(new QPushButton(parent))
 	{
-		totalAmountLabel->setFont(setFontSize(20, true, totalAmountLabel->font()));
-		rootLayout->addWidget(totalAmountLabel);
-		rootLayout->addWidget(dateInput);
-		rootLayout->addWidget(categoryInput);
-		rootLayout->addWidget(descriptionInput);
-		rootLayout->addWidget(tableView);
+		total_amount_label->setFont(set_font_size(20, true, total_amount_label->font()));
+		root_layout->addWidget(total_amount_label);
+		root_layout->addWidget(date_input);
+		root_layout->addWidget(category_input);
+		root_layout->addWidget(description_input);
+		root_layout->addWidget(table_view);
 
-		addButton->setFont(setFontSize(12, false, addButton->font()));
-		addButton->setText("Add");
-		editButton->setFont(setFontSize(12, false, editButton->font()));
-		editButton->setText("Edit");
-		removeButton->setFont(setFontSize(12, false, removeButton->font()));
-		removeButton->setText("Remove");
-		transactionButtonLayout->addWidget(addButton);
-		transactionButtonLayout->addWidget(editButton);
-		transactionButtonLayout->addWidget(removeButton);
-		rootLayout->addLayout(transactionButtonLayout);
+		add_button->setFont(set_font_size(12, false, add_button->font()));
+		add_button->setText("Add");
+		edit_button->setFont(set_font_size(12, false, edit_button->font()));
+		edit_button->setText("Edit");
+		remove_button->setFont(set_font_size(12, false, remove_button->font()));
+		remove_button->setText("Remove");
+		QHBoxLayout* transaction_button_layout = new QHBoxLayout;
+		transaction_button_layout->addWidget(add_button);
+		transaction_button_layout->addWidget(edit_button);
+		transaction_button_layout->addWidget(remove_button);
+		root_layout->addLayout(transaction_button_layout);
 
-		okButton->setFont(setFontSize(12, false, okButton->font()));
-		okButton->setText("OK");
-		cancelButton->setFont(setFontSize(12, false, cancelButton->font()));
-		cancelButton->setText("Cancel");
-		confirmationButtonLayout->addWidget(okButton);
-		confirmationButtonLayout->addWidget(cancelButton);
-		rootLayout->addLayout(confirmationButtonLayout);
+		ok_button->setFont(set_font_size(12, false, ok_button->font()));
+		ok_button->setText("OK");
+		cancel_button->setFont(set_font_size(12, false, cancel_button->font()));
+		cancel_button->setText("Cancel");
+		QHBoxLayout* confirmation_button_layout = new QHBoxLayout;
+		confirmation_button_layout->addWidget(ok_button);
+		confirmation_button_layout->addWidget(cancel_button);
+		root_layout->addLayout(confirmation_button_layout);
 	}
 
-	void update(const TransactionModel& transactionModel)
+	void update(const TransactionModel& transaction_model)
 	{
-		Amount totalAmount = getFilteredTotalAmount(transactionModel);
-		totalAmountLabel->setText(totalAmount.toString());
+		Amount total_amount = get_filtered_total_amount(transaction_model);
+		total_amount_label->setText(total_amount.to_string());
 	}
 
-	QVBoxLayout* rootLayout;
-	QLabel* totalAmountLabel;
-	QDateEdit* dateInput;
-	QComboBox* categoryInput;
-	QLineEdit* descriptionInput;
-	QTableView* tableView;
+	QVBoxLayout* root_layout;
+	QLabel* total_amount_label;
+	QDateEdit* date_input;
+	QComboBox* category_input;
+	QLineEdit* description_input;
+	QTableView* table_view;
 
-	QHBoxLayout* transactionButtonLayout;
-	QPushButton* addButton;
-	QPushButton* editButton;
-	QPushButton* removeButton;
+	QPushButton* add_button;
+	QPushButton* edit_button;
+	QPushButton* remove_button;
 
-	QHBoxLayout* confirmationButtonLayout;
-	QPushButton* okButton;
-	QPushButton* cancelButton;
+	QPushButton* ok_button;
+	QPushButton* cancel_button;
 };

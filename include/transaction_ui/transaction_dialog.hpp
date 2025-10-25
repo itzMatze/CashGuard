@@ -1,5 +1,4 @@
-#ifndef TRANSACTIONDIALOG_H
-#define TRANSACTIONDIALOG_H
+#pragma once
 
 #include "transaction.hpp"
 #include "transaction_model.hpp"
@@ -17,23 +16,21 @@ class TransactionDialog : public QDialog
 	Q_OBJECT;
 
 public:
-	TransactionDialog(const TransactionModel& globalTransactionModel, QWidget *parent = nullptr);
-	TransactionDialog(const TransactionModel& globalTransactionModel, const Transaction& transaction, QWidget *parent = nullptr);
-	Transaction getTransaction();
+	TransactionDialog(const TransactionModel& global_transaction_model, QWidget* parent);
+	TransactionDialog(const TransactionModel& global_transaction_model, const Transaction& transaction, QWidget* parent);
+	Transaction get_transaction();
 
 protected:
 	bool eventFilter(QObject* obj, QEvent* event) override;
 
 private:
-	QDateEdit* dateInput;
-	QComboBox* categoryInput;
-	QLineEdit* amountInput;
-	QLineEdit* descriptionInput;
-	const TransactionModel& globalTransactionModel;
+	QDateEdit* date_input;
+	QComboBox* category_input;
+	QLineEdit* amount_input;
+	QLineEdit* description_input;
+	const TransactionModel& global_transaction_model;
 	Transaction transaction;
 
 	void init();
-	void autoCompleteFromDescription();
+	void auto_complete_from_description();
 };
-
-#endif // TRANSACTIONDIALOG_H

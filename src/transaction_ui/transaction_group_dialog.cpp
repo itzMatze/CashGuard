@@ -10,25 +10,25 @@
 #include <qmessagebox.h>
 #include <qshortcut.h>
 
-TransactionGroupDialog::TransactionGroupDialog(const TransactionModel& globalTransactionModel, QWidget *parent)
+TransactionGroupDialog::TransactionGroupDialog(const TransactionModel& global_transaction_model, QWidget* parent)
 	: QDialog(parent)
-	, ui(TransactionGroupDialogUI())
-	, transactionModel()
-	, globalTransactionModel(globalTransactionModel)
+	, ui(TransactionGroupDialogUI(this))
+	, transaction_model(this)
+	, global_transaction_model(global_transaction_model)
 {
-	transactionGroup.id = 0;
-	transactionGroup.date = QDate::currentDate();
-	transactionGroup.category = "";
-	transactionGroup.amount = 0;
+	transaction_group.id = 0;
+	transaction_group.date = QDate::currentDate();
+	transaction_group.category = "";
+	transaction_group.amount = 0;
 	init();
 }
 
-TransactionGroupDialog::TransactionGroupDialog(const TransactionModel& globalTransactionModel, const TransactionGroup& transactionGroup, QWidget *parent)
+TransactionGroupDialog::TransactionGroupDialog(const TransactionModel& global_transaction_model, const TransactionGroup& transaction_group, QWidget* parent)
 	: QDialog(parent)
-	, ui(TransactionGroupDialogUI())
-	, transactionModel()
-	, globalTransactionModel(globalTransactionModel)
-	, transactionGroup(transactionGroup)
+	, ui(TransactionGroupDialogUI(this))
+	, transaction_model(this)
+	, global_transaction_model(global_transaction_model)
+	, transaction_group(transaction_group)
 {
 	init();
 }
@@ -38,105 +38,105 @@ TransactionGroupDialog::~TransactionGroupDialog()
 
 void TransactionGroupDialog::init()
 {
-	QCompleter* completer = new QCompleter(globalTransactionModel.getUniqueValueList(TransactionFieldNames::Description), this);
+	QCompleter* completer = new QCompleter(global_transaction_model.get_unique_value_list(TransactionFieldNames::Description), this);
 	completer->setCaseSensitivity(Qt::CaseInsensitive);
 	completer->setFilterMode(Qt::MatchContains);
-	ui.descriptionInput->setCompleter(completer);
-	transactionModel.setCategories(globalTransactionModel.getCategoryNames(), globalTransactionModel.getCategoryColors());
-	this->setLayout(ui.rootLayout);
+	ui.description_input->setCompleter(completer);
+	transaction_model.set_categories(global_transaction_model.get_category_names(), global_transaction_model.get_category_colors());
+	this->setLayout(ui.root_layout);
 	this->setGeometry(QRect(QPoint(0, 0), QPoint(1400, 800)));
-	ui.dateInput->setDisplayFormat("dd.MM.yyyy");
-	ui.dateInput->setDate(transactionGroup.date);
+	ui.date_input->setDisplayFormat("dd.MM.yyyy");
+	ui.date_input->setDate(transaction_group.date);
 
-	ui.categoryInput->addItems(globalTransactionModel.getCategoryNames());
-	ui.categoryInput->setCurrentText(transactionGroup.category);
+	ui.category_input->addItems(global_transaction_model.get_category_names());
+	ui.category_input->setCurrentText(transaction_group.category);
 
-	ui.descriptionInput->setPlaceholderText("Enter description...");
-	ui.descriptionInput->setText(transactionGroup.getField(TransactionFieldNames::Description));
+	ui.description_input->setPlaceholderText("Enter description...");
+	ui.description_input->setText(transaction_group.get_field(TransactionFieldNames::Description));
 
-	QShortcut* addShortcut = new QShortcut(QKeySequence("Ctrl+N"), this);
-	connect(addShortcut, &QShortcut::activated, this, &TransactionGroupDialog::openAddTransactionDialog);
-	connect(ui.addButton, &QPushButton::clicked, this, &TransactionGroupDialog::openAddTransactionDialog);
-	QShortcut* editShortcut = new QShortcut(QKeySequence("Ctrl+E"), this);
-	connect(editShortcut, &QShortcut::activated, this, &TransactionGroupDialog::openEditTransactionDialog);
-	connect(ui.editButton, &QPushButton::clicked, this, &TransactionGroupDialog::openEditTransactionDialog);
-	QShortcut* removeShortcut = new QShortcut(QKeySequence("Ctrl+D"), this);
-	connect(removeShortcut, &QShortcut::activated, this, &TransactionGroupDialog::openDeleteTransactionDialog);
-	connect(ui.removeButton, &QPushButton::clicked, this, &TransactionGroupDialog::openDeleteTransactionDialog);
-	QShortcut* okShortcut = new QShortcut(QKeySequence("Ctrl+O"), this);
-	connect(okShortcut, &QShortcut::activated, this, &QDialog::accept);
-	connect(ui.okButton, &QPushButton::clicked, this, &QDialog::accept);
-	QShortcut* cancelShortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
-	connect(cancelShortcut, &QShortcut::activated, this, &QDialog::reject);
-	connect(ui.cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+	QShortcut* add_shortcut = new QShortcut(QKeySequence("Ctrl+N"), this);
+	connect(add_shortcut, &QShortcut::activated, this, &TransactionGroupDialog::open_add_transaction_dialog);
+	connect(ui.add_button, &QPushButton::clicked, this, &TransactionGroupDialog::open_add_transaction_dialog);
+	QShortcut* edit_shortcut = new QShortcut(QKeySequence("Ctrl+E"), this);
+	connect(edit_shortcut, &QShortcut::activated, this, &TransactionGroupDialog::open_edit_transaction_dialog);
+	connect(ui.edit_button, &QPushButton::clicked, this, &TransactionGroupDialog::open_edit_transaction_dialog);
+	QShortcut* remove_shortcut = new QShortcut(QKeySequence("Ctrl+D"), this);
+	connect(remove_shortcut, &QShortcut::activated, this, &TransactionGroupDialog::open_delete_transaction_dialog);
+	connect(ui.remove_button, &QPushButton::clicked, this, &TransactionGroupDialog::open_delete_transaction_dialog);
+	QShortcut* ok_shortcut = new QShortcut(QKeySequence("Ctrl+O"), this);
+	connect(ok_shortcut, &QShortcut::activated, this, &QDialog::accept);
+	connect(ui.ok_button, &QPushButton::clicked, this, &QDialog::accept);
+	QShortcut* cancel_shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+	connect(cancel_shortcut, &QShortcut::activated, this, &QDialog::reject);
+	connect(ui.cancel_button, &QPushButton::clicked, this, &QDialog::reject);
 
-	for (const std::shared_ptr<Transaction>& transaction : transactionGroup.transactions) transactionModel.add(transaction);
-	ui.tableView->setModel(&transactionModel);
-	ui.tableView->resizeColumnsToContents();
-	ui.tableView->resizeRowsToContents();
-	if (ui.tableView->columnWidth(4) > 800) ui.tableView->setColumnWidth(4, 800);
-	ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	ui.tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-	ui.tableView->setItemDelegate(new TableStyleDelegate(ui.tableView));
-	ui.totalAmountLabel->setText(getFilteredTotalAmount(transactionModel).toString() + " €");
+	for (const std::shared_ptr<Transaction>& transaction : transaction_group.transactions) transaction_model.add(transaction);
+	ui.table_view->setModel(&transaction_model);
+	ui.table_view->resizeColumnsToContents();
+	ui.table_view->resizeRowsToContents();
+	if (ui.table_view->columnWidth(4) > 800) ui.table_view->setColumnWidth(4, 800);
+	ui.table_view->setSelectionBehavior(QAbstractItemView::SelectRows);
+	ui.table_view->setSelectionMode(QAbstractItemView::SingleSelection);
+	ui.table_view->setItemDelegate(new TableStyleDelegate(ui.table_view));
+	ui.total_amount_label->setText(get_filtered_total_amount(transaction_model).to_string() + " €");
 }
 
-TransactionGroup TransactionGroupDialog::getTransactionGroup()
+TransactionGroup TransactionGroupDialog::get_transaction_group()
 {
-	transactionGroup.transactions.clear();
-	transactionGroup.date = ui.dateInput->date();
-	transactionGroup.category = ui.categoryInput->currentText();
-	transactionGroup.description = ui.descriptionInput->text();
+	transaction_group.transactions.clear();
+	transaction_group.date = ui.date_input->date();
+	transaction_group.category = ui.category_input->currentText();
+	transaction_group.description = ui.description_input->text();
 	// prevent overwriting of the id when a transaction is edited
-	if (transactionGroup.id == 0) transactionGroup.id = rng::random_int64();
-	for (uint32_t i = 0; i < transactionModel.rowCount(); i++) transactionGroup.transactions.push_back(transactionModel.getTransaction(i));
-	transactionGroup.amount = getFilteredTotalAmount(transactionModel);
-	return transactionGroup;
+	if (transaction_group.id == 0) transaction_group.id = rng::random_int64();
+	for (uint32_t i = 0; i < transaction_model.rowCount(); i++) transaction_group.transactions.push_back(transaction_model.get_transaction(i));
+	transaction_group.amount = get_filtered_total_amount(transaction_model);
+	return transaction_group;
 }
 
-void TransactionGroupDialog::openAddTransactionDialog()
+void TransactionGroupDialog::open_add_transaction_dialog()
 {
 	Transaction transaction;
-	transaction.date = ui.dateInput->date();
-	transaction.category = ui.categoryInput->currentText();
-	TransactionDialog dialog(globalTransactionModel, transaction, this);
+	transaction.date = ui.date_input->date();
+	transaction.category = ui.category_input->currentText();
+	TransactionDialog dialog(global_transaction_model, transaction, this);
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		std::shared_ptr<Transaction> transaction = std::make_shared<Transaction>(dialog.getTransaction());
+		std::shared_ptr<Transaction> transaction = std::make_shared<Transaction>(dialog.get_transaction());
 		transaction->added = QDateTime::currentDateTime();
 		transaction->edited = QDateTime::currentDateTime();
-		transactionModel.add(transaction);
-		ui.update(transactionModel);
+		transaction_model.add(transaction);
+		ui.update(transaction_model);
 	}
 }
 
-void TransactionGroupDialog::openEditTransactionDialog()
+void TransactionGroupDialog::open_edit_transaction_dialog()
 {
-	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
-	if (!validateTransactionIndex(idx, transactionModel, this)) return;
-	std::shared_ptr<Transaction> transaction = transactionModel.getTransaction(idx);
-	TransactionDialog dialog(globalTransactionModel, *transaction, this);
+	int32_t idx = ui.table_view->selectionModel()->currentIndex().row();
+	if (!validate_transaction_index(idx, transaction_model)) return;
+	std::shared_ptr<Transaction> transaction = transaction_model.get_transaction(idx);
+	TransactionDialog dialog(global_transaction_model, *transaction, this);
 
 	if (dialog.exec() == QDialog::Accepted)
 	{
-		std::shared_ptr<Transaction> newTransaction = std::make_shared<Transaction>(dialog.getTransaction());
-		if (*transaction == *newTransaction) return;
-		newTransaction->edited = QDateTime::currentDateTime();
-		transactionModel.setTransaction(idx, newTransaction);
-		ui.update(transactionModel);
+		std::shared_ptr<Transaction> new_transaction = std::make_shared<Transaction>(dialog.get_transaction());
+		if (*transaction == *new_transaction) return;
+		new_transaction->edited = QDateTime::currentDateTime();
+		transaction_model.set_transaction(idx, new_transaction);
+		ui.update(transaction_model);
 	}
 }
 
-void TransactionGroupDialog::openDeleteTransactionDialog()
+void TransactionGroupDialog::open_delete_transaction_dialog()
 {
-	int32_t idx = ui.tableView->selectionModel()->currentIndex().row();
-	if (!validateTransactionIndex(idx, transactionModel, this)) return;
-	QString message(QString("Delete transaction %1?").arg(transactionModel.getTransaction(idx)->getField(TransactionFieldNames::ID)));
+	int32_t idx = ui.table_view->selectionModel()->currentIndex().row();
+	if (!validate_transaction_index(idx, transaction_model)) return;
+	QString message(QString("Delete transaction %1?").arg(transaction_model.get_transaction(idx)->get_field(TransactionFieldNames::ID)));
 	QMessageBox::StandardButton reply = QMessageBox::question(this, "CashGuard", message, QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes)
 	{
-		transactionModel.removeTransaction(idx);
-		ui.update(transactionModel);
+		transaction_model.remove_transaction(idx);
+		ui.update(transaction_model);
 	}
 }

@@ -2,7 +2,7 @@
 
 #include <qfont.h>
 
-inline QFont setFontSize(int size, bool bold, QFont font)
+inline QFont set_font_size(int size, bool bold, QFont font)
 {
 	font.setPointSize(size);
 	font.setBold(bold);

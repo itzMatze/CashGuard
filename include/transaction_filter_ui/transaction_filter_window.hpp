@@ -9,16 +9,16 @@ class TransactionFilterWindow : public QWidget
 	Q_OBJECT;
 
 public:
-	explicit TransactionFilterWindow(TransactionModel& globalTransactionModel, QWidget* parent = nullptr);
+	explicit TransactionFilterWindow(TransactionModel& global_transaction_model, QWidget* parent = nullptr);
 
 private:
 	TransactionFilterUI ui;
-	TransactionFilter transactionFilter;
-	TransactionModel& globalTransactionModel;
+	TransactionFilter transaction_filter;
+	TransactionModel& global_transaction_model;
 
 	void apply();
 	void reset();
 
 signals:
-	void updateMainUI();
+	void update_main_ui();
 };

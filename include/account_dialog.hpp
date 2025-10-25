@@ -4,25 +4,21 @@
 #include "account_dialog_ui.hpp"
 #include <QDialog>
 
-namespace Ui {
-class AccountDialog;
-}
-
 class AccountDialog : public QDialog
 {
 	Q_OBJECT;
 
 public:
-	explicit AccountDialog(AccountModel& accountModel, const Amount& totalAmount, QWidget *parent = nullptr);
+	explicit AccountDialog(AccountModel& account_model, const Amount& total_amount, QWidget* parent);
 	~AccountDialog();
 
 private slots:
-	void addAccount();
-	void deleteAccount();
+	void add_account();
+	void delete_account();
 	void update();
 
 private:
 	AccountDialogUI ui;
-	AccountModel& accountModel;
-	const Amount& totalAmount;
+	AccountModel& account_model;
+	const Amount& total_amount;
 };

@@ -1,37 +1,30 @@
-#ifndef TRANSACTION_GROUP_DIALOG_H
-#define TRANSACTION_GROUP_DIALOG_H
+#pragma once
 
 #include "transaction.hpp"
 #include "transaction_model.hpp"
 #include "transaction_group_dialog_ui.hpp"
 #include <QDialog>
 
-namespace Ui {
-class TransactionGroupDialog;
-}
-
 class TransactionGroupDialog : public QDialog
 {
 	Q_OBJECT;
 
 public:
-	explicit TransactionGroupDialog(const TransactionModel& transactionModel, QWidget *parent = nullptr);
-	TransactionGroupDialog(const TransactionModel& transactionModel, const TransactionGroup& transactionGroup, QWidget *parent = nullptr);
+	explicit TransactionGroupDialog(const TransactionModel& transaction_model, QWidget* parent);
+	TransactionGroupDialog(const TransactionModel& transaction_model, const TransactionGroup& transaction_group, QWidget* parent);
 	~TransactionGroupDialog();
-	TransactionGroup getTransactionGroup();
+	TransactionGroup get_transaction_group();
 
 private slots:
-	void openAddTransactionDialog();
-	void openEditTransactionDialog();
-	void openDeleteTransactionDialog();
+	void open_add_transaction_dialog();
+	void open_edit_transaction_dialog();
+	void open_delete_transaction_dialog();
 
 private:
 	TransactionGroupDialogUI ui;
-	TransactionModel transactionModel;
-	const TransactionModel& globalTransactionModel;
-	TransactionGroup transactionGroup;
+	TransactionModel transaction_model;
+	const TransactionModel& global_transaction_model;
+	TransactionGroup transaction_group;
 
 	void init();
 };
-
-#endif // TRANSACTION_GROUP_DIALOG_H

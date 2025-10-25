@@ -9,12 +9,12 @@ public:
 	TransactionFilter() = default;
 	bool check(const Transaction& transaction) const;
 
-	QDate dateMin = QDate::currentDate().addYears(-80);
-	QDate dateMax = QDate::currentDate().addMonths(1);
+	QDate date_min = QDate::currentDate().addYears(-80);
+	QDate date_max = QDate::currentDate().addMonths(1);
 	QString category = "None";
-	Amount amountMin = std::numeric_limits<int32_t>::min();
-	Amount amountMax = std::numeric_limits<int32_t>::max();
-	QString searchPhrase = "";
+	Amount amount_min = std::numeric_limits<int32_t>::min();
+	Amount amount_max = std::numeric_limits<int32_t>::max();
+	QString search_phrase = "";
 	bool active = false;
 	bool negated = false;
 };
