@@ -9,7 +9,7 @@ class TransactionFilterWindow : public QWidget
 	Q_OBJECT;
 
 public:
-	explicit TransactionFilterWindow(TransactionModel& global_transaction_model, QWidget* parent = nullptr);
+	explicit TransactionFilterWindow(TransactionModel& global_transaction_model, QWidget* parent);
 
 private:
 	TransactionFilterUI ui;

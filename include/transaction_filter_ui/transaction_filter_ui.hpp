@@ -20,8 +20,7 @@ class TransactionFilterUI
 {
 public:
 	TransactionFilterUI(const TransactionModel& global_transaction_model, QWidget* parent)
-		: central_widget(new QWidget(parent))
-		, negated_check_box(new QCheckBox(parent))
+		: negated_check_box(new QCheckBox(parent))
 		, date_min_label(new QLabel(parent))
 		, date_min_input(new QDateEdit(parent))
 		, date_max_label(new QLabel(parent))
@@ -37,52 +36,66 @@ public:
 		, ok_button(new QPushButton(parent))
 		, reset_button(new QPushButton(parent))
 	{
-		date_min_label->setText("Min Date");
-		date_min_input->setDisplayFormat("dd.MM.yyyy");
-		date_max_label->setText("Max Date");
-		date_max_input->setDisplayFormat("dd.MM.yyyy");
-		category_label->setText("Category (None to disable filtering)");
-		category_lnput->addItems(global_transaction_model.get_category_names());
-		amount_min_label->setText("Min Amount");
-		amount_min_input->setPlaceholderText("Enter amount...");
-		amount_max_label->setText("Max Amount");
-		amount_max_input->setPlaceholderText("Enter amount...");
-		description_label->setText("Search Phrase");
-		description_input->setPlaceholderText("Enter phrase...");
-		negated_check_box->setText("Negate Filter");
-
-		ok_button->setText("OK");
-		reset_button->setText("Reset");
-		QHBoxLayout* button_layout = new QHBoxLayout(parent);
-		button_layout->addWidget(ok_button);
-		button_layout->addWidget(reset_button);
-
-		QHBoxLayout* date_label_layout = new QHBoxLayout(parent);
-		date_label_layout->addWidget(date_min_label);
-		date_label_layout->addWidget(date_max_label);
-		QHBoxLayout* date_layout = new QHBoxLayout(parent);
-		date_layout->addWidget(date_min_input);
-		date_layout->addWidget(date_max_input);
-
-		QHBoxLayout* amount_label_layout = new QHBoxLayout(parent);
-		amount_label_layout->addWidget(amount_min_label);
-		amount_label_layout->addWidget(amount_max_label);
-		QHBoxLayout* amount_layout = new QHBoxLayout(parent);
-		amount_layout->addWidget(amount_min_input);
-		amount_layout->addWidget(amount_max_input);
-
 		QVBoxLayout* root_layout = new QVBoxLayout(parent);
+		negated_check_box->setText("Negate Filter");
 		root_layout->addWidget(negated_check_box);
-		root_layout->addLayout(date_label_layout);
+
+		QVBoxLayout* date_layout = new QVBoxLayout;
+		QHBoxLayout* date_label_layout = new QHBoxLayout;
+		date_min_label->setText("Min Date");
+		date_label_layout->addWidget(date_min_label);
+		date_max_label->setText("Max Date");
+		date_label_layout->addWidget(date_max_label);
+		date_layout->addLayout(date_label_layout);
+		QHBoxLayout* date_input_layout = new QHBoxLayout;
+		date_min_input->setDisplayFormat("dd.MM.yyyy");
+		date_input_layout->addWidget(date_min_input);
+		date_max_input->setDisplayFormat("dd.MM.yyyy");
+		date_input_layout->addWidget(date_max_input);
+		date_layout->addLayout(date_input_layout);
+		date_layout->setAlignment(Qt::AlignmentFlag::AlignVCenter);
 		root_layout->addLayout(date_layout);
-		root_layout->addWidget(category_label);
-		root_layout->addWidget(category_lnput);
-		root_layout->addLayout(amount_label_layout);
+
+		QVBoxLayout* category_layout = new QVBoxLayout;
+		category_label->setText("Category (None to disable filtering)");
+		category_layout->addWidget(category_label);
+		category_lnput->addItems(global_transaction_model.get_category_names());
+		category_layout->addWidget(category_lnput);
+		category_layout->setAlignment(Qt::AlignmentFlag::AlignVCenter);
+		root_layout->addLayout(category_layout);
+
+		QVBoxLayout* amount_layout = new QVBoxLayout;
+		QHBoxLayout* amount_label_layout = new QHBoxLayout;
+		amount_min_label->setText("Min Amount");
+		amount_label_layout->addWidget(amount_min_label);
+		amount_max_label->setText("Max Amount");
+		amount_label_layout->addWidget(amount_max_label);
+		amount_layout->addLayout(amount_label_layout);
+		QHBoxLayout* amount_input_layout = new QHBoxLayout;
+		amount_min_input->setPlaceholderText("Enter amount...");
+		amount_input_layout->addWidget(amount_min_input);
+		amount_max_input->setPlaceholderText("Enter amount...");
+		amount_input_layout->addWidget(amount_max_input);
+		amount_layout->addLayout(amount_input_layout);
+		amount_layout->setAlignment(Qt::AlignmentFlag::AlignVCenter);
 		root_layout->addLayout(amount_layout);
-		root_layout->addWidget(description_label);
-		root_layout->addWidget(description_input);
+
+		QVBoxLayout* description_layout = new QVBoxLayout;
+		description_label->setText("Search Phrase");
+		description_layout->addWidget(description_label);
+		description_input->setPlaceholderText("Enter phrase...");
+		description_layout->addWidget(description_input);
+		description_layout->setAlignment(Qt::AlignmentFlag::AlignVCenter);
+		root_layout->addLayout(description_layout);
+
+		QHBoxLayout* button_layout = new QHBoxLayout;
+		ok_button->setText("Apply");
+		button_layout->addWidget(ok_button);
+		reset_button->setText("Reset");
+		button_layout->addWidget(reset_button);
 		root_layout->addLayout(button_layout);
-		central_widget->setLayout(root_layout);
+
+		parent->setLayout(root_layout);
 	}
 
 	void update(const TransactionFilter& transactionFilter)
@@ -97,7 +110,6 @@ public:
 		description_input->setText(transactionFilter.search_phrase);
 	}
 
-	QWidget* central_widget;
 	QCheckBox* negated_check_box;
 	QLabel* date_min_label;
 	QDateEdit* date_min_input;

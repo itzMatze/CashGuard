@@ -7,10 +7,9 @@ TransactionFilterWindow::TransactionFilterWindow(TransactionModel& global_transa
 	, ui(global_transaction_model, this)
 	, global_transaction_model(global_transaction_model)
 {
-	QVBoxLayout* layout = new QVBoxLayout(this);
-	layout->addWidget(ui.central_widget);
 	setWindowTitle("Transaction Filter Window");
-	resize(500, 150);
+	adjustSize();
+	setFixedSize(size());
 
 	QShortcut* ok_shortcut = new QShortcut(QKeySequence("Ctrl+O"), this);
 	connect(ok_shortcut, &QShortcut::activated, this, &TransactionFilterWindow::apply);
