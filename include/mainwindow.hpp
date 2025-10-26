@@ -12,8 +12,9 @@ class MainWindow : public QMainWindow
 	Q_OBJECT;
 
 public:
-	explicit MainWindow(const QString& file_path, QWidget* parent = nullptr);
+	MainWindow();
 	~MainWindow();
+	bool init(const QString& file_path);
 	void update();
 
 private slots:

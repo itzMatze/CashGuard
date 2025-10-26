@@ -1,4 +1,6 @@
 #include <vector>
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "util/log.hpp"
 #include <QApplication>
 #include "mainwindow.hpp"
@@ -30,14 +32,18 @@ int parse_args(int argc, char** argv, argparse::ArgumentParser& program)
 int main(int argc, char** argv)
 {
 	std::vector<spdlog::sink_ptr> sinks;
-	sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
+	sinks.push_back(std::make_shared<spdlog::sinks::stderr_color_sink_mt>());
+	sinks[0]->set_pattern("%^[%Y-%m-%d %T.%e] [%L]%$ %v");
 #ifndef NDEBUG
 	sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_st>("CashGuard.log", true));
+	sinks[1]->set_pattern("[%Y-%m-%d %T.%e] [%L] %v");
 #endif
-	auto combined_logger = std::make_shared<spdlog::logger>("default_logger", sinks.begin(), sinks.end());
+	std::shared_ptr<spdlog::logger> combined_logger = std::make_shared<spdlog::logger>("default_logger", sinks.begin(), sinks.end());
 	spdlog::set_default_logger(combined_logger);
+#ifndef NDEBUG
 	spdlog::set_level(spdlog::level::debug);
-	spdlog::set_pattern("[%Y-%m-%d %T.%e] [%L] %v");
+#endif
+	spdlog::set_level(spdlog::level::info);
 
 	argparse::ArgumentParser program("CashGuard");
 	int parse_status = parse_args(argc, argv, program);
@@ -50,7 +56,8 @@ int main(int argc, char** argv)
 	file_path += QString("Documents/CashGuardTransactions.json");
 
 	if (program.is_used("--file")) file_path = QString::fromStdString(program.get<std::string>("--file"));
-	MainWindow main_window(file_path);
+	MainWindow main_window;
+	if (!main_window.init(file_path)) return 1;
 	main_window.setWindowTitle("CashGuard");
 	main_window.resize(800, 600);
 	main_window.show();

@@ -19,12 +19,11 @@
 #include <qtablewidget.h>
 #include "util/log.hpp"
 
-MainWindow::MainWindow(const QString& filePath, QWidget* parent)
-	: QMainWindow(parent)
+MainWindow::MainWindow()
+	: QMainWindow(nullptr)
 	, ui(this)
 	, transaction_model(this)
 	, account_model(this)
-	, file_path(filePath)
 	, transaction_filter_window(nullptr)
 {
 	setWindowTitle("Cash Guard");
@@ -47,20 +46,28 @@ MainWindow::MainWindow(const QString& filePath, QWidget* parent)
 	QShortcut* account_shortcut = new QShortcut(QKeySequence("Ctrl+A"), this);
 	connect(account_shortcut, &QShortcut::activated, this, &MainWindow::open_accounts_dialog);
 	connect(ui.account_button, &QPushButton::clicked, this, &MainWindow::open_accounts_dialog);
+}
 
-	if (!QFile::exists(filePath))
+bool MainWindow::init(const QString& file_path)
+{
+	this->file_path = file_path;
+	if (!QFile::exists(file_path))
 	{
-		QMessageBox::warning(this, "Warning", QString("Failed to find file \"%1\". Creating new file.").arg(filePath));
-		QFile file(filePath);
+		QMessageBox::warning(this, "Warning", QString("Failed to find file \"%1\". Creating new file.").arg(file_path));
+		QFile file(file_path);
 		QDir dir;
-		bool success = dir.mkpath(QFileInfo(filePath).absolutePath());
+		bool success = dir.mkpath(QFileInfo(file_path).absolutePath());
 		CG_ASSERT(success, "Failed to create directories!");
 		success = file.open(QIODevice::ReadWrite | QIODevice::Text);
 		CG_ASSERT(success, "Failed to open file!");
 		file.close();
 	}
 
-	if (!load_from_file(filePath, transaction_model, account_model)) CG_THROW("Failed to load transactions file!");
+	if (!load_from_file(file_path, transaction_model, account_model))
+	{
+		QMessageBox::warning(this, "Error", QString("Failed to load file \"%1\". Exiting.").arg(file_path));
+		return false;
+	}
 	if (!transaction_model.is_empty())
 	{
 		transaction_model.get_filter().date_max = transaction_model.get_unfiltered_transactions().at(0)->date.addDays(28);
@@ -71,6 +78,7 @@ MainWindow::MainWindow(const QString& filePath, QWidget* parent)
 	if (ui.table_view->columnWidth(4) > 800) ui.table_view->setColumnWidth(4, 800);
 
 	update();
+	return true;
 }
 
 MainWindow::~MainWindow()

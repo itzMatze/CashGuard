@@ -94,7 +94,7 @@ bool save_to_file(const QString& file_path, const TransactionModel& transaction_
 {
 	rapidjson::Document doc;
 	doc.SetObject();
-	auto& allocator = doc.GetAllocator();
+	rapidjson::MemoryPoolAllocator<>& allocator = doc.GetAllocator();
 	rapidjson::Value value(version_string, allocator);
 	doc.AddMember("Version", value, allocator);
 
