@@ -1,14 +1,19 @@
-#include "transaction_ui/transaction_group_dialog.hpp"
+#include "transaction/transaction_group_dialog.hpp"
 #include "table_style_delegate.hpp"
 #include "total_amount.hpp"
 #include "transaction.hpp"
-#include "transaction_ui/transaction_dialog.hpp"
+#include "transaction/transaction_dialog.hpp"
 #include "util/random_generator.hpp"
 #include "validation.hpp"
-#include <memory>
-#include <qcompleter.h>
-#include <qmessagebox.h>
-#include <qshortcut.h>
+#include <QComboBox>
+#include <QCompleter>
+#include <QDateEdit>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QShortcut>
+#include <QTableView>
 
 TransactionGroupDialog::TransactionGroupDialog(const TransactionModel& global_transaction_model, QWidget* parent)
 	: QDialog(parent)
@@ -43,7 +48,6 @@ void TransactionGroupDialog::init()
 	completer->setFilterMode(Qt::MatchContains);
 	ui.description_input->setCompleter(completer);
 	transaction_model.set_categories(global_transaction_model.get_category_names(), global_transaction_model.get_category_colors());
-	this->setLayout(ui.root_layout);
 	this->setGeometry(QRect(QPoint(0, 0), QPoint(1400, 800)));
 	ui.date_input->setDisplayFormat("dd.MM.yyyy");
 	ui.date_input->setDate(transaction_group.date);
@@ -78,7 +82,7 @@ void TransactionGroupDialog::init()
 	ui.table_view->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui.table_view->setSelectionMode(QAbstractItemView::SingleSelection);
 	ui.table_view->setItemDelegate(new TableStyleDelegate(ui.table_view));
-	ui.total_amount_label->setText(get_filtered_total_amount(transaction_model).to_string() + " €");
+	ui.update(transaction_model);
 }
 
 TransactionGroup TransactionGroupDialog::get_transaction_group()

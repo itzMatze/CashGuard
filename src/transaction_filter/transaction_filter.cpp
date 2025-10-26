@@ -1,4 +1,4 @@
-#include "transaction_filter_ui/transaction_filter.hpp"
+#include "transaction_filter/transaction_filter.hpp"
 #include "transaction.hpp"
 
 bool TransactionFilter::check(const Transaction& transaction) const

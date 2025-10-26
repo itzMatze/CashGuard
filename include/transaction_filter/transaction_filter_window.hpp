@@ -1,8 +1,10 @@
 #pragma once
 
-#include "transaction_filter_ui/transaction_filter_ui.hpp"
-#include "transaction_model.hpp"
-#include <qshortcut.h>
+#include "transaction_filter/transaction_filter_window_ui.hpp"
+#include "transaction_filter/transaction_filter.hpp"
+#include <QWidget>
+
+class TransactionModel;
 
 class TransactionFilterWindow : public QWidget
 {
@@ -12,7 +14,7 @@ public:
 	explicit TransactionFilterWindow(TransactionModel& global_transaction_model, QWidget* parent);
 
 private:
-	TransactionFilterUI ui;
+	TransactionFilterWindowUI ui;
 	TransactionFilter transaction_filter;
 	TransactionModel& global_transaction_model;
 

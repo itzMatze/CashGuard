@@ -11,26 +11,33 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 
 set(SOURCE_FILES
-	include/table_style_delegate.hpp
 	include/mainwindow.hpp
 	src/mainwindow.cpp
 	include/tooltip_chart_view.hpp
 	src/tooltip_chart_view.cpp
+	# account
 	include/account_dialog.hpp
 	src/account_dialog.cpp
 	include/account_model.hpp
 	src/account_model.cpp
-	include/transaction_ui/transaction_dialog.hpp
-	src/transaction_ui/transaction_dialog.cpp
-	include/transaction_filter_ui/transaction_filter_window.hpp
-	src/transaction_filter_ui/transaction_filter_window.cpp
-	src/transaction_filter_ui/transaction_filter.cpp
-	include/transaction_ui/transaction_group_dialog.hpp
-	src/transaction_ui/transaction_group_dialog.cpp
+	# transaction dialogs
+	include/transaction/transaction_dialog.hpp
+	src/transaction/transaction_dialog.cpp
+	src/transaction/transaction_dialog_ui.cpp
+	include/transaction/transaction_group_dialog.hpp
+	src/transaction/transaction_group_dialog.cpp
+	src/transaction/transaction_group_dialog_ui.cpp
+	# transaction filter
+	include/transaction_filter/transaction_filter_window.hpp
+	src/transaction_filter/transaction_filter.cpp
+	src/transaction_filter/transaction_filter_window.cpp
+	src/transaction_filter/transaction_filter_window_ui.cpp
+	# transaction
 	include/transaction_model.hpp
 	src/transaction_model.cpp
 	src/transaction.cpp
 	src/transaction_file_handler.cpp
+	include/table_style_delegate.hpp
 	src/table_style_delegate.cpp
 	src/total_amount.cpp
 	src/validation.cpp

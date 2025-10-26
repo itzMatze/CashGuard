@@ -1,10 +1,9 @@
 #include "transaction_model.hpp"
+#include "transaction.hpp"
 
 #include <QBrush>
 #include <memory>
 #include <set>
-
-#include "transaction.hpp"
 
 TransactionModel::TransactionModel(QObject* parent) : QAbstractTableModel(parent)
 {}

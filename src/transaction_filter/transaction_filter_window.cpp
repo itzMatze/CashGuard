@@ -1,6 +1,14 @@
-#include "transaction_filter_ui/transaction_filter_window.hpp"
+#include "transaction_filter/transaction_filter_window.hpp"
 #include "transaction.hpp"
-#include <qcompleter.h>
+#include "transaction_model.hpp"
+#include <QCheckBox>
+#include <QComboBox>
+#include <QCompleter>
+#include <QDateEdit>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QShortcut>
+#include <QPushButton>
 
 TransactionFilterWindow::TransactionFilterWindow(TransactionModel& global_transaction_model, QWidget* parent)
 	: QWidget(parent)

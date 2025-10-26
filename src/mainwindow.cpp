@@ -1,12 +1,12 @@
 #include "mainwindow.hpp"
 #include "account_dialog.hpp"
 #include "transaction.hpp"
-#include "transaction_filter_ui/transaction_filter_window.hpp"
+#include "transaction_filter/transaction_filter_window.hpp"
 #include "transaction_model.hpp"
 #include "transaction_file_handler.hpp"
 #include "mainwindow_ui.hpp"
-#include "transaction_ui/transaction_dialog.hpp"
-#include "transaction_ui/transaction_group_dialog.hpp"
+#include "transaction/transaction_dialog.hpp"
+#include "transaction/transaction_group_dialog.hpp"
 #include "validation.hpp"
 #include <QFileDialog>
 #include <QTableWidget>

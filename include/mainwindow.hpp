@@ -2,7 +2,7 @@
 
 #include "account_model.hpp"
 #include "mainwindow_ui.hpp"
-#include "transaction_filter_ui/transaction_filter_window.hpp"
+#include "transaction_filter/transaction_filter_window.hpp"
 #include "transaction_model.hpp"
 #include <QMainWindow>
 #include <qshortcut.h>

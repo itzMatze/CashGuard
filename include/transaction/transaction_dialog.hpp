@@ -1,15 +1,10 @@
 #pragma once
 
+#include "transaction/transaction_dialog_ui.hpp"
 #include "transaction.hpp"
-#include "transaction_model.hpp"
-#include <QComboBox>
-#include <QDateEdit>
 #include <QDialog>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <qlineedit.h>
+
+class TransactionModel;
 
 class TransactionDialog : public QDialog
 {
@@ -24,10 +19,7 @@ protected:
 	bool eventFilter(QObject* obj, QEvent* event) override;
 
 private:
-	QDateEdit* date_input;
-	QComboBox* category_input;
-	QLineEdit* amount_input;
-	QLineEdit* description_input;
+	TransactionDialogUI ui;
 	const TransactionModel& global_transaction_model;
 	Transaction transaction;
 
