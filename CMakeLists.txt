@@ -13,6 +13,7 @@ set(CMAKE_AUTOMOC ON)
 set(SOURCE_FILES
 	include/mainwindow.hpp
 	src/mainwindow.cpp
+	src/mainwindow_ui.cpp
 	include/tooltip_chart_view.hpp
 	src/tooltip_chart_view.cpp
 	# account
