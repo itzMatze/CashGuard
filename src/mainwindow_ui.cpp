@@ -17,21 +17,22 @@
 #include <QWidget>
 
 MainWindowUI::MainWindowUI(QWidget* parent)
-	: central_widget(new QWidget(parent))
-	, tab_widget(new QTabWidget(central_widget))
-	, tab_transaction_table(new QWidget(tab_widget))
-	, total_amount_label(new QLabel(tab_transaction_table))
-	, total_amount_small_chart(new QChartView(tab_transaction_table))
-	, table_view(new QTableView(tab_transaction_table))
-	, add_button(new QPushButton(tab_transaction_table))
-	, add_group_button(new QPushButton(tab_transaction_table))
-	, edit_button(new QPushButton(tab_transaction_table))
-	, remove_button(new QPushButton(tab_transaction_table))
-	, filter_button(new QPushButton(tab_transaction_table))
-	, account_button(new QPushButton(tab_transaction_table))
-	, tab_total_amount_graph(new QWidget(tab_widget))
-	, total_amount_chart(new TotalAmountChartView(tab_total_amount_graph))
 {
+	central_widget = new QWidget(parent);
+	tab_widget = new QTabWidget(central_widget);
+	tab_transaction_table = new QWidget(tab_widget);
+	total_amount_label = new QLabel(tab_transaction_table);
+	total_amount_small_chart = new QChartView(tab_transaction_table);
+	table_view = new QTableView(tab_transaction_table);
+	add_button = new QPushButton(tab_transaction_table);
+	add_group_button = new QPushButton(tab_transaction_table);
+	edit_button = new QPushButton(tab_transaction_table);
+	remove_button = new QPushButton(tab_transaction_table);
+	filter_button = new QPushButton(tab_transaction_table);
+	account_button = new QPushButton(tab_transaction_table);
+	tab_total_amount_graph = new QWidget(tab_widget);
+	total_amount_chart = new TotalAmountChartView(tab_total_amount_graph);
+
 	QVBoxLayout* root_layout = new QVBoxLayout(central_widget);
 	central_widget->setLayout(root_layout);
 	root_layout->addWidget(tab_widget);

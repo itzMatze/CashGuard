@@ -14,9 +14,9 @@ public:
 	void update(const Transaction& transaction);
 
 	QDateEdit* date_input;
-	QComboBox* category_input;
-	QLineEdit* amount_input;
 	QLineEdit* description_input;
+	QLineEdit* amount_input;
+	QComboBox* category_input;
 	QPushButton* ok_button;
 	QPushButton* cancel_button;
 };

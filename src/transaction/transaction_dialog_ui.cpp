@@ -8,16 +8,16 @@
 #include <QVBoxLayout>
 
 TransactionDialogUI::TransactionDialogUI(QWidget* parent)
-	: date_input(new QDateEdit(parent))
-	, description_input(new QLineEdit(parent))
-	, amount_input(new QLineEdit(parent))
-	, category_input(new QComboBox(parent))
-	, ok_button(new QPushButton("OK", parent))
-	, cancel_button(new QPushButton("Cancel", parent))
 {
+	date_input = new QDateEdit(parent);
 	date_input->setDisplayFormat("dd.MM.yyyy");
+	description_input = new QLineEdit(parent);
 	description_input->setPlaceholderText("Enter description...");
+	amount_input = new QLineEdit(parent);
 	amount_input->setPlaceholderText("Enter amount...");
+	category_input = new QComboBox(parent);
+	ok_button = new QPushButton("OK", parent);
+	cancel_button = new QPushButton("Cancel", parent);
 
 	QHBoxLayout* button_layout = new QHBoxLayout;
 	button_layout->addWidget(ok_button);

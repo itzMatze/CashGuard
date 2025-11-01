@@ -11,22 +11,23 @@
 #include <QVBoxLayout>
 
 TransactionFilterWindowUI::TransactionFilterWindowUI(const TransactionModel& global_transaction_model, QWidget* parent)
-	: negated_check_box(new QCheckBox(parent))
-	, date_min_label(new QLabel(parent))
-	, date_min_input(new QDateEdit(parent))
-	, date_max_label(new QLabel(parent))
-	, date_max_input(new QDateEdit(parent))
-	, category_label(new QLabel(parent))
-	, category_lnput(new QComboBox(parent))
-	, amount_min_label(new QLabel(parent))
-	, amount_min_input(new QLineEdit(parent))
-	, amount_max_label(new QLabel(parent))
-	, amount_max_input(new QLineEdit(parent))
-	, description_label(new QLabel(parent))
-	, description_input(new QLineEdit(parent))
-	, ok_button(new QPushButton(parent))
-	, reset_button(new QPushButton(parent))
 {
+	negated_check_box = new QCheckBox(parent);
+	date_min_label = new QLabel(parent);
+	date_min_input = new QDateEdit(parent);
+	date_max_label = new QLabel(parent);
+	date_max_input = new QDateEdit(parent);
+	category_label = new QLabel(parent);
+	category_lnput = new QComboBox(parent);
+	amount_min_label = new QLabel(parent);
+	amount_min_input = new QLineEdit(parent);
+	amount_max_label = new QLabel(parent);
+	amount_max_input = new QLineEdit(parent);
+	description_label = new QLabel(parent);
+	description_input = new QLineEdit(parent);
+	ok_button = new QPushButton(parent);
+	reset_button = new QPushButton(parent);
+
 	QVBoxLayout* root_layout = new QVBoxLayout(parent);
 	negated_check_box->setText("Negate Filter");
 	root_layout->addWidget(negated_check_box);
