@@ -8,12 +8,12 @@
 #include <QToolTip>
 #include <qdatetime.h>
 
-class TooltipChartView : public QChartView
+class TotalAmountChartView : public QChartView
 {
 	Q_OBJECT;
 
 public:
-	explicit TooltipChartView(QWidget* parent);
+	explicit TotalAmountChartView(QWidget* parent);
 	void update(QChart* new_chart, QLineSeries* series, const QDate& starting_date);
 
 protected:

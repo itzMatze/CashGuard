@@ -14,8 +14,8 @@ set(SOURCE_FILES
 	include/mainwindow.hpp
 	src/mainwindow.cpp
 	src/mainwindow_ui.cpp
-	include/tooltip_chart_view.hpp
-	src/tooltip_chart_view.cpp
+	include/total_amount_chart_view.hpp
+	src/total_amount_chart_view.cpp
 	# account
 	include/account_dialog.hpp
 	src/account_dialog.cpp

@@ -1,17 +1,17 @@
-#include "tooltip_chart_view.hpp"
+#include "total_amount_chart_view.hpp"
 #include <QChartView>
 #include <QValueAxis>
 #include <QLineSeries>
 #include <QMouseEvent>
 #include <QToolTip>
 
-TooltipChartView::TooltipChartView(QWidget* parent)
+TotalAmountChartView::TotalAmountChartView(QWidget* parent)
 	: QChartView(parent)
 	, series(nullptr)
 	, marker(new QScatterSeries(parent))
 {}
 
-void TooltipChartView::update(QChart* new_chart, QLineSeries* series, const QDate& starting_date)
+void TotalAmountChartView::update(QChart* new_chart, QLineSeries* series, const QDate& starting_date)
 {
 	this->starting_date = starting_date;
 	new_chart->addSeries(marker);
@@ -24,7 +24,7 @@ void TooltipChartView::update(QChart* new_chart, QLineSeries* series, const QDat
 	this->series = series;
 }
 
-void TooltipChartView::mouseMoveEvent(QMouseEvent* event)
+void TotalAmountChartView::mouseMoveEvent(QMouseEvent* event)
 {
 	QPointF chart_pos = chart()->mapToValue(event->pos());
 	float x = chart_pos.x();
@@ -37,7 +37,7 @@ void TooltipChartView::mouseMoveEvent(QMouseEvent* event)
 	QChartView::mouseMoveEvent(event);
 }
 
-float TooltipChartView::find_y_value_from_x(float x) const
+float TotalAmountChartView::find_y_value_from_x(float x) const
 {
 	if (series->count() == 0) return 0;
 	if (series->count() == 1) return series->at(0).y();

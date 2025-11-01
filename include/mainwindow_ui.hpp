@@ -3,7 +3,7 @@
 class AccountModel;
 struct Amount;
 class TransactionModel;
-class TooltipChartView;
+class TotalAmountChartView;
 class QChartView;
 class QLabel;
 class QTableView;
@@ -32,5 +32,5 @@ public:
 	QPushButton* account_button;
 
 	QWidget* tab_total_amount_graph;
-	TooltipChartView* total_amount_chart;
+	TotalAmountChartView* total_amount_chart;
 };

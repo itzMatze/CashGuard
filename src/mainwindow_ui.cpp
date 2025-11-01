@@ -1,7 +1,7 @@
 #include "account_model.hpp"
 #include "mainwindow_ui.hpp"
 #include "transaction_table_style_delegate.hpp"
-#include "tooltip_chart_view.hpp"
+#include "total_amount_chart_view.hpp"
 #include "total_amount.hpp"
 #include "transaction_model.hpp"
 #include "qt_util.hpp"
@@ -30,7 +30,7 @@ MainWindowUI::MainWindowUI(QWidget* parent)
 	, filter_button(new QPushButton(tab_transaction_table))
 	, account_button(new QPushButton(tab_transaction_table))
 	, tab_total_amount_graph(new QWidget(tab_widget))
-	, total_amount_chart(new TooltipChartView(tab_total_amount_graph))
+	, total_amount_chart(new TotalAmountChartView(tab_total_amount_graph))
 {
 	QVBoxLayout* root_layout = new QVBoxLayout(central_widget);
 	central_widget->setLayout(root_layout);
