@@ -3,9 +3,9 @@
 #include <QStyledItemDelegate>
 #include <QPainter>
 
-class TableStyleDelegate : public QStyledItemDelegate
+class TransactionTableStyleDelegate : public QStyledItemDelegate
 {
 public:
-	explicit TableStyleDelegate(QObject* parent);
+	explicit TransactionTableStyleDelegate(QObject* parent);
 	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };

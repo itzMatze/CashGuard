@@ -1,20 +1,21 @@
 #pragma once
 
 #include "account_model.hpp"
-#include "table_style_delegate.hpp"
+#include "transaction_table_style_delegate.hpp"
 #include "tooltip_chart_view.hpp"
 #include "total_amount.hpp"
 #include "transaction_model.hpp"
 #include "qt_util.hpp"
-#include <qboxlayout.h>
-#include <qchartview.h>
-#include <qlabel.h>
-#include <qlineseries.h>
-#include <qmainwindow.h>
-#include <qpushbutton.h>
-#include <qtableview.h>
-#include <qtabwidget.h>
-#include <qwidget.h>
+#include <QBoxLayout>
+#include <QChartView>
+#include <QHeaderView>
+#include <QLabel>
+#include <QLineSeries>
+#include <QMainWindow>
+#include <QPushButton>
+#include <QTableView>
+#include <QTabWidget>
+#include <QWidget>
 
 class MainWindowUI
 {
@@ -59,7 +60,11 @@ public:
 		tab0_root_layout->setStretchFactor(table_view, 4);
 		table_view->setSelectionBehavior(QAbstractItemView::SelectRows);
 		table_view->setSelectionMode(QAbstractItemView::SingleSelection);
-		table_view->setItemDelegate(new TableStyleDelegate(table_view));
+		table_view->setItemDelegate(new TransactionTableStyleDelegate(table_view));
+		table_view->horizontalHeader()->setHighlightSections(false);
+		table_view->horizontalHeader()->setFocusPolicy(Qt::NoFocus);
+		table_view->verticalHeader()->setHighlightSections(false);
+		table_view->verticalHeader()->setFocusPolicy(Qt::NoFocus);
 		// buttons
 		add_button->setFont(set_font_size(12, false, add_button->font()));
 		add_button->setText("Add");

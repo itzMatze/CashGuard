@@ -2,8 +2,10 @@
 #include "total_amount.hpp"
 #include "transaction_model.hpp"
 #include "qt_util.hpp"
+#include "transaction_table_style_delegate.hpp"
 #include <QComboBox>
 #include <QDateEdit>
+#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -30,6 +32,13 @@ TransactionGroupDialogUI::TransactionGroupDialogUI(QWidget* parent)
 	root_layout->addWidget(category_input);
 	root_layout->addWidget(description_input);
 	root_layout->addWidget(table_view);
+	table_view->setSelectionBehavior(QAbstractItemView::SelectRows);
+	table_view->setSelectionMode(QAbstractItemView::SingleSelection);
+	table_view->setItemDelegate(new TransactionTableStyleDelegate(table_view));
+	table_view->horizontalHeader()->setHighlightSections(false);
+	table_view->horizontalHeader()->setFocusPolicy(Qt::NoFocus);
+	table_view->verticalHeader()->setHighlightSections(false);
+	table_view->verticalHeader()->setFocusPolicy(Qt::NoFocus);
 
 	add_button->setFont(set_font_size(12, false, add_button->font()));
 	add_button->setText("Add");

@@ -1,5 +1,5 @@
 #include "transaction/transaction_group_dialog.hpp"
-#include "table_style_delegate.hpp"
+#include "transaction_table_style_delegate.hpp"
 #include "total_amount.hpp"
 #include "transaction.hpp"
 #include "transaction/transaction_dialog.hpp"
@@ -79,9 +79,6 @@ void TransactionGroupDialog::init()
 	ui.table_view->resizeColumnsToContents();
 	ui.table_view->resizeRowsToContents();
 	if (ui.table_view->columnWidth(4) > 800) ui.table_view->setColumnWidth(4, 800);
-	ui.table_view->setSelectionBehavior(QAbstractItemView::SelectRows);
-	ui.table_view->setSelectionMode(QAbstractItemView::SingleSelection);
-	ui.table_view->setItemDelegate(new TableStyleDelegate(ui.table_view));
 	ui.update(transaction_model);
 }
 

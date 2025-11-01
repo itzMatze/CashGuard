@@ -37,8 +37,8 @@ set(SOURCE_FILES
 	src/transaction_model.cpp
 	src/transaction.cpp
 	src/transaction_file_handler.cpp
-	include/table_style_delegate.hpp
-	src/table_style_delegate.cpp
+	include/transaction_table_style_delegate.hpp
+	src/transaction_table_style_delegate.cpp
 	src/total_amount.cpp
 	src/validation.cpp
 	src/util/random_generator.cpp
