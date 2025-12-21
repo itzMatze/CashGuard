@@ -92,6 +92,25 @@ void MainWindow::update()
 	ui.update(transaction_model, account_model, filtered_total_amount, global_total_amount);
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+	if (account_model.get_total_amount().value != global_total_amount.value)
+	{
+		QMessageBox::StandardButton reply = QMessageBox::question(
+			this,
+			"Exit program",
+			"Account sum does not match transaction sum. Are you sure you want to exit?",
+			QMessageBox::Yes | QMessageBox::No
+		);
+		if (reply != QMessageBox::Yes)
+		{
+			event->ignore();
+			return;
+		}
+	}
+	event->accept();
+}
+
 void MainWindow::open_add_transaction_dialog()
 {
 	TransactionDialog dialog(transaction_model, this);

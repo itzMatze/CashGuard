@@ -17,6 +17,9 @@ public:
 	bool init(const QString& file_path);
 	void update();
 
+protected:
+	void closeEvent(QCloseEvent* event) override;
+
 private slots:
 	void open_add_transaction_dialog();
 	void open_add_transaction_group_dialog();
