@@ -1,12 +1,15 @@
 #pragma once
 
 #include <QChartView>
-#include <QValueAxis>
-#include <QLineSeries>
-#include <QScatterSeries>
-#include <QMouseEvent>
-#include <QToolTip>
 #include <qdatetime.h>
+
+class TransactionModel;
+class QCategoryAxis;
+class QLineSeries;
+class QMouseEvent;
+class QScatterSeries;
+class QValueAxis;
+class QWidget;
 
 class TotalAmountChartView : public QChartView
 {
@@ -14,12 +17,15 @@ class TotalAmountChartView : public QChartView
 
 public:
 	explicit TotalAmountChartView(QWidget* parent);
-	void update(QChart* new_chart, QLineSeries* series, const QDate& starting_date);
+	void update(const TransactionModel& transaction_model, const QDate& starting_date);
 
 protected:
 	void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
+	QChart* chart;
+	QCategoryAxis* x_axis;
+	QValueAxis* y_axis;
 	QLineSeries* series;
 	QScatterSeries* marker;
 	QDate starting_date;

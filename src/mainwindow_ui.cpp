@@ -1,12 +1,11 @@
 #include "account_model.hpp"
 #include "mainwindow_ui.hpp"
+#include "small_total_amount_chart.hpp"
 #include "transaction_table_style_delegate.hpp"
-#include "total_amount_chart_view.hpp"
-#include "total_amount.hpp"
+#include "total_amount_chart.hpp"
 #include "transaction_model.hpp"
 #include "qt_util.hpp"
 #include <QBoxLayout>
-#include <QChartView>
 #include <QHeaderView>
 #include <QLabel>
 #include <QLineSeries>
@@ -22,7 +21,7 @@ MainWindowUI::MainWindowUI(QWidget* parent)
 	tab_widget = new QTabWidget(central_widget);
 	tab_transaction_table = new QWidget(tab_widget);
 	total_amount_label = new QLabel(tab_transaction_table);
-	total_amount_small_chart = new QChartView(tab_transaction_table);
+	small_total_amount_chart_view = new SmallTotalAmountChartView(tab_transaction_table);
 	table_view = new QTableView(tab_transaction_table);
 	add_button = new QPushButton(tab_transaction_table);
 	add_group_button = new QPushButton(tab_transaction_table);
@@ -31,7 +30,7 @@ MainWindowUI::MainWindowUI(QWidget* parent)
 	filter_button = new QPushButton(tab_transaction_table);
 	account_button = new QPushButton(tab_transaction_table);
 	tab_total_amount_graph = new QWidget(tab_widget);
-	total_amount_chart = new TotalAmountChartView(tab_total_amount_graph);
+	total_amount_chart_view = new TotalAmountChartView(tab_total_amount_graph);
 
 	QVBoxLayout* root_layout = new QVBoxLayout(central_widget);
 	central_widget->setLayout(root_layout);
@@ -46,8 +45,8 @@ MainWindowUI::MainWindowUI(QWidget* parent)
 	total_amount_label->setIndent(20);
 	QHBoxLayout* total_amount_layout = new QHBoxLayout;
 	total_amount_layout->addWidget(total_amount_label);
-	total_amount_small_chart->setRenderHint(QPainter::Antialiasing);
-	total_amount_layout->addWidget(total_amount_small_chart);
+	small_total_amount_chart_view->setRenderHint(QPainter::Antialiasing);
+	total_amount_layout->addWidget(small_total_amount_chart_view);
 	tab0_root_layout->addLayout(total_amount_layout);
 	tab0_root_layout->setStretchFactor(total_amount_layout, 1);
 	// transaction table
@@ -87,17 +86,16 @@ MainWindowUI::MainWindowUI(QWidget* parent)
 	QVBoxLayout* tab1_root_layout = new QVBoxLayout(tab_total_amount_graph);
 	tab_widget->addTab(tab_total_amount_graph, "Total Amount Graph");
 	tab_total_amount_graph->setLayout(tab1_root_layout);
-	total_amount_chart->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	total_amount_chart->setRenderHint(QPainter::Antialiasing);
-	tab1_root_layout->addWidget(total_amount_chart);
+	total_amount_chart_view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	total_amount_chart_view->setRenderHint(QPainter::Antialiasing);
+	tab1_root_layout->addWidget(total_amount_chart_view);
 }
 
 void MainWindowUI::update(const TransactionModel& transaction_model, const AccountModel& account_model, const Amount& filtered_total_amount, const Amount& global_total_amount)
 {
 	total_amount_label->setText(filtered_total_amount.to_string() + " €");
-	total_amount_small_chart->setChart(get_small_total_amount_chart(transaction_model).first);
-	std::pair<QChart*, QLineSeries*> total_amount_data = get_total_amount_chart(transaction_model);
-	total_amount_chart->update(total_amount_data.first, total_amount_data.second, transaction_model.get_filter().date_min);
+	small_total_amount_chart_view->update(transaction_model, transaction_model.get_filter().date_min);
+	total_amount_chart_view->update(transaction_model, transaction_model.get_filter().date_min);
 	if (account_model.get_total_amount().value == global_total_amount.value)
 	{
 		account_button->setStyleSheet("QPushButton { color: #00ff00; }");

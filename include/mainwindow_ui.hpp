@@ -2,9 +2,9 @@
 
 class AccountModel;
 struct Amount;
+class SmallTotalAmountChartView;
 class TransactionModel;
 class TotalAmountChartView;
-class QChartView;
 class QLabel;
 class QTableView;
 class QTabWidget;
@@ -22,7 +22,7 @@ public:
 	QTabWidget* tab_widget;
 	QWidget* tab_transaction_table;
 	QLabel* total_amount_label;
-	QChartView* total_amount_small_chart;
+	SmallTotalAmountChartView* small_total_amount_chart_view;
 	QTableView* table_view;
 	QPushButton* add_button;
 	QPushButton* add_group_button;
@@ -32,5 +32,5 @@ public:
 	QPushButton* account_button;
 
 	QWidget* tab_total_amount_graph;
-	TotalAmountChartView* total_amount_chart;
+	TotalAmountChartView* total_amount_chart_view;
 };
