@@ -1,6 +1,7 @@
 #pragma once
 
 #include "account_model.hpp"
+#include "cg_file_handler.hpp"
 #include "mainwindow_ui.hpp"
 #include "transaction_filter/transaction_filter_window.hpp"
 #include "transaction_model.hpp"
@@ -31,6 +32,7 @@ private slots:
 
 private:
 	MainWindowUI ui;
+	CGFileHandler cg_file_handler;
 	TransactionModel transaction_model;
 	AccountModel account_model;
 	QString file_path;

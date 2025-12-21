@@ -5,7 +5,7 @@
 #include "transaction.hpp"
 #include "transaction_filter/transaction_filter_window.hpp"
 #include "transaction_model.hpp"
-#include "transaction_file_handler.hpp"
+#include "cg_file_handler.hpp"
 #include "transaction/transaction_dialog.hpp"
 #include "transaction/transaction_group_dialog.hpp"
 #include "validation.hpp"
@@ -64,7 +64,7 @@ bool MainWindow::init(const QString& file_path)
 		file.close();
 	}
 
-	if (!load_from_file(file_path, transaction_model, account_model))
+	if (!cg_file_handler.load_from_file(file_path, transaction_model, account_model))
 	{
 		QMessageBox::warning(this, "Error", QString("Failed to load file \"%1\". Exiting.").arg(file_path));
 		return false;
@@ -216,5 +216,5 @@ void MainWindow::open_accounts_dialog()
 
 void MainWindow::save_transactions()
 {
-	if (!save_to_file(file_path, transaction_model, account_model)) QMessageBox::warning(this, "Error", "Failed to save data!");
+	if (!cg_file_handler.save_to_file(file_path, transaction_model, account_model)) QMessageBox::warning(this, "Error", "Failed to save data!");
 }

@@ -11,6 +11,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 
 set(SOURCE_FILES
+	src/cg_file_handler.cpp
 	include/mainwindow.hpp
 	src/mainwindow.cpp
 	src/mainwindow_ui.cpp
@@ -37,7 +38,6 @@ set(SOURCE_FILES
 	include/transaction_model.hpp
 	src/transaction_model.cpp
 	src/transaction.cpp
-	src/transaction_file_handler.cpp
 	include/transaction_table_style_delegate.hpp
 	src/transaction_table_style_delegate.cpp
 	src/total_amount.cpp

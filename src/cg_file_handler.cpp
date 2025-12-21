@@ -1,4 +1,4 @@
-#include "transaction_file_handler.hpp"
+#include "cg_file_handler.hpp"
 #include <set>
 #include <QFile>
 #include <QMessageBox>
@@ -22,7 +22,7 @@ Transaction parse_transaction(const auto& rj_transaction)
 	return transaction;
 }
 
-bool load_from_file(const QString& file_path, TransactionModel& transaction_model, AccountModel& account_model)
+bool CGFileHandler::load_from_file(const QString& file_path, TransactionModel& transaction_model, AccountModel& account_model)
 {
 	cglog::debug("Loading file \"{}\"", file_path.toStdString());
 	transaction_model.clear();
@@ -35,6 +35,7 @@ bool load_from_file(const QString& file_path, TransactionModel& transaction_mode
 	if (file.size() == 0) return true;
 	QTextStream in(&file);
 	QString file_content = in.readAll();
+	hash = qHash(file_content, 0);
 
 	rapidjson::Document doc;
 	doc.Parse(file_content.toStdString().c_str());
@@ -90,7 +91,7 @@ void serialize_transaction(const Transaction& transaction, rapidjson::Value& jso
 	}
 }
 
-bool save_to_file(const QString& file_path, const TransactionModel& transaction_model, const AccountModel& account_model)
+bool CGFileHandler::save_to_file(const QString& file_path, const TransactionModel& transaction_model, const AccountModel& account_model)
 {
 	rapidjson::Document doc;
 	doc.SetObject();
@@ -167,10 +168,32 @@ bool save_to_file(const QString& file_path, const TransactionModel& transaction_
 	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
 	doc.Accept(writer);
 
+	// check if file hash is still the one we expect
 	QFile file(file_path);
-	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text)) return false;
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		cglog::error("Failed to open file \"{}\"", file_path.toStdString());
+		return false;
+	}
+	QTextStream in(&file);
+	QString file_content = in.readAll();
+	uint32_t new_hash = qHash(file_content, 0);
+	if (new_hash != hash)
+	{
+		cglog::error("Failed to save file! \"{}\" has been modified outside this program!", file_path.toStdString());
+		return false;
+	}
+	file.close();
+	// write file
+	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text))
+	{
+		cglog::error("Failed to open file \"{}\"", file_path.toStdString());
+		return false;
+	}
 	QTextStream out(&file);
-	out << buffer.GetString();
+	QString output = QString(buffer.GetString());
+	hash = qHash(output);
+	out << output;
 	file.close();
 	return true;
 }
