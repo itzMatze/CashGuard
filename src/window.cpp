@@ -1,5 +1,6 @@
 #include "window.hpp"
 
+#include "fonts/Roboto_Medium.h"
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -49,6 +50,10 @@ bool Window::construct(const std::string& title)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui::StyleColorsDark();
+	ImFontConfig font_cfg;
+	font_cfg.FontDataOwnedByAtlas = false;
+	fonts[FONT_DEFAULT] = io.Fonts->AddFontFromMemoryTTF((void*)(Roboto_Medium_ttf), Roboto_Medium_ttf_len, 20.0f, &font_cfg);
+	io.FontDefault = fonts[FONT_DEFAULT];
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.ScaleAllSizes(main_scale);
 	style.FontScaleDpi = main_scale;
@@ -74,6 +79,11 @@ void Window::destruct()
 SDL_WindowID Window::get_id() const
 {
 	return SDL_GetWindowID(window);
+}
+
+ImFont* Window::get_font(Font font)
+{
+	return fonts[font];
 }
 
 void Window::new_frame()
