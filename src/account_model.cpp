@@ -1,72 +1,29 @@
 #include "account_model.hpp"
 
-AccountModel::AccountModel(QObject* parent) : QAbstractTableModel(parent)
-{}
-
-int AccountModel::rowCount(const QModelIndex& parent) const
+int32_t AccountModel::count() const
 {
-	return static_cast<int>(accounts.size());
+	return static_cast<int32_t>(accounts.size());
 }
 
-int AccountModel::columnCount(const QModelIndex& parent) const
+const Account& AccountModel::at(int32_t index) const
 {
-	return 2; // name + amount
+	return accounts[index];
 }
 
-QVariant AccountModel::data(const QModelIndex& index, int role) const
+void AccountModel::set(int32_t index, const Account& account)
 {
-	if (!index.isValid()) return QVariant();
-	if (role == Qt::DisplayRole || role == Qt::EditRole)
-	{
-		const Account &acc = accounts[index.row()];
-		if (index.column() == 0) return acc.name;
-		if (index.column() == 1) return acc.amount.to_string() + " €";
-	}
-	return QVariant();
-}
-
-QVariant AccountModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
-	{
-		if (section == 0) return "Name";
-		if (section == 1) return "Amount";
-	}
-	return QVariant();
-}
-
-Qt::ItemFlags AccountModel::flags(const QModelIndex &index) const
-{
-	if (!index.isValid()) return Qt::NoItemFlags;
-	return Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-}
-
-bool AccountModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-	if (role == Qt::EditRole && index.isValid())
-	{
-		Account& acc = accounts[index.row()];
-		if (index.column() == 0) acc.name = value.toString();
-		if (index.column() == 1) acc.amount = Amount(value.toString());
-		emit dataChanged(index, index);
-		return true;
-	}
-	return false;
+	accounts[index] = account;
 }
 
 void AccountModel::add(const Account& account)
 {
-	beginInsertRows(QModelIndex(), accounts.size(), accounts.size());
 	accounts.push_back(account);
-	endInsertRows();
 }
 
-void AccountModel::remove_account(int row)
+void AccountModel::remove(int32_t index)
 {
-	if (row < 0 || row >= static_cast<int>(accounts.size())) return;
-	beginRemoveRows(QModelIndex(), row, row);
-	accounts.erase(accounts.begin() + row);
-	endRemoveRows();
+	if (index < 0 || index >= accounts.size()) return;
+	accounts.erase(accounts.begin() + index);
 }
 
 const std::vector<Account>& AccountModel::get_data() const

@@ -1,29 +1,25 @@
 #pragma once
 
 #include "transaction.hpp"
-#include <QAbstractTableModel>
+#include <string>
+#include <vector>
 
 struct Account
 {
-	QString name;
+	std::string name;
 	Amount amount;
 };
 
-class AccountModel : public QAbstractTableModel
+class AccountModel
 {
-	Q_OBJECT;
-
 public:
-	explicit AccountModel(QObject* parent);
+	AccountModel() = default;
 
-	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-	QVariant data(const QModelIndex& index, int role) const override;
-	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-	Qt::ItemFlags flags(const QModelIndex &index) const override;
-	bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+	int32_t count() const;
+	const Account& at(int32_t index) const;
+	void set(int32_t index, const Account& account);
 	void add(const Account& account);
-	void remove_account(int row);
+	void remove(int32_t index);
 	const std::vector<Account>& get_data() const;
 	Amount get_total_amount() const;
 

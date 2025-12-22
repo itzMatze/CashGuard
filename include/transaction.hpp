@@ -1,54 +1,61 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
-#include <qcolor.h>
-#include <qobject.h>
-#include <QDate>
+#include <string>
+#include <vector>
 
 struct Amount
 {
 	Amount() = default;
-	Amount(int32_t value);
-	Amount(QString string_value);
-	QString to_string() const;
+	Amount(int64_t value);
+	std::string to_string() const;
 	bool is_negative() const;
 
 	// amount in cents
-	int32_t value;
+	int64_t value;
 };
+
+bool to_amount(const std::string& string_value, Amount& amount);
 
 bool operator<(const Amount& a, const Amount& b);
 bool operator>(const Amount& a, const Amount& b);
 
 namespace TransactionFieldNames
 {
-	const QString ID = "ID";
-	const QString Date = "Date";
-	const QString Category = "Category";
-	const QString Amount = "Amount";
-	const QString Description = "Description";
-	const QString Added = "Added";
-	const QString Edited = "Edited";
+	constexpr std::string ID = "ID";
+	constexpr std::string Date = "Date";
+	constexpr std::string Category = "Category";
+	constexpr std::string Amount = "Amount";
+	constexpr std::string Description = "Description";
+	constexpr std::string Added = "Added";
+	constexpr std::string Edited = "Edited";
 }
+
+using Clock = std::chrono::system_clock;
+using Date = std::chrono::year_month_day;
+using DateTime = Clock::time_point;
+
+Date to_date(DateTime time_point);
 
 class Transaction
 {
 public:
 	Transaction();
 	virtual ~Transaction() = default;
-	static QStringList get_field_names();
-	QString get_field(const QString& field_name) const;
-	QString get_field_view(const QString& field_name) const;
-	void set_field(const QString& field_name, const QString& value);
-	virtual QString to_string() const;
+	static std::vector<std::string> get_field_names();
+	std::string get_field(const std::string& field_name) const;
+	std::string get_field_view(const std::string& field_name) const;
+	void set_field(const std::string& field_name, const std::string& value);
+	virtual std::string to_string() const;
 
 	size_t id;
-	QDate date;
-	QString category;
+	Date date;
+	std::string category;
 	Amount amount;
-	QString description;
-	QDateTime added;
-	QDateTime edited;
+	std::string description;
+	DateTime added;
+	DateTime edited;
 };
 
 bool operator<(const Transaction& a, const Transaction& b);
@@ -59,7 +66,7 @@ class TransactionGroup : public Transaction
 public:
 	TransactionGroup() = default;
 	TransactionGroup(const Transaction& transaction);
-	QString to_string() const override;
+	std::string to_string() const override;
 
 	std::vector<std::shared_ptr<Transaction>> transactions;
 };

@@ -1,7 +1,6 @@
 #include "cg_file_handler.hpp"
+#include <fstream>
 #include <set>
-#include <QFile>
-#include <QMessageBox>
 #include "transaction_model.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -12,55 +11,64 @@ const char* version_string = "0.2.0";
 
 Transaction parse_transaction(const auto& rj_transaction)
 {
-	QStringList fields = Transaction::get_field_names();
+	std::vector<std::string> fields = Transaction::get_field_names();
 	Transaction transaction;
-	for (const QString& field : fields)
+	for (const std::string& field : fields)
 	{
-		if (!rj_transaction.HasMember(field.toStdString().c_str())) continue;
-		transaction.set_field(field, rj_transaction[field.toStdString().c_str()].GetString());
+		if (!rj_transaction.HasMember(field.c_str())) continue;
+		transaction.set_field(field, rj_transaction[field.c_str()].GetString());
 	}
 	return transaction;
 }
 
-bool CGFileHandler::load_from_file(const QString& file_path, TransactionModel& transaction_model, AccountModel& account_model)
+bool CGFileHandler::load_from_file(const std::string& file_path, TransactionModel& transaction_model, AccountModel& account_model)
 {
-	cglog::debug("Loading file \"{}\"", file_path.toStdString());
+	cglog::debug("Loading file \"{}\"", file_path);
 	transaction_model.clear();
-	QFile file(file_path);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	std::ifstream file(file_path);
+	if (!file.is_open())
 	{
-		cglog::error("Failed to open file \"{}\"", file_path.toStdString());
+		cglog::error("Failed to open file \"{}\"", file_path);
 		return false;
-	};
-	if (file.size() == 0) return true;
-	QTextStream in(&file);
-	QString file_content = in.readAll();
-	hash = qHash(file_content, 0);
+	}
+	std::stringstream file_stream;
+	file_stream << file.rdbuf();
+	std::string file_content = file_stream.str();
+	if (file_content.size() == 0) return true;
+	hash = std::hash<std::string>{}(file_content);
 
 	rapidjson::Document doc;
-	doc.Parse(file_content.toStdString().c_str());
+	doc.Parse(file_content.c_str());
 	if (doc.HasParseError())
 	{
-		cglog::error("Failed to parse file \"{}\"", file_path.toStdString());
+		cglog::error("Failed to parse file \"{}\"", file_path);
 		return false;
 	}
 
 	if (std::string(doc["Version"].GetString()) != std::string(version_string))
 	{
-		cglog::error("Unsupported version in file \"{}\"", file_path.toStdString());
+		cglog::error("Unsupported version in file \"{}\"", file_path);
 		return false;
 	}
 
-	transaction_model.add_category("None", QColor());
-	for (const auto& rj_category : doc["Categories"].GetArray()) transaction_model.add_category(rj_category["Name"].GetString(), QColor(rj_category["Color"].GetString()));
-	for (const auto& rj_account : doc["Accounts"].GetArray()) account_model.add(Account{.name = rj_account["Name"].GetString(), .amount = Amount(rj_account["Amount"].GetString())});
+	transaction_model.add_category("None", Color());
+	for (const auto& rj_category : doc["Categories"].GetArray()) transaction_model.add_category(rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));
+	for (const auto& rj_account : doc["Accounts"].GetArray())
+	{
+		Account account{.name = rj_account["Name"].GetString()};
+		if (!to_amount(rj_account["Amount"].GetString(), account.amount))
+		{
+			cglog::error("Failed to parse amount!");
+			return false;
+		}
+	}
 	std::set<uint64_t> ids;
 	for (const auto& rj_transaction : doc["Transactions"].GetArray())
 	{
 		Transaction transaction = parse_transaction(rj_transaction);
 		if (!ids.emplace(transaction.id).second)
 		{
-			CG_THROW("Duplicate ID: {}", transaction.get_field(TransactionFieldNames::ID).toStdString());
+			CG_THROW("Duplicate ID: {}", transaction.get_field(TransactionFieldNames::ID));
 		}
 		if (rj_transaction.HasMember("Transactions"))
 		{
@@ -82,16 +90,16 @@ bool CGFileHandler::load_from_file(const QString& file_path, TransactionModel& t
 void serialize_transaction(const Transaction& transaction, rapidjson::Value& json_object, rapidjson::Document::AllocatorType& allocator)
 {
 	json_object.SetObject();
-	QStringList fields = Transaction::get_field_names();
-	for (const QString& field : fields)
+	std::vector<std::string> fields = Transaction::get_field_names();
+	for (const std::string& field : fields)
 	{
-		rapidjson::Value name(field.toStdString().c_str(), allocator);
-		rapidjson::Value value(transaction.get_field(field).toStdString().c_str(), allocator);
+		rapidjson::Value name(field.c_str(), allocator);
+		rapidjson::Value value(transaction.get_field(field).c_str(), allocator);
 		json_object.AddMember(name, value, allocator);
 	}
 }
 
-bool CGFileHandler::save_to_file(const QString& file_path, const TransactionModel& transaction_model, const AccountModel& account_model)
+bool CGFileHandler::save_to_file(const std::string& file_path, const TransactionModel& transaction_model, const AccountModel& account_model)
 {
 	rapidjson::Document doc;
 	doc.SetObject();
@@ -101,17 +109,17 @@ bool CGFileHandler::save_to_file(const QString& file_path, const TransactionMode
 
 	rapidjson::Value json_categories;
 	json_categories.SetArray();
-	for (const QString& category : transaction_model.get_category_names())
+	for (const std::string& category : transaction_model.get_category_names())
 	{
 		if (category == "None") continue;
 		rapidjson::Value json_object;
 		json_object.SetObject();
 		{
-			rapidjson::Value value(category.toStdString().c_str(), allocator);
+			rapidjson::Value value(category.c_str(), allocator);
 			json_object.AddMember("Name", value, allocator);
 		}
 		{
-			rapidjson::Value value(transaction_model.get_category_colors().at(category).name(QColor::NameFormat::HexArgb).toStdString().c_str(), allocator);
+			rapidjson::Value value(transaction_model.get_category_colors().at(category).to_string().c_str(), allocator);
 			json_object.AddMember("Color", value, allocator);
 		}
 		json_categories.PushBack(json_object, allocator);
@@ -125,11 +133,11 @@ bool CGFileHandler::save_to_file(const QString& file_path, const TransactionMode
 		rapidjson::Value json_object;
 		json_object.SetObject();
 		{
-			rapidjson::Value value(account.name.toStdString().c_str(), allocator);
+			rapidjson::Value value(account.name.c_str(), allocator);
 			json_object.AddMember("Name", value, allocator);
 		}
 		{
-			rapidjson::Value value(account.amount.to_string().toStdString().c_str(), allocator);
+			rapidjson::Value value(account.amount.to_string().c_str(), allocator);
 			json_object.AddMember("Amount", value, allocator);
 		}
 		json_accounts.PushBack(json_object, allocator);
@@ -169,31 +177,33 @@ bool CGFileHandler::save_to_file(const QString& file_path, const TransactionMode
 	doc.Accept(writer);
 
 	// check if file hash is still the one we expect
-	QFile file(file_path);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	std::ifstream in_file(file_path);
+	if (!in_file.is_open())
 	{
-		cglog::error("Failed to open file \"{}\"", file_path.toStdString());
+		cglog::error("Failed to open file \"{}\"", file_path);
 		return false;
 	}
-	QTextStream in(&file);
-	QString file_content = in.readAll();
-	uint32_t new_hash = qHash(file_content, 0);
+	std::stringstream file_stream;
+	file_stream << in_file.rdbuf();
+	std::string file_content = file_stream.str();
+	if (file_content.size() == 0) return true;
+	std::size_t new_hash = std::hash<std::string>{}(file_content);
 	if (new_hash != hash)
 	{
-		cglog::error("Failed to save file! \"{}\" has been modified outside this program!", file_path.toStdString());
+		cglog::error("Failed to save file! \"{}\" has been modified outside this program!", file_path);
 		return false;
 	}
-	file.close();
+	in_file.close();
 	// write file
-	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text))
+	std::ofstream out_file(file_path);
+	if (!out_file.is_open())
 	{
-		cglog::error("Failed to open file \"{}\"", file_path.toStdString());
+		cglog::error("Failed to open file \"{}\"", file_path);
 		return false;
 	}
-	QTextStream out(&file);
-	QString output = QString(buffer.GetString());
-	hash = qHash(output);
-	out << output;
-	file.close();
+	std::string output = buffer.GetString();
+	hash = std::hash<std::string>{}(output);
+	out_file << output;
+	out_file.close();
 	return true;
 }

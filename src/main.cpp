@@ -1,9 +1,9 @@
+#include <filesystem>
 #include <vector>
+#include "application.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "util/log.hpp"
-#include <QApplication>
-#include "mainwindow.hpp"
 
 #include "argparse/argparse.hpp"
 
@@ -42,25 +42,20 @@ int main(int argc, char** argv)
 	spdlog::set_default_logger(combined_logger);
 #ifndef NDEBUG
 	spdlog::set_level(spdlog::level::debug);
-#endif
+#else
 	spdlog::set_level(spdlog::level::info);
+#endif
 
+	cglog::info("Starting");
 	argparse::ArgumentParser program("CashGuard");
 	int parse_status = parse_args(argc, argv, program);
 	if (parse_status != 0) return parse_status;
 
-	QApplication app(argc, argv);
+	std::filesystem::path file_path = getenv("HOME");
+	file_path /= std::filesystem::path("Sync/Private/CashGuardTransactions.json");
 
-	QString file_path = getenv("HOME");
-	if (!file_path.endsWith("/")) file_path += "/";
-	file_path += QString("Documents/CashGuardTransactions.json");
-
-	if (program.is_used("--file")) file_path = QString::fromStdString(program.get<std::string>("--file"));
-	MainWindow main_window;
-	if (!main_window.init(file_path)) return 1;
-	main_window.setWindowTitle("CashGuard");
-	main_window.resize(800, 600);
-	main_window.show();
-
-	return app.exec();
+	if (program.is_used("--file")) file_path = program.get<std::string>("--file");
+	Application app;
+	if (!app.init(file_path)) return 1;
+	return app.run();
 }
