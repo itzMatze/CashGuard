@@ -61,6 +61,7 @@ bool CGFileHandler::load_from_file(const std::string& file_path, TransactionMode
 			cglog::error("Failed to parse amount!");
 			return false;
 		}
+		account_model.add(account);
 	}
 	std::set<uint64_t> ids;
 	for (const auto& rj_transaction : doc["Transactions"].GetArray())
