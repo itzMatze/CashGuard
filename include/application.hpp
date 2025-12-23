@@ -1,7 +1,7 @@
 #pragma once
 #include "cg_file_handler.hpp"
+#include "transaction_page.hpp"
 #include "transaction_model.hpp"
-#include "transaction_table.hpp"
 #include <string>
 
 class Application
@@ -16,5 +16,5 @@ private:
 	CGFileHandler cg_file_handler;
 	TransactionModel transaction_model;
 	AccountModel account_model;
-	TransactionTable transaction_table;
+	TransactionPage transaction_page;
 };

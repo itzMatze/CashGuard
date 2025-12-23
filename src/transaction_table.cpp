@@ -1,15 +1,12 @@
 #include "transaction_table.hpp"
-#include "imgui.h"
 #include "transaction_model.hpp"
 
-void TransactionTable::draw(const TransactionModel& transaction_model)
+void TransactionTable::draw(ImVec2 available_space, const TransactionModel& transaction_model)
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
 	constexpr ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
-	float available_height = ImGui::GetContentRegionAvail().y;
-	float table_height = available_height * 0.95f;
 
-	if (ImGui::BeginTable("Transactions", 8, flags, ImVec2(0.0f, table_height)))
+	if (ImGui::BeginTable("Transactions", 8, flags, available_space))
 	{
 		ImGui::TableSetupScrollFreeze(0, 1);
 		const std::vector<std::string>& field_names = Transaction::get_field_names();

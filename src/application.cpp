@@ -41,19 +41,18 @@ int32_t Application::run()
 	SDL_Event event;
 	while (!quit)
 	{
+		window.new_frame();
+		ImVec2 available_space = ImGui::GetContentRegionAvail();
+		available_space.y -= ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemInnerSpacing.y * 2.0f;
+		transaction_page.draw(available_space, transaction_model, account_model);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		window.end_frame();
 		while (SDL_PollEvent(&event))
 		{
 			ImGui_ImplSDL3_ProcessEvent(&event);
 			if (event.type == SDL_EVENT_QUIT) quit = true;
 			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == window.get_id()) quit = true;
 		}
-		window.new_frame();
-		ImGui::PushFont(NULL, 64.0f);
-		ImGui::Text(" %s €", transaction_model.get_filtered_total_amount().to_string().c_str());
-		ImGui::PopFont();
-		transaction_table.draw(transaction_model);
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		window.end_frame();
 	}
 	window.destruct();
 	return 0;

@@ -19,6 +19,7 @@ set(SOURCE_FILES
 	src/transaction.cpp
 	src/transaction_filter.cpp
 	src/transaction_model.cpp
+	src/transaction_page.cpp
 	src/transaction_table.cpp
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/imgui.cpp"
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/backends/imgui_impl_sdl3.cpp"
