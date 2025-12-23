@@ -16,7 +16,6 @@ set(SOURCE_FILES
 	src/util/color.cpp
 	src/cg_file_handler.cpp
 	src/account_model.cpp
-	src/total_amount.cpp
 	src/transaction.cpp
 	src/transaction_filter.cpp
 	src/transaction_model.cpp

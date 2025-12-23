@@ -120,6 +120,20 @@ void TransactionModel::set_categories(const std::vector<std::string>& categoryNa
 	this->category_colors = categoryColors;
 }
 
+Amount TransactionModel::get_filtered_total_amount() const
+{
+	int32_t total_amount = 0;
+	for (uint32_t i = 0; i < filtered_transactions.size(); i++) total_amount += filtered_transactions[i]->amount.value;
+	return Amount(total_amount);
+}
+
+Amount TransactionModel::get_global_total_amount() const
+{
+	int32_t total_amount = 0;
+	for (std::shared_ptr<const Transaction> t : transactions) total_amount += t->amount.value;
+	return Amount(total_amount);
+}
+
 int32_t TransactionModel::get_transaction_index(std::shared_ptr<Transaction> transaction)
 {
 	for (uint32_t i = 0; i < transactions.size(); i++) if (transactions.at(i) == transaction) return i;

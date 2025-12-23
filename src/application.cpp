@@ -2,7 +2,6 @@
 
 #include "SDL3/SDL_events.h"
 #include "backends/imgui_impl_sdl3.h"
-#include "total_amount.hpp"
 #include "util/log.hpp"
 #include "window.hpp"
 #include <filesystem>
@@ -50,7 +49,7 @@ int32_t Application::run()
 		}
 		window.new_frame();
 		ImGui::PushFont(NULL, 64.0f);
-		ImGui::Text(" %s €", get_filtered_total_amount(transaction_model).to_string().c_str());
+		ImGui::Text(" %s €", transaction_model.get_filtered_total_amount().to_string().c_str());
 		ImGui::PopFont();
 		transaction_table.draw(transaction_model);
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
