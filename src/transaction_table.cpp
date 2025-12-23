@@ -36,7 +36,7 @@ void TransactionTable::draw(const TransactionModel& transaction_model)
 					const uint32_t intensity = std::min(uint64_t(std::abs(transaction->amount.value)) / 40ull + 20ull, 255ull);
 					if (transaction->amount.is_negative()) color = IM_COL32(intensity, 0, 0, 150);
 					else color = IM_COL32(0, intensity, 0, 150);
-					if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction->category).get_hex_color());
+					if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction->category).get_ImU32());
 					else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
 					ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
 				}
