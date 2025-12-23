@@ -11,7 +11,7 @@ int32_t TransactionModel::count() const
 
 const std::shared_ptr<Transaction> TransactionModel::at(int32_t index) const
 {
-	return transactions[index];
+	return filtered_transactions[index];
 }
 
 void TransactionModel::remove(int32_t index)
