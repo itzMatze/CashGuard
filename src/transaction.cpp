@@ -151,8 +151,8 @@ void Transaction::set_field(const std::string& field_name, const std::string& va
 	else if (field_name == tfn::Date)
 	{
 		std::istringstream iss(value);
-    DateTime date_time;
-    iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
+		DateTime date_time;
+		iss >> std::chrono::parse("%d.%m.%Y", date_time);
 		if (!iss.fail()) date = to_date(date_time);
 	}
 	else if (field_name == tfn::Category) category = value;
@@ -165,15 +165,15 @@ void Transaction::set_field(const std::string& field_name, const std::string& va
 	else if (field_name == tfn::Added)
 	{ 
 		std::istringstream iss(value);
-    DateTime date_time;
-    iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
+		DateTime date_time;
+		iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
 		if (!iss.fail()) added = date_time;
 	}
 	else if (field_name == tfn::Edited)
 	{
 		std::istringstream iss(value);
-    DateTime date_time;
-    iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
+		DateTime date_time;
+		iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
 		if (!iss.fail()) edited = date_time;
 	}
 	else CG_THROW("Invalid transaction field name!");
