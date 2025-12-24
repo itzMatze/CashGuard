@@ -5,7 +5,7 @@
 void TransactionTable::draw(ImVec2 available_space, const TransactionModel& transaction_model)
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
-	constexpr ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+	constexpr ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
@@ -27,18 +27,17 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 			for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
 			{
 				ImGui::TableNextRow();
+				const std::shared_ptr<Transaction> transaction = transaction_model.at(row);
+				ImU32 color = IM_COL32(0, 0, 0, 255);
+				const uint32_t intensity = std::min(uint64_t(std::abs(transaction->amount.value)) / 40ull + 20ull, 255ull);
+				if (transaction->amount.is_negative()) color = IM_COL32(intensity, 0, 0, 150);
+				else color = IM_COL32(0, intensity, 0, 150);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, color);
 				for (int32_t column = 0; column < field_names.size(); column++)
 				{
 					const std::string& field_name = field_names[column];
-					const std::shared_ptr<Transaction> transaction = transaction_model.at(row);
 					ImGui::TableSetColumnIndex(column);
-					ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 0));
-					ImU32 color = IM_COL32(0, 0, 0, 255);
-					const uint32_t intensity = std::min(uint64_t(std::abs(transaction->amount.value)) / 40ull + 20ull, 255ull);
-					if (transaction->amount.is_negative()) color = IM_COL32(intensity, 0, 0, 150);
-					else color = IM_COL32(0, intensity, 0, 150);
 					if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction->category).get_ImU32());
-					else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
 					// set up selection and highlighting
 					if (column == 0)
 					{
