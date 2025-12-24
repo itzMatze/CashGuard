@@ -21,6 +21,7 @@ set(SOURCE_FILES
 	src/transaction_model.cpp
 	src/transaction_page.cpp
 	src/transaction_table.cpp
+	src/util/random_generator.cpp
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/imgui.cpp"
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/backends/imgui_impl_sdl3.cpp"
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/backends/imgui_impl_opengl3.cpp"

@@ -101,6 +101,11 @@ Date to_date(DateTime time_point)
 	return std::chrono::floor<std::chrono::days>(time_point);
 }
 
+Date to_date(int32_t day, int32_t month, int32_t year)
+{
+	return Date(std::chrono::year{year}, std::chrono::month{uint32_t(month)}, std::chrono::day{uint32_t(day)});
+}
+
 Transaction::Transaction() :
 	id(0),
 	date(to_date(Clock::now())),

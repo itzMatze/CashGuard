@@ -37,6 +37,7 @@ using Date = std::chrono::year_month_day;
 using DateTime = Clock::time_point;
 
 Date to_date(DateTime time_point);
+Date to_date(int32_t day, int32_t month, int32_t year);
 
 class Transaction
 {

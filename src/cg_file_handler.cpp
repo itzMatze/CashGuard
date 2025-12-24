@@ -206,5 +206,6 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 	hash = std::hash<std::string>{}(output);
 	out_file << output;
 	out_file.close();
+	cglog::debug("Wrote to \"{}\"", file_path);
 	return true;
 }
