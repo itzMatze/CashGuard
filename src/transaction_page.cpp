@@ -5,6 +5,8 @@
 
 void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
 {
+	const int32_t row_index = transaction_table.get_selected_row();
+	const bool row_valid = row_index > -1 && row_index < transaction_model.count();
 	ImGui::PushFont(NULL, 64.0f);
 	available_space.y -= ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemInnerSpacing.y * 2.0f;
 	ImGui::Text(" %s €", transaction_model.get_filtered_total_amount().to_string().c_str());
@@ -22,24 +24,33 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 		opened_transaction = Transaction();
 		ImGui::OpenPopup("Transaction Add##Dialog");
 	}
-	if (ImGui::BeginPopupModal("Transaction Add##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		transaction_dialog(transaction_model, -1);
-	}
+	if (ImGui::BeginPopupModal("Transaction Add##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) transaction_dialog(transaction_model, -1);
 	ImGui::SameLine();
-	ImGui::Button("Group", button_size);
+	ImGui::Button("Add Group", button_size);
 	ImGui::SameLine();
-	if (ImGui::Button("Edit", button_size))
+	if (ImGui::Button("Edit", button_size) && row_valid)
 	{
-		opened_transaction = *transaction_model.at(transaction_table.get_selected_row());
+		opened_transaction = *transaction_model.at(row_index);
 		ImGui::OpenPopup("Transaction Edit##Dialog");
 	}
 	if (ImGui::BeginPopupModal("Transaction Edit##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		transaction_dialog(transaction_model, transaction_table.get_selected_row());
+		transaction_dialog(transaction_model, row_index);
 	}
 	ImGui::SameLine();
-	ImGui::Button("Remove", button_size);
+	if (ImGui::Button("Remove", button_size) && row_valid) ImGui::OpenPopup("Transaction Remove##Dialog");
+	if (ImGui::BeginPopupModal("Transaction Remove##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Remove transaction with id %zu?", transaction_model.at(row_index)->id);
+		if (ImGui::Button("OK"))
+		{
+			transaction_model.remove(row_index);
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
+		ImGui::EndPopup();
+	}
 	ImGui::PopStyleColor(3);
 	ImGui::SameLine();
 	ImVec4 account_button_color(0.0f, 0.7f, 0.0f, 1.0f);

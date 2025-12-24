@@ -12,5 +12,5 @@ public:
 	int32_t get_selected_row() const;
 
 private:
-	int32_t selected_row = -1;
+	int32_t selected_row = 0;
 };
