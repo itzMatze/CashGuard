@@ -10,6 +10,11 @@ const Account& AccountModel::at(int32_t index) const
 	return accounts[index];
 }
 
+Account& AccountModel::at(int32_t index)
+{
+	return accounts[index];
+}
+
 void AccountModel::set(int32_t index, const Account& account)
 {
 	accounts[index] = account;

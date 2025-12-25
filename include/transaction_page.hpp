@@ -19,7 +19,10 @@ private:
 	Transaction opened_transaction;
 	TransactionGroup opened_transaction_group;
 	int32_t selected_group_row = 0;
+	int32_t selected_account_row = 0;
+	int32_t opened_account_row = -1;
 	void transaction_dialog(TransactionModel& transaction_model, int32_t transaction_index = -1);
 	void transaction_member_dialog(const std::vector<std::string>& category_names, int32_t transaction_index = -1);
 	void transaction_group_dialog(TransactionModel& transaction_model, int32_t transaction_index = -1);
+	void accounts_dialog(AccountModel& account_model, int64_t account_total_amount, int64_t transaction_total_amount);
 };

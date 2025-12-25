@@ -10,10 +10,11 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 
-	if (ImGui::BeginTable("Transactions", 8, flags, available_space))
+	const std::vector<std::string>& field_names = Transaction::get_field_names();
+	// show additional group field
+	if (ImGui::BeginTable("Transactions", field_names.size() + 1, flags, available_space))
 	{
 		ImGui::TableSetupScrollFreeze(0, 1);
-		const std::vector<std::string>& field_names = Transaction::get_field_names();
 		for (const std::string& field_name : field_names)
 		{
 			ImGui::TableSetupColumn(field_name.c_str(), ImGuiTableColumnFlags_None);
@@ -47,7 +48,7 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 						// last column is the group column which is not contained in field_names
 						ImVec2 lower_right(ImGui::TableGetCellBgRect(table, field_names.size()).Max.x, cursor_pos.y + ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemInnerSpacing.y);
 						bool selected = (row == selected_row);
-						if (ImGui::Selectable(std::string("##row_" + std::to_string(row)).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns)) selected_row = row;
+						if (ImGui::Selectable(transaction->get_field_view(field_name).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap)) selected_row = row;
 						bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 						if (selected || hovered)
 						{
@@ -60,7 +61,7 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 						}
 						ImGui::SameLine();
 					}
-					ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
+					else ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
 				}
 				ImGui::TableSetColumnIndex(field_names.size());
 				ImGui::Text("%s", std::dynamic_pointer_cast<TransactionGroup>(transaction_model.at(row)) ? "x" : " ");

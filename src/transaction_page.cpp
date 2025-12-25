@@ -72,16 +72,19 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 		if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
-	ImGui::PopStyleColor(3);
 	ImGui::SameLine();
 
 	// Accounts
 	ImVec4 account_button_color(0.0f, 0.7f, 0.0f, 1.0f);
-	if (account_model.get_total_amount().value != transaction_model.get_global_total_amount().value) account_button_color = ImVec4(0.7f, 0.0f, 0.0f, 1.0f);
+	const int64_t account_total_amount = account_model.get_total_amount().value;
+	const int64_t transaction_total_amount = transaction_model.get_global_total_amount().value;
+	if (account_total_amount != transaction_total_amount) account_button_color = ImVec4(0.7f, 0.0f, 0.0f, 1.0f);
 	ImGui::PushStyleColor(ImGuiCol_Button, account_button_color);
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(account_button_color.x + 0.1f, account_button_color.y + 0.1f, account_button_color.z + 0.1f, account_button_color.w));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(account_button_color.x - 0.1f, account_button_color.y - 0.1f, account_button_color.z - 0.1f, account_button_color.w));
-	ImGui::Button("Accounts", button_size);
+	if (ImGui::Button("Accounts", button_size)) ImGui::OpenPopup("Accounts##Dialog");
+	ImGui::PopStyleColor(3);
+	if (ImGui::BeginPopupModal("Accounts##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) accounts_dialog(account_model, account_total_amount, transaction_total_amount);
 	ImGui::PopStyleColor(3);
 }
 
@@ -139,7 +142,7 @@ void TransactionPage::transaction_dialog(TransactionModel& transaction_model, in
 {
 	opened_transaction.date = date_input(opened_transaction.date);
 	opened_transaction.description = string_input("##Description", "Description", opened_transaction.description);
-	bool parse_success = to_amount(string_input("##Amount", "Amount", opened_transaction.get_field_view(TransactionFieldNames::Amount)), opened_transaction.amount);
+	bool parse_success = to_amount(string_input("##Amount", "Amount", opened_transaction.amount.to_string_view()), opened_transaction.amount);
 	opened_transaction.category = category_dropdown(opened_transaction.category, transaction_model.get_category_names());
 	if (ImGui::Button("OK##TransactionDialog"))
 	{
@@ -166,7 +169,7 @@ void TransactionPage::transaction_member_dialog(const std::vector<std::string>& 
 {
 	opened_transaction.date = date_input(opened_transaction.date);
 	opened_transaction.description = string_input("##Description", "Description", opened_transaction.description);
-	bool parse_success = to_amount(string_input("##Amount", "Amount", opened_transaction.get_field_view(TransactionFieldNames::Amount)), opened_transaction.amount);
+	bool parse_success = to_amount(string_input("##Amount", "Amount", opened_transaction.amount.to_string_view()), opened_transaction.amount);
 	opened_transaction.category = category_dropdown(opened_transaction.category, category_names);
 	if (ImGui::Button("OK##TransactionMemberDialog"))
 	{
@@ -199,12 +202,11 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 	opened_transaction_group.amount.value = 0;
 	for (const std::shared_ptr<Transaction> transaction : opened_transaction_group.transactions) opened_transaction_group.amount.value += transaction->amount.value;
 	ImGui::PushFont(NULL, 32.0f);
-	ImGui::Text(" %s", opened_transaction_group.get_field_view(TransactionFieldNames::Amount).c_str());
+	ImGui::Text(" %s", opened_transaction_group.amount.to_string_view().c_str());
 	ImGui::PopFont();
 	opened_transaction_group.date = date_input(opened_transaction_group.date);
 	opened_transaction_group.description = string_input("##Description", "Description", opened_transaction_group.description);
 	opened_transaction_group.category = category_dropdown(opened_transaction_group.category, transaction_model.get_category_names());
-	// TODO(Matze): transaction table and edit handling
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
 	constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
@@ -212,19 +214,18 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 
 	ImGui::SeparatorText("Transactions");
-	if (ImGui::BeginTable("Transactions##TransactionGroupDialog", 8, flags))
+	const std::vector<std::string>& field_names = Transaction::get_field_names();
+	if (ImGui::BeginTable("Transactions##TransactionGroupDialog", field_names.size(), flags))
 	{
 		ImGui::TableSetupScrollFreeze(0, 1);
-		const std::vector<std::string>& field_names = Transaction::get_field_names();
 		for (const std::string& field_name : field_names)
 		{
 			ImGui::TableSetupColumn(field_name.c_str(), ImGuiTableColumnFlags_None);
 		}
-		ImGui::TableSetupColumn("Group", ImGuiTableColumnFlags_None);
 		ImGui::TableHeadersRow();
 		for (int32_t row = 0; row < opened_transaction_group.transactions.size(); row++)
 		{
-			ImGui::TableNextRow();
+			ImGui::TableNextRow(ImGuiTableRowFlags_None);
 			const std::shared_ptr<Transaction> transaction = opened_transaction_group.transactions[row];
 			ImU32 color = IM_COL32(0, 0, 0, 255);
 			const uint32_t intensity = std::min(uint64_t(std::abs(transaction->amount.value)) / 40ull + 20ull, 255ull);
@@ -243,9 +244,9 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 					ImGuiTable* table = ImGui::GetCurrentTable();
 					ImVec2 upper_left(ImGui::TableGetCellBgRect(table, 0).Min.x, cursor_pos.y - ImGui::GetStyle().ItemInnerSpacing.y);
 					// last column is the group column which is not contained in field_names
-					ImVec2 lower_right(ImGui::TableGetCellBgRect(table, field_names.size()).Max.x, cursor_pos.y + ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemInnerSpacing.y);
+					ImVec2 lower_right(ImGui::TableGetCellBgRect(table, field_names.size() - 1).Max.x, cursor_pos.y + ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemInnerSpacing.y);
 					bool selected = (row == selected_group_row);
-					if (ImGui::Selectable(std::string("##transaction_group_row_" + std::to_string(row)).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups)) selected_group_row = row;
+					if (ImGui::Selectable(transaction->get_field_view(field_name).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_DontClosePopups)) selected_group_row = row;
 					bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					if (selected || hovered)
 					{
@@ -258,7 +259,7 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 					}
 					ImGui::SameLine();
 				}
-				ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
+				else ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
 			}
 		}
 		ImGui::EndTable();
@@ -324,5 +325,95 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Cancel##TransactionGroupDialog")) ImGui::CloseCurrentPopup();
+	ImGui::EndPopup();
+}
+
+void TransactionPage::accounts_dialog(AccountModel& account_model, int64_t account_total_amount, int64_t transaction_total_amount)
+{
+	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImGui::GetStyle().CellPadding);
+	const float row_height = ImGui::GetFrameHeight();
+	constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
+
+	ImGui::PushFont(NULL, 32.0f);
+	if (account_total_amount == transaction_total_amount) ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Accounts match!");
+	else ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Accounts don't match! Difference: %s", Amount(account_total_amount - transaction_total_amount).to_string_view().c_str());
+	ImGui::PopFont();
+	if (ImGui::BeginTable("Accounts", 3, flags))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
+		ImGui::TableSetupColumn("##Index", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn("Amount", ImGuiTableColumnFlags_None);
+		ImGui::TableHeadersRow();
+		for (int32_t row = 0; row < account_model.count(); row++)
+		{
+			Account& account = account_model.at(row);
+			ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
+			ImGui::TableSetColumnIndex(0);
+			// set up selection and highlighting
+			ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+			ImGuiTable* table = ImGui::GetCurrentTable();
+			ImVec2 upper_left(ImGui::TableGetCellBgRect(table, 0).Min.x, cursor_pos.y - ImGui::GetStyle().ItemInnerSpacing.y);
+			// last column is the group column which is not contained in field_names
+			ImVec2 lower_right(ImGui::TableGetCellBgRect(table, 2).Max.x, cursor_pos.y + row_height + ImGui::GetStyle().ItemInnerSpacing.y);
+			bool selected = (row == selected_account_row);
+			const bool is_edited = row == opened_account_row && opened_account_row == selected_account_row;
+			std::array<char, 32> label;
+			std::snprintf(label.data(), label.size(), "%u", row + 1);
+			if (ImGui::Selectable(label.data(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_DontClosePopups))
+			{
+				selected_account_row = row;
+				opened_account_row = -1;
+			}
+			bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) opened_account_row = row;
+			if (selected || hovered)
+			{
+				constexpr float border_thickness = 4.0f;
+				ImDrawList* dl = ImGui::GetWindowDrawList();
+				ImU32 col = ImGui::GetColorU32(ImGuiCol_HeaderActive);
+				ImU32 color = IM_COL32(0, 255, 255, 128);
+				if (selected) color = IM_COL32(0, 255, 255, 255);
+				dl->AddRect(ImVec2(upper_left.x + border_thickness / 2.0f, upper_left.y), ImVec2(lower_right.x - border_thickness / 2.0f, lower_right.y), color, 0.0f, 0, 4.0f);
+			}
+			ImGui::TableSetColumnIndex(1);
+			if (is_edited)
+			{
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				account.name = string_input("##AccountName", "Name", account.name);
+			}
+			else
+			{
+				ImGui::AlignTextToFramePadding();
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
+				ImGui::Text("%s", account.name.c_str());
+			}
+			ImGui::TableSetColumnIndex(2);
+			if (is_edited)
+			{
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				to_amount(string_input("##AccountAmount", "Amount", account.amount.to_string_view()), account.amount);
+			}
+			else
+			{
+				ImGui::AlignTextToFramePadding();
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
+				ImGui::Text("%s", account.amount.to_string_view().c_str());
+			}
+		}
+		ImGui::EndTable();
+	}
+	ImGui::PopStyleColor(3);
+	ImGui::PopStyleVar(2);
+	if (ImGui::Button("Add##AccountsDialog")) account_model.add(Account());
+	ImGui::SameLine();
+	if (ImGui::Button("Remove##AccountsDialog")) account_model.remove(selected_account_row);
+	ImGui::SameLine();
+	if (ImGui::Button("Close##AccountsDialog")) ImGui::CloseCurrentPopup();
 	ImGui::EndPopup();
 }

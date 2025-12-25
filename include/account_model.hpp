@@ -17,6 +17,7 @@ public:
 
 	int32_t count() const;
 	const Account& at(int32_t index) const;
+	Account& at(int32_t index);
 	void set(int32_t index, const Account& account);
 	void add(const Account& account);
 	void remove(int32_t index);

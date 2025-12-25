@@ -10,6 +10,7 @@ struct Amount
 	Amount() = default;
 	Amount(int64_t value);
 	std::string to_string() const;
+	std::string to_string_view() const;
 	bool is_negative() const;
 
 	// amount in cents

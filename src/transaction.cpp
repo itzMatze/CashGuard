@@ -10,6 +10,11 @@ std::string Amount::to_string() const
 	return (is_negative() ? "-" : "+") + std::format("{}.{:02}", (std::abs(value) / 100), (std::abs(value) % 100));
 }
 
+std::string Amount::to_string_view() const
+{
+	return to_string() + std::string(" €");
+}
+
 bool Amount::is_negative() const
 {
 	return value < 0;
@@ -144,9 +149,8 @@ std::string Transaction::get_field(const std::string& field_name) const
 std::string Transaction::get_field_view(const std::string& field_name) const
 {
 	namespace tfn = TransactionFieldNames;
-	std::string output = get_field(field_name);
-	if (field_name == tfn::Amount) output += " €";
-	return output;
+	if (field_name == tfn::Amount) return amount.to_string_view();
+	else return get_field(field_name);
 }
 
 void Transaction::set_field(const std::string& field_name, const std::string& value)
