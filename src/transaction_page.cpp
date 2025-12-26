@@ -217,6 +217,7 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 	const std::vector<std::string>& field_names = Transaction::get_field_names();
 	if (ImGui::BeginTable("Transactions##TransactionGroupDialog", field_names.size(), flags))
 	{
+		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
 		ImGui::TableSetupScrollFreeze(0, 1);
 		for (const std::string& field_name : field_names)
 		{
@@ -231,12 +232,12 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 			const uint32_t intensity = std::min(uint64_t(std::abs(transaction->amount.value)) / 40ull + 20ull, 255ull);
 			if (transaction->amount.is_negative()) color = IM_COL32(intensity, 0, 0, 150);
 			else color = IM_COL32(0, intensity, 0, 150);
-			ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, color);
 			for (int32_t column = 0; column < field_names.size(); column++)
 			{
 				const std::string& field_name = field_names[column];
 				ImGui::TableSetColumnIndex(column);
 				if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction->category).get_ImU32());
+				else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
 				// set up selection and highlighting
 				if (column == 0)
 				{
