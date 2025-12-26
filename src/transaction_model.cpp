@@ -14,12 +14,6 @@ const std::shared_ptr<Transaction> TransactionModel::at(int32_t index) const
 	return filtered_transactions[index];
 }
 
-void TransactionModel::remove(int32_t index)
-{
-	transactions.erase(transactions.begin() + get_transaction_index(filtered_transactions.at(index)));
-	filtered_transactions.erase(filtered_transactions.begin() + index);
-}
-
 void TransactionModel::add(const std::shared_ptr<Transaction> transaction)
 {
 	int32_t index = 0;
@@ -29,6 +23,12 @@ void TransactionModel::add(const std::shared_ptr<Transaction> transaction)
 	index = 0;
 	while (index < filtered_transactions.size() && *transaction < *filtered_transactions[index]) index++;
 	filtered_transactions.insert(filtered_transactions.begin() + index, transaction);
+}
+
+void TransactionModel::remove(int32_t index)
+{
+	transactions.erase(transactions.begin() + get_transaction_index(filtered_transactions.at(index)));
+	filtered_transactions.erase(filtered_transactions.begin() + index);
 }
 
 void TransactionModel::set(int32_t index, const std::shared_ptr<Transaction> transaction)

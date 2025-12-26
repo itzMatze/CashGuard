@@ -68,9 +68,14 @@ class TransactionGroup : public Transaction
 public:
 	TransactionGroup() = default;
 	TransactionGroup(const Transaction& transaction);
+	void set_transaction(int32_t index, const Transaction& transaction);
+	void add_transaction(const Transaction& transaction);
+	void remove_transaction(int32_t index);
+	const std::vector<Transaction>& get_transactions() const;
 	std::string to_string() const override;
 
-	std::vector<std::shared_ptr<Transaction>> transactions;
+private:
+	std::vector<Transaction> transactions;
 };
 
 bool operator==(const TransactionGroup& a, const TransactionGroup& b);

@@ -221,6 +221,29 @@ bool operator==(const Transaction& a, const Transaction& b)
 TransactionGroup::TransactionGroup(const Transaction& transaction) : Transaction(transaction)
 {}
 
+void TransactionGroup::add_transaction(const Transaction& transaction)
+{
+	int32_t index = 0;
+	while (index < transactions.size() && transaction < transactions[index]) index++;
+	transactions.insert(transactions.begin() + index, transaction);
+}
+
+void TransactionGroup::remove_transaction(int32_t index)
+{
+	transactions.erase(transactions.begin() + index);
+}
+
+void TransactionGroup::set_transaction(int32_t index, const Transaction& transaction)
+{
+	remove_transaction(index);
+	add_transaction(transaction);
+}
+
+const std::vector<Transaction>& TransactionGroup::get_transactions() const
+{
+	return transactions;
+}
+
 std::string TransactionGroup::to_string() const
 {
 	return Transaction::to_string() + "Transaction Group";
@@ -233,10 +256,10 @@ bool operator==(const TransactionGroup& a, const TransactionGroup& b)
 	{
 		if (a.get_field(field) != b.get_field(field)) return false;
 	}
-	if (a.transactions.size() != b.transactions.size()) return false;
-	for (int32_t i = 0; i < a.transactions.size(); i++)
+	if (a.get_transactions().size() != b.get_transactions().size()) return false;
+	for (int32_t i = 0; i < a.get_transactions().size(); i++)
 	{
-		if (*a.transactions[i] != *b.transactions[i]) return false;
+		if (a.get_transactions()[i] != b.get_transactions()[i]) return false;
 	}
 	return true;
 }

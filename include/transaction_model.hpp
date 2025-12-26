@@ -11,9 +11,9 @@ public:
 	TransactionModel() = default;
 	int32_t count() const;
 	const std::shared_ptr<Transaction> at(int32_t index) const;
-	void set(int32_t index, const std::shared_ptr<Transaction> transaction);
 	void add(const std::shared_ptr<Transaction> transaction);
 	void remove(int32_t index);
+	void set(int32_t index, const std::shared_ptr<Transaction> transaction);
 	const std::vector<std::shared_ptr<Transaction>>& get_unfiltered_transactions() const;
 	void clear();
 	void set_filter_active(bool active);

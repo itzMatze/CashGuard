@@ -76,7 +76,7 @@ bool CGFileHandler::load_from_file(const std::string& file_path, TransactionMode
 			std::shared_ptr<TransactionGroup> transaction_group = std::make_shared<TransactionGroup>(transaction);
 			for (const auto& rj_sub_transaction : rj_transaction["Transactions"].GetArray())
 			{
-				transaction_group->transactions.push_back(std::make_shared<Transaction>(parse_transaction(rj_sub_transaction)));
+				transaction_group->add_transaction(parse_transaction(rj_sub_transaction));
 			}
 			transaction_model.add(transaction_group);
 		}
@@ -155,10 +155,10 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 			serialize_transaction(*transaction, group, allocator);
 			rapidjson::Value json_sub_transactions;
 			json_sub_transactions.SetArray();
-			for (const std::shared_ptr<const Transaction> sub_transaction : transaction_group->transactions)
+			for (const Transaction& sub_transaction : transaction_group->get_transactions())
 			{
 				rapidjson::Value json_object;
-				serialize_transaction(*sub_transaction, json_object, allocator);
+				serialize_transaction(sub_transaction, json_object, allocator);
 				json_sub_transactions.PushBack(json_object, allocator);
 			}
 			group.AddMember("Transactions", json_sub_transactions, allocator);

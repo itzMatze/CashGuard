@@ -178,17 +178,12 @@ void TransactionPage::transaction_member_dialog(const std::vector<std::string>& 
 			opened_transaction.id = rng::random_int64();
 			opened_transaction.added = DateTime(Clock::now());
 			opened_transaction.edited = DateTime(Clock::now());
-			int32_t index = 0;
-			while (index < opened_transaction_group.transactions.size() && opened_transaction < *opened_transaction_group.transactions[index]) index++;
-			opened_transaction_group.transactions.insert(opened_transaction_group.transactions.begin() + index, std::make_shared<Transaction>(opened_transaction));
+			opened_transaction_group.add_transaction(opened_transaction);
 		}
 		else
 		{
 			opened_transaction.edited = DateTime(Clock::now());
-			opened_transaction_group.transactions.erase(opened_transaction_group.transactions.begin() + transaction_index);
-			int32_t index = 0;
-			while (index < opened_transaction_group.transactions.size() && opened_transaction < *opened_transaction_group.transactions[index]) index++;
-			opened_transaction_group.transactions.insert(opened_transaction_group.transactions.begin() + index, std::make_shared<Transaction>(opened_transaction));
+			opened_transaction_group.set_transaction(transaction_index, opened_transaction);
 		}
 		ImGui::CloseCurrentPopup();
 	}
@@ -200,7 +195,7 @@ void TransactionPage::transaction_member_dialog(const std::vector<std::string>& 
 void TransactionPage::transaction_group_dialog(TransactionModel& transaction_model, int32_t transaction_index)
 {
 	opened_transaction_group.amount.value = 0;
-	for (const std::shared_ptr<Transaction> transaction : opened_transaction_group.transactions) opened_transaction_group.amount.value += transaction->amount.value;
+	for (const Transaction& transaction : opened_transaction_group.get_transactions()) opened_transaction_group.amount.value += transaction.amount.value;
 	ImGui::PushFont(NULL, 32.0f);
 	ImGui::Text(" %s", opened_transaction_group.amount.to_string_view().c_str());
 	ImGui::PopFont();
@@ -224,19 +219,19 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 			ImGui::TableSetupColumn(field_name.c_str(), ImGuiTableColumnFlags_None);
 		}
 		ImGui::TableHeadersRow();
-		for (int32_t row = 0; row < opened_transaction_group.transactions.size(); row++)
+		for (int32_t row = 0; row < opened_transaction_group.get_transactions().size(); row++)
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None);
-			const std::shared_ptr<Transaction> transaction = opened_transaction_group.transactions[row];
+			const Transaction& transaction = opened_transaction_group.get_transactions()[row];
 			ImU32 color = IM_COL32(0, 0, 0, 255);
-			const uint32_t intensity = std::min(uint64_t(std::abs(transaction->amount.value)) / 40ull + 20ull, 255ull);
-			if (transaction->amount.is_negative()) color = IM_COL32(intensity, 0, 0, 150);
+			const uint32_t intensity = std::min(uint64_t(std::abs(transaction.amount.value)) / 40ull + 20ull, 255ull);
+			if (transaction.amount.is_negative()) color = IM_COL32(intensity, 0, 0, 150);
 			else color = IM_COL32(0, intensity, 0, 150);
 			for (int32_t column = 0; column < field_names.size(); column++)
 			{
 				const std::string& field_name = field_names[column];
 				ImGui::TableSetColumnIndex(column);
-				if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction->category).get_ImU32());
+				if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction.category).get_ImU32());
 				else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
 				// set up selection and highlighting
 				if (column == 0)
@@ -247,7 +242,7 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 					// last column is the group column which is not contained in field_names
 					ImVec2 lower_right(ImGui::TableGetCellBgRect(table, field_names.size() - 1).Max.x, cursor_pos.y + ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemInnerSpacing.y);
 					bool selected = (row == selected_group_row);
-					if (ImGui::Selectable(transaction->get_field_view(field_name).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_DontClosePopups)) selected_group_row = row;
+					if (ImGui::Selectable(transaction.get_field_view(field_name).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_DontClosePopups)) selected_group_row = row;
 					bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					if (selected || hovered)
 					{
@@ -260,7 +255,7 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 					}
 					ImGui::SameLine();
 				}
-				else ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
+				else ImGui::Text("%s", transaction.get_field_view(field_name).c_str());
 			}
 		}
 		ImGui::EndTable();
@@ -268,7 +263,7 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 	ImGui::PopStyleColor(3);
 	ImGui::PopStyleVar();
 
-	const bool row_valid = selected_group_row > -1 && selected_group_row < opened_transaction_group.transactions.size();
+	const bool row_valid = selected_group_row > -1 && selected_group_row < opened_transaction_group.get_transactions().size();
 
 	// Add
 	if (ImGui::Button("Add##TransactionGroupDialog"))
@@ -284,8 +279,8 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 	// Edit
 	if (ImGui::Button("Edit##TransactionGroupDialog") && row_valid)
 	{
-		const std::shared_ptr<Transaction> transaction = opened_transaction_group.transactions[selected_group_row];
-		opened_transaction = *transaction;
+		const Transaction& transaction = opened_transaction_group.get_transactions()[selected_group_row];
+		opened_transaction = transaction;
 		ImGui::OpenPopup("Transaction Edit##MemberDialog");
 	}
 	if (ImGui::BeginPopupModal("Transaction Edit##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -298,10 +293,10 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 	if (ImGui::Button("Remove##TransactionGroupDialog") && row_valid) ImGui::OpenPopup("Transaction Remove##MemberDialog");
 	if (ImGui::BeginPopupModal("Transaction Remove##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		ImGui::Text("Remove transaction with id %zu?", opened_transaction_group.transactions[selected_group_row]->id);
+		ImGui::Text("Remove transaction with id %zu?", opened_transaction_group.get_transactions()[selected_group_row].id);
 		if (ImGui::Button("OK##TransactionGroupDialogRemove"))
 		{
-			opened_transaction_group.transactions.erase(opened_transaction_group.transactions.begin() + selected_group_row);
+			opened_transaction_group.remove_transaction(selected_group_row);
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
