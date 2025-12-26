@@ -366,6 +366,7 @@ void TransactionPage::accounts_dialog(AccountModel& account_model, int64_t accou
 			const bool is_edited = row == opened_account_row && opened_account_row == selected_account_row;
 			std::array<char, 32> label;
 			std::snprintf(label.data(), label.size(), "%u", row + 1);
+			ImGui::AlignTextToFramePadding();
 			if (ImGui::Selectable(label.data(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_DontClosePopups))
 			{
 				selected_account_row = row;
