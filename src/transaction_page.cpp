@@ -223,39 +223,38 @@ void TransactionPage::transaction_group_dialog(TransactionModel& transaction_mod
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None);
 			const Transaction& transaction = opened_transaction_group.get_transactions()[row];
-			ImU32 color = IM_COL32(0, 0, 0, 255);
+			ImU32 background_color = IM_COL32(0, 0, 0, 255);
 			const uint32_t intensity = std::min(uint64_t(std::abs(transaction.amount.value)) / 40ull + 20ull, 255ull);
-			if (transaction.amount.is_negative()) color = IM_COL32(intensity, 0, 0, 150);
-			else color = IM_COL32(0, intensity, 0, 150);
+			if (transaction.amount.is_negative()) background_color = IM_COL32(intensity, 0, 0, 150);
+			else background_color = IM_COL32(0, intensity, 0, 150);
+			bool hovered = false;
+			bool selected = false;
 			for (int32_t column = 0; column < field_names.size(); column++)
 			{
 				const std::string& field_name = field_names[column];
 				ImGui::TableSetColumnIndex(column);
 				if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction.category).get_ImU32());
-				else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, color);
+				else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
 				// set up selection and highlighting
 				if (column == 0)
 				{
-					ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
-					ImGuiTable* table = ImGui::GetCurrentTable();
-					ImVec2 upper_left(ImGui::TableGetCellBgRect(table, 0).Min.x, cursor_pos.y - ImGui::GetStyle().ItemInnerSpacing.y);
-					// last column is the group column which is not contained in field_names
-					ImVec2 lower_right(ImGui::TableGetCellBgRect(table, field_names.size() - 1).Max.x, cursor_pos.y + ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemInnerSpacing.y);
-					bool selected = (row == selected_group_row);
+					selected = (row == selected_group_row);
 					if (ImGui::Selectable(transaction.get_field_view(field_name).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_DontClosePopups)) selected_group_row = row;
-					bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
-					if (selected || hovered)
-					{
-						constexpr float border_thickness = 4.0f;
-						ImDrawList* dl = ImGui::GetWindowDrawList();
-						ImU32 col = ImGui::GetColorU32(ImGuiCol_HeaderActive);
-						ImU32 color = IM_COL32(0, 255, 255, 128);
-						if (selected) color = IM_COL32(0, 255, 255, 255);
-						dl->AddRect(ImVec2(upper_left.x + border_thickness / 2.0f, upper_left.y), ImVec2(lower_right.x - border_thickness / 2.0f, lower_right.y), color, 0.0f, 0, 4.0f);
-					}
-					ImGui::SameLine();
+					hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 				}
 				else ImGui::Text("%s", transaction.get_field_view(field_name).c_str());
+			}
+			if (selected || hovered)
+			{
+				ImU32 highlight_color = IM_COL32(0, 255, 255, 128);
+				if (selected) highlight_color = IM_COL32(0, 255, 255, 255);
+				ImGuiTable* table = ImGui::GetCurrentTable();
+				ImVec2 min(ImGui::TableGetCellBgRect(table, 0).Min);
+				// last column is the group column which is not contained in field_names
+				ImVec2 max(ImGui::TableGetCellBgRect(table, field_names.size() - 1).Max);
+				constexpr float border_thickness = 4.0f;
+				ImDrawList* dl = ImGui::GetWindowDrawList();
+				dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, max.y), highlight_color, 0.0f, 0, border_thickness);
 			}
 		}
 		ImGui::EndTable();
@@ -352,11 +351,6 @@ void TransactionPage::accounts_dialog(AccountModel& account_model, int64_t accou
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
 			ImGui::TableSetColumnIndex(0);
 			// set up selection and highlighting
-			ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
-			ImGuiTable* table = ImGui::GetCurrentTable();
-			ImVec2 upper_left(ImGui::TableGetCellBgRect(table, 0).Min.x, cursor_pos.y - ImGui::GetStyle().ItemInnerSpacing.y);
-			// last column is the group column which is not contained in field_names
-			ImVec2 lower_right(ImGui::TableGetCellBgRect(table, 2).Max.x, cursor_pos.y + row_height + ImGui::GetStyle().ItemInnerSpacing.y);
 			bool selected = (row == selected_account_row);
 			const bool is_edited = row == opened_account_row && opened_account_row == selected_account_row;
 			std::array<char, 32> label;
@@ -369,15 +363,6 @@ void TransactionPage::accounts_dialog(AccountModel& account_model, int64_t accou
 			}
 			bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) opened_account_row = row;
-			if (selected || hovered)
-			{
-				constexpr float border_thickness = 4.0f;
-				ImDrawList* dl = ImGui::GetWindowDrawList();
-				ImU32 col = ImGui::GetColorU32(ImGuiCol_HeaderActive);
-				ImU32 color = IM_COL32(0, 255, 255, 128);
-				if (selected) color = IM_COL32(0, 255, 255, 255);
-				dl->AddRect(ImVec2(upper_left.x + border_thickness / 2.0f, upper_left.y), ImVec2(lower_right.x - border_thickness / 2.0f, lower_right.y), color, 0.0f, 0, 4.0f);
-			}
 			ImGui::TableSetColumnIndex(1);
 			if (is_edited)
 			{
@@ -401,6 +386,18 @@ void TransactionPage::accounts_dialog(AccountModel& account_model, int64_t accou
 				ImGui::AlignTextToFramePadding();
 				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
 				ImGui::Text("%s", account.amount.to_string_view().c_str());
+			}
+			if (selected || hovered)
+			{
+				ImU32 highlight_color = IM_COL32(0, 255, 255, 128);
+				if (selected) highlight_color = IM_COL32(0, 255, 255, 255);
+				ImGuiTable* table = ImGui::GetCurrentTable();
+				ImVec2 min(ImGui::TableGetCellBgRect(table, 0).Min);
+				// last column is the group column which is not contained in field_names
+				ImVec2 max(ImGui::TableGetCellBgRect(table, 2).Max);
+				constexpr float border_thickness = 4.0f;
+				ImDrawList* dl = ImGui::GetWindowDrawList();
+				dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, max.y), highlight_color, 0.0f, 0, border_thickness);
 			}
 		}
 		ImGui::EndTable();
