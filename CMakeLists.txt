@@ -11,16 +11,16 @@ add_subdirectory("${SPDLOG_DIR}")
 find_package(OpenGL REQUIRED)
 
 set(SOURCE_FILES
-	src/application.cpp
-	src/window.cpp
-	src/util/color.cpp
-	src/cg_file_handler.cpp
 	src/account_model.cpp
+	src/application.cpp
+	src/cg_file_handler.cpp
 	src/transaction.cpp
 	src/transaction_filter.cpp
 	src/transaction_model.cpp
 	src/transaction_page.cpp
 	src/transaction_table.cpp
+	src/window.cpp
+	src/util/color.cpp
 	src/util/random_generator.cpp
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/imgui.cpp"
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/backends/imgui_impl_sdl3.cpp"

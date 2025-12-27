@@ -118,7 +118,7 @@ std::string string_input(const char* label, const char* hint, const std::string&
 {
 	std::array<char, 1024> input;
 	std::snprintf(input.data(), input.size(), "%s", text.c_str());
-	ImGui::InputTextWithHint(label, hint, input.data(), 1024);
+	ImGui::InputTextWithHint(label, hint, input.data(), input.size());
 	return std::string(input.data(), strnlen(input.data(), input.size()));
 }
 

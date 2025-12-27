@@ -1,18 +1,6 @@
 #include "transaction_filter.hpp"
 #include "transaction.hpp"
-
-bool contains_substring_case_insensitive(const std::string& text, const std::string& substring)
-{
-	auto it = std::search(
-		text.begin(), text.end(),
-		substring.begin(), substring.end(),
-		[](char a, char b) {
-			return std::tolower((unsigned char)a)
-			== std::tolower((unsigned char)b);
-		}
-	);
-	return it != text.end();
-}
+#include "util/utils.hpp"
 
 bool TransactionFilter::check(const Transaction& transaction) const
 {
