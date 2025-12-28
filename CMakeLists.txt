@@ -14,6 +14,8 @@ set(SOURCE_FILES
 	src/account_model.cpp
 	src/application.cpp
 	src/cg_file_handler.cpp
+	src/dialogs.cpp
+	src/inputs.cpp
 	src/transaction.cpp
 	src/transaction_filter.cpp
 	src/transaction_model.cpp

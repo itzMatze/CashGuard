@@ -226,11 +226,13 @@ void TransactionGroup::add_transaction(const Transaction& transaction)
 	int32_t index = 0;
 	while (index < transactions.size() && transaction < transactions[index]) index++;
 	transactions.insert(transactions.begin() + index, transaction);
+	update_amount();
 }
 
 void TransactionGroup::remove_transaction(int32_t index)
 {
 	transactions.erase(transactions.begin() + index);
+	update_amount();
 }
 
 void TransactionGroup::set_transaction(int32_t index, const Transaction& transaction)
@@ -247,6 +249,12 @@ const std::vector<Transaction>& TransactionGroup::get_transactions() const
 std::string TransactionGroup::to_string() const
 {
 	return Transaction::to_string() + "Transaction Group";
+}
+
+void TransactionGroup::update_amount()
+{
+	amount.value = 0;
+	for (const Transaction& transaction : transactions) amount.value += transaction.amount.value;
 }
 
 bool operator==(const TransactionGroup& a, const TransactionGroup& b)

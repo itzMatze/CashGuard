@@ -73,6 +73,7 @@ public:
 	void remove_transaction(int32_t index);
 	const std::vector<Transaction>& get_transactions() const;
 	std::string to_string() const override;
+	void update_amount();
 
 private:
 	std::vector<Transaction> transactions;
