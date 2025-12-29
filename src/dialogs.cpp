@@ -6,15 +6,29 @@ void TransactionDialog::init(const TransactionModel& transaction_model, const Tr
 {
 	this->transaction = transaction;
 	date_input.init(transaction.date);
-	description_input.init(transaction.description);
+	description_input.init(transaction_model.get_unique_value_list(TransactionFieldNames::Description), transaction.description);
 	amount_input.init(transaction.amount);
 	category_dropdown.init(transaction_model.get_category_names(), transaction.category);
 }
 
-DialogResult TransactionDialog::draw(const std::string& label)
+DialogResult TransactionDialog::draw(const std::string& label, const TransactionModel& transaction_model)
 {
 	if (date_input.draw("##TransactionDialogDate")) transaction.date = date_input.get_result();
-	if (description_input.draw("##TransactionDialogDescription", "Description")) transaction.description = description_input.get_result();
+	if (description_input.draw("##TransactionDialogDescription", "Description"))
+	{
+		transaction.description = description_input.get_result();
+		for (const std::shared_ptr<Transaction> t : transaction_model.get_unfiltered_transactions())
+		{
+			if (transaction.description == t->description)
+			{
+				transaction.amount = t->amount;
+				amount_input.update(transaction.amount);
+				transaction.category = t->category;
+				category_dropdown.update(transaction.category);
+				break;
+			}
+		}
+	}
 	if (amount_input.draw("##TransactionDialogAmount")) transaction.amount = amount_input.get_result();
 	if (category_dropdown.draw("##TransactionDialogCategory")) transaction.category = category_dropdown.get_result_string();
 	if (ImGui::Button("OK##TransactionDialog")) return DialogResult::Accept;
@@ -32,7 +46,7 @@ void TransactionGroupDialog::init(const TransactionModel& transaction_model, con
 {
 	this->transaction_group = transaction_group;
 	date_input.init(transaction_group.date);
-	description_input.init(transaction_group.description);
+	description_input.init(transaction_model.get_unique_value_list(TransactionFieldNames::Description), transaction_group.description);
 	category_dropdown.init(transaction_model.get_category_names(), transaction_group.category);
 }
 
@@ -42,7 +56,19 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	ImGui::Text(" %s", transaction_group.amount.to_string_view().c_str());
 	ImGui::PopFont();
 	if (date_input.draw("##TransactionGroupDialogDate")) transaction_group.date = date_input.get_result();
-	if (description_input.draw("##TransactionGroupDialogDescription", "Description")) transaction_group.description = description_input.get_result();
+	if (description_input.draw("##TransactionGroupDialogDescription", "Description"))
+	{
+		transaction_group.description = description_input.get_result();
+		for (const std::shared_ptr<Transaction> t : transaction_model.get_unfiltered_transactions())
+		{
+			if (transaction_group.description == t->description)
+			{
+				transaction_group.category = t->category;
+				category_dropdown.update(transaction_group.category);
+				break;
+			}
+		}
+	}
 	if (category_dropdown.draw("##TransactionGroupDialogCategory")) transaction_group.category = category_dropdown.get_result_string();
 	ImGui::SeparatorText("Transactions");
 	draw_transaction_table(transaction_model);
@@ -59,7 +85,7 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	}
 	if (ImGui::BeginPopupModal("Transaction Add##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		DialogResult result = member_dialog.draw("Member Transaction Dialog");
+		DialogResult result = member_dialog.draw("Member Transaction Dialog", transaction_model);
 		if (result == DialogResult::Accept)
 		{
 			Transaction new_transaction = member_dialog.get_transaction();
@@ -82,7 +108,7 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	}
 	if (ImGui::BeginPopupModal("Transaction Edit##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		DialogResult result = member_dialog.draw("Member Transaction Dialog");
+		DialogResult result = member_dialog.draw("Member Transaction Dialog", transaction_model);
 		if (result == DialogResult::Accept)
 		{
 			Transaction new_transaction = member_dialog.get_transaction();

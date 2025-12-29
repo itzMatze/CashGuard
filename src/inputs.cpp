@@ -1,6 +1,7 @@
 #include "inputs.hpp"
 #include "imgui.h"
 #include "util/log.hpp"
+#include "util/utils.hpp"
 
 bool lost_focus(bool has_focus, bool& had_focus)
 {
@@ -32,6 +33,11 @@ void StringInput::init(const std::string& initial_text)
 	focused = false;
 }
 
+void StringInput::update(const std::string& new_text)
+{
+	std::snprintf(buffer.data(), buffer.size(), "%s", new_text.c_str());
+}
+
 bool StringInput::draw(const std::string& label, const char* hint)
 {
 	ImGui::InputTextWithHint(label.c_str(), hint, buffer.data(), buffer.size());
@@ -49,6 +55,13 @@ void DateInput::init(const Date& initial_date)
 	month = uint32_t(initial_date.month());
 	year = int32_t(initial_date.year());
 	focused = false;
+}
+
+void DateInput::update(const Date& new_date)
+{
+	day = uint32_t(new_date.day());
+	month = uint32_t(new_date.month());
+	year = int32_t(new_date.year());
 }
 
 bool DateInput::draw(const std::string& label, const char* hint)
@@ -88,6 +101,11 @@ void AmountInput::init(const Amount& initial_amount)
 	input.init(initial_amount.to_string_view());
 }
 
+void AmountInput::update(const Amount& new_amount)
+{
+	input.update(new_amount.to_string_view());
+}
+
 bool AmountInput::draw(const std::string& label, const char* hint)
 {
 	return input.draw(label);
@@ -124,6 +142,18 @@ void Dropdown::init(const std::vector<std::string>& options, const std::string& 
 	init(options);
 }
 
+void Dropdown::update(const std::string& new_selected_option)
+{
+	for (int32_t i = 0; i < options.size(); i++)
+	{
+		if (options[i] == new_selected_option)
+		{
+			current = i;
+			return;
+		}
+	}
+}
+
 bool Dropdown::draw(const std::string& label, const char* hint)
 {
 	const bool current_valid = (current >= 0 && current < options.size());
@@ -155,4 +185,93 @@ std::string Dropdown::get_result_string()
 	CG_ASSERT(current >= 0 && current < options.size(), "Invalid current element!");
 	if (current < 0 || current >= options.size()) return std::string();
 	return options[current];
+}
+
+int32_t input_callback(ImGuiInputTextCallbackData* data)
+{
+	int32_t* p_selected_index = (int32_t*)(data->UserData);
+	if (ImGui::IsKeyDown(ImGuiKey_UpArrow))
+	{
+		(*p_selected_index)--;
+		return 1;
+	}
+	else if (ImGui::IsKeyDown(ImGuiKey_DownArrow))
+	{
+		(*p_selected_index)++;
+		return 1;
+	}
+	return 0;
+}
+
+void CompletionInput::init(const std::vector<std::string>& completion_items, const std::string& initial_text)
+{
+	this->completion_items.clear();
+	filtered_completion_items.clear();
+	std::snprintf(buffer.data(), buffer.size(), "%s", initial_text.c_str());
+	focused = false;
+	filtered_completion_items.reserve(result_count);
+	for (const std::string& item : completion_items) this->completion_items.push_back(item);
+	update_filter();
+}
+
+bool CompletionInput::draw(const std::string& label, const char* hint)
+{
+	ImVec2 input_pos = ImGui::GetCursorScreenPos();
+	int32_t local_selected_index = selected_index;
+	bool input_changed = ImGui::InputTextWithHint(label.c_str(), hint, buffer.data(), buffer.size(), ImGuiInputTextFlags_CallbackHistory, &input_callback, (void*)(&local_selected_index));
+	selected_index = std::max(std::min(local_selected_index, int32_t(filtered_completion_items.size()) - 1), -1);
+	bool is_input_focused = ImGui::IsItemFocused();
+
+	if (input_changed)
+	{
+		timer.restart();
+		is_open = true;
+		is_filter_updated = false;
+		selected_index = -1;
+	}
+
+	if (lost_focus(is_input_focused, focused) && !filtered_completion_items.empty())
+	{
+		if (selected_index != -1) std::snprintf(buffer.data(), buffer.size(), "%s", filtered_completion_items[selected_index].c_str());
+		is_open = false;
+		return true;
+	}
+
+	if (is_open)
+	{
+		// get the size of the input box to match the popup width
+		ImVec2 input_size = ImGui::GetItemRectSize();
+		ImGui::SetNextWindowPos(ImVec2(input_pos.x, input_pos.y + input_size.y));
+		ImGui::SetNextWindowSize(ImVec2(input_size.x, 0.0f));
+		ImGui::BeginTooltip();
+		if (timer.elapsed() > filter_delay && !is_filter_updated) update_filter();
+
+		for (int32_t i = 0; i < filtered_completion_items.size(); i++)
+		{
+			bool is_selected = (selected_index == i);
+			if (is_selected) ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "%s", filtered_completion_items[i].c_str());
+			else ImGui::Text("%s", filtered_completion_items[i].c_str());
+		}
+
+		if (filtered_completion_items.empty()) ImGui::TextDisabled("No results");
+		if (!is_input_focused && !ImGui::IsWindowFocused()) is_open = false;
+		ImGui::EndTooltip();
+	}
+	return false;
+}
+
+std::string CompletionInput::get_result()
+{
+	return std::string(buffer.data(), strnlen(buffer.data(), buffer.size()));
+}
+
+void CompletionInput::update_filter()
+{
+	std::string current_text(buffer.data(), strnlen(buffer.data(), buffer.size()));
+	filtered_completion_items.clear();
+	for (int32_t i = 0; i < completion_items.size() && filtered_completion_items.size() < result_count; i++)
+	{
+		if (current_text.empty() || contains_substring_case_insensitive(completion_items[i], current_text)) filtered_completion_items.push_back(completion_items[i]);
+	}
+	is_filter_updated = true;
 }

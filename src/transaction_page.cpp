@@ -1,6 +1,5 @@
 #include "transaction_page.hpp"
 #include "account_model.hpp"
-#include "imgui_internal.h"
 #include "transaction_model.hpp"
 #include "util/random_generator.hpp"
 
@@ -29,7 +28,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	}
 	if (ImGui::BeginPopupModal("Transaction Add##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		DialogResult result = transaction_dialog.draw("Transaction Dialog");
+		DialogResult result = transaction_dialog.draw("Transaction Dialog", transaction_model);
 		if (result == DialogResult::Accept)
 		{
 			Transaction new_transaction = transaction_dialog.get_transaction();
@@ -97,7 +96,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	}
 	if (ImGui::BeginPopupModal("Transaction Edit##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		DialogResult result = transaction_dialog.draw("Transaction Dialog");
+		DialogResult result = transaction_dialog.draw("Transaction Dialog", transaction_model);
 		if (result == DialogResult::Accept)
 		{
 			Transaction new_transaction = transaction_dialog.get_transaction();

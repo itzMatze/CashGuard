@@ -1,7 +1,6 @@
 #pragma once
 
 #include "dialogs.hpp"
-#include "imgui.h"
 #include "transaction_table.hpp"
 
 class TransactionModel;
