@@ -101,7 +101,6 @@ void Window::new_frame()
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
 	ImGuiWindowFlags flags =
 		ImGuiWindowFlags_NoTitleBar |
@@ -116,7 +115,7 @@ void Window::new_frame()
 
 void Window::end_frame()
 {
-	ImGui::PopStyleVar(3);
+	ImGui::PopStyleVar(2);
 	ImGui::End();
 	ImGui::Render();
 	glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
