@@ -10,11 +10,11 @@ class TransactionModel
 public:
 	TransactionModel() = default;
 	int32_t count() const;
-	const std::shared_ptr<Transaction> at(int32_t index) const;
-	void add(const std::shared_ptr<Transaction> transaction);
+	const std::shared_ptr<const Transaction> at(int32_t index) const;
+	void add(const std::shared_ptr<const Transaction> transaction);
 	void remove(int32_t index);
-	void set(int32_t index, const std::shared_ptr<Transaction> transaction);
-	const std::vector<std::shared_ptr<Transaction>>& get_unfiltered_transactions() const;
+	void set(int32_t index, const std::shared_ptr<const Transaction> transaction);
+	const std::vector<std::shared_ptr<const Transaction>>& get_unfiltered_transactions() const;
 	void clear();
 	void set_filter_active(bool active);
 	void set_filter(const TransactionFilter& new_filter);
@@ -33,10 +33,10 @@ public:
 private:
 	std::vector<std::string> category_names;
 	std::unordered_map<std::string, Color> category_colors;
-	std::vector<std::shared_ptr<Transaction>> transactions;
-	std::vector<std::shared_ptr<Transaction>> filtered_transactions;
+	std::vector<std::shared_ptr<const Transaction>> transactions;
+	std::vector<std::shared_ptr<const Transaction>> filtered_transactions;
 	TransactionFilter filter;
 
-	int32_t get_transaction_index(std::shared_ptr<Transaction> transaction);
+	int32_t get_transaction_index(std::shared_ptr<const Transaction> transaction);
 	void reset();
 };

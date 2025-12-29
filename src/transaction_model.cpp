@@ -9,12 +9,12 @@ int32_t TransactionModel::count() const
 	return filtered_transactions.size();
 }
 
-const std::shared_ptr<Transaction> TransactionModel::at(int32_t index) const
+const std::shared_ptr<const Transaction> TransactionModel::at(int32_t index) const
 {
 	return filtered_transactions[index];
 }
 
-void TransactionModel::add(const std::shared_ptr<Transaction> transaction)
+void TransactionModel::add(const std::shared_ptr<const Transaction> transaction)
 {
 	int32_t index = 0;
 	while (index < transactions.size() && *transaction < *transactions[index]) index++;
@@ -31,13 +31,13 @@ void TransactionModel::remove(int32_t index)
 	filtered_transactions.erase(filtered_transactions.begin() + index);
 }
 
-void TransactionModel::set(int32_t index, const std::shared_ptr<Transaction> transaction)
+void TransactionModel::set(int32_t index, const std::shared_ptr<const Transaction> transaction)
 {
 	remove(index);
 	add(transaction);
 }
 
-const std::vector<std::shared_ptr<Transaction>>& TransactionModel::get_unfiltered_transactions() const
+const std::vector<std::shared_ptr<const Transaction>>& TransactionModel::get_unfiltered_transactions() const
 {
 	return transactions;
 }
@@ -78,7 +78,7 @@ bool TransactionModel::is_empty() const
 std::vector<std::string> TransactionModel::get_unique_value_list(const std::string& field_name) const
 {
 	std::set<std::string> unique_values;
-	for (const std::shared_ptr<Transaction> transaction : transactions) unique_values.emplace(transaction->get_field(field_name));
+	for (const std::shared_ptr<const Transaction> transaction : transactions) unique_values.emplace(transaction->get_field(field_name));
 	std::vector<std::string> values;
 	for (const std::string& value : unique_values) values.push_back(value);
 	return values;
@@ -114,12 +114,6 @@ const std::unordered_map<std::string, Color>& TransactionModel::get_category_col
 	return category_colors;
 }
 
-void TransactionModel::set_categories(const std::vector<std::string>& categoryNames, const std::unordered_map<std::string, Color>& categoryColors)
-{
-	this->category_names = categoryNames;
-	this->category_colors = categoryColors;
-}
-
 Amount TransactionModel::get_filtered_total_amount() const
 {
 	int32_t total_amount = 0;
@@ -130,11 +124,11 @@ Amount TransactionModel::get_filtered_total_amount() const
 Amount TransactionModel::get_global_total_amount() const
 {
 	int32_t total_amount = 0;
-	for (std::shared_ptr<const Transaction> t : transactions) total_amount += t->amount.value;
+	for (const std::shared_ptr<const Transaction> t : transactions) total_amount += t->amount.value;
 	return Amount(total_amount);
 }
 
-int32_t TransactionModel::get_transaction_index(std::shared_ptr<Transaction> transaction)
+int32_t TransactionModel::get_transaction_index(std::shared_ptr<const Transaction> transaction)
 {
 	for (uint32_t i = 0; i < transactions.size(); i++) if (transactions.at(i) == transaction) return i;
 	return transactions.size();
@@ -142,9 +136,9 @@ int32_t TransactionModel::get_transaction_index(std::shared_ptr<Transaction> tra
 
 void TransactionModel::reset()
 {
-	std::vector<std::shared_ptr<Transaction>> transactions_copy(transactions);
+	std::vector<std::shared_ptr<const Transaction>> transactions_copy(transactions);
 	clear();
-	for (std::shared_ptr<Transaction> transaction : transactions_copy)
+	for (std::shared_ptr<const Transaction> transaction : transactions_copy)
 	{
 		add(transaction);
 	}

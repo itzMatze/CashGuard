@@ -69,8 +69,8 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	// Edit
 	if (ImGui::Button("Edit", button_size) && row_valid)
 	{
-		const std::shared_ptr<Transaction> transaction = transaction_model.at(row_index);
-		if (const std::shared_ptr<TransactionGroup> transaction_group = std::dynamic_pointer_cast<TransactionGroup>(transaction))
+		const std::shared_ptr<const Transaction> transaction = transaction_model.at(row_index);
+		if (const std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
 		{
 			transaction_group_dialog.init(transaction_model, *transaction_group);
 			ImGui::OpenPopup("Transaction Group Edit##Dialog");

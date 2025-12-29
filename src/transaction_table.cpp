@@ -29,7 +29,7 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 			for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
 			{
 				ImGui::TableNextRow();
-				const std::shared_ptr<Transaction> transaction = transaction_model.at(row);
+				const std::shared_ptr<const Transaction> transaction = transaction_model.at(row);
 				ImU32 background_color = IM_COL32(0, 0, 0, 255);
 				const uint32_t intensity = std::min(uint64_t(std::abs(transaction->amount.value)) / 40ull + 20ull, 255ull);
 				if (transaction->amount.is_negative()) background_color = IM_COL32(intensity, 0, 0, 150);
@@ -53,7 +53,7 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 					else ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
 				}
 				ImGui::TableSetColumnIndex(field_names.size());
-				ImGui::Text("%s", std::dynamic_pointer_cast<TransactionGroup>(transaction_model.at(row)) ? "x" : " ");
+				ImGui::Text("%s", std::dynamic_pointer_cast<const TransactionGroup>(transaction_model.at(row)) ? "x" : " ");
 				if (selected || hovered)
 				{
 					ImGuiTable* table = ImGui::GetCurrentTable();
