@@ -2,6 +2,7 @@
 
 #include "fonts/Roboto_Medium.h"
 #include "imgui.h"
+#include "implot.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 #define SDL_MAIN_HANDLED
@@ -47,6 +48,7 @@ bool Window::construct(const std::string& title)
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImPlot::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui::StyleColorsDark();
@@ -70,6 +72,7 @@ void Window::destruct()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
+	ImPlot::DestroyContext();
 
 	SDL_GL_DestroyContext(gl_context);
 	SDL_DestroyWindow(window);

@@ -3,18 +3,32 @@
 #include "transaction_model.hpp"
 #include "util/random_generator.hpp"
 
+void TransactionPage::init(TransactionModel& transaction_model, AccountModel& account_model)
+{
+	small_total_amount_graph.update_data(transaction_model);
+}
+
+constexpr float graph_relative_height = 0.2f;
+constexpr float table_relative_height = 0.75f;
+constexpr float buttons_relative_height = 1.0f - graph_relative_height - table_relative_height;
+
 void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
 {
 	const int32_t row_index = transaction_table.get_selected_row();
 	const bool row_valid = row_index > -1 && row_index < transaction_model.count();
 	ImGui::PushFont(NULL, 64.0f);
-	available_space.y -= ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemInnerSpacing.y * 2.0f;
+	// center text vertically
+	float cursor_pos_y = ImGui::GetCursorPosY();
+	const float text_height = ImGui::GetFrameHeight();
+	ImGui::SetCursorPosY((available_space.y * graph_relative_height - text_height) / 2.0f);
 	ImGui::Text(" %s €", transaction_model.get_filtered_total_amount().to_string().c_str());
 	ImGui::PopFont();
-	constexpr float table_relative_height = 0.95f;
+	ImGui::SameLine();
+	ImGui::SetCursorPosY(cursor_pos_y);
+	small_total_amount_graph.draw(ImVec2(-1.0f, available_space.y * graph_relative_height));
 	transaction_table.draw(ImVec2(available_space.x, available_space.y * table_relative_height), transaction_model);
 	constexpr int32_t button_count = 5;
-	ImVec2 button_size(available_space.x * (1.0f / float(button_count)) - ImGui::GetStyle().ItemInnerSpacing.x * float(button_count - 1) / float(button_count), available_space.y * (1.0f - table_relative_height));
+	ImVec2 button_size(available_space.x * (1.0f / float(button_count)) - ImGui::GetStyle().ItemInnerSpacing.x * float(button_count - 1) / float(button_count), available_space.y * buttons_relative_height);
 	constexpr ImVec4 button_color(0.0f, 0.4f, 0.4f, 1.0f);
 	ImGui::PushStyleColor(ImGuiCol_Button, button_color);
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(button_color.x + 0.1f, button_color.y + 0.1f, button_color.z + 0.1f, button_color.w));

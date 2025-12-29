@@ -37,6 +37,7 @@ int32_t Application::run()
 {
 	Window window;
 	if (!window.construct("CashGuard")) return 1;
+	transaction_page.init(transaction_model, account_model);
 	bool quit = false;
 	SDL_Event event;
 	while (!quit)

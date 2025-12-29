@@ -15,6 +15,7 @@ set(SOURCE_FILES
 	src/application.cpp
 	src/cg_file_handler.cpp
 	src/dialogs.cpp
+	src/graphs.cpp
 	src/inputs.cpp
 	src/transaction.cpp
 	src/transaction_filter.cpp
@@ -30,6 +31,8 @@ set(SOURCE_FILES
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/imgui_draw.cpp"
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/imgui_widgets.cpp"
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/imgui_tables.cpp"
+	"${PROJECT_SOURCE_DIR}/dependencies/implot/implot.cpp"
+	"${PROJECT_SOURCE_DIR}/dependencies/implot/implot_items.cpp"
 )
 
 add_executable(CashGuard src/main.cpp ${SOURCE_FILES})
@@ -38,6 +41,7 @@ target_include_directories(CashGuard PRIVATE
 	"${PROJECT_SOURCE_DIR}/include"
 	"${PROJECT_SOURCE_DIR}/dependencies/"
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/"
+	"${PROJECT_SOURCE_DIR}/dependencies/implot/"
 	"${SDL3_DIR}/include/"
 	"${SPDLOG_DIR}/include")
 
