@@ -1,5 +1,6 @@
 #pragma once
 
+#include "account_model.hpp"
 #include "inputs.hpp"
 #include "transaction_model.hpp"
 
@@ -43,4 +44,19 @@ private:
 	int32_t selected_group_row = 0;
 
 	void draw_transaction_table(const TransactionModel& transaction_model);
+};
+
+class AccountsDialog
+{
+public:
+	void init(AccountModel& account_model, int64_t transaction_total_amount);
+	void draw(AccountModel& account_model);
+
+private:
+	StringInput name_input;
+	AmountInput amount_input;
+	int64_t transaction_total_amount;
+	int64_t account_total_amount;
+	int32_t selected_row;
+	int32_t opened_row;
 };

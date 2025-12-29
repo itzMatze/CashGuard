@@ -124,5 +124,22 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 		if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
+	ImGui::SameLine();
+
+	// Accounts
+	ImVec4 account_button_color(0.0f, 0.7f, 0.0f, 1.0f);
+	const int64_t account_total_amount = account_model.get_total_amount().value;
+	const int64_t transaction_total_amount = transaction_model.get_global_total_amount().value;
+	if (account_total_amount != transaction_total_amount) account_button_color = ImVec4(0.7f, 0.0f, 0.0f, 1.0f);
+	ImGui::PushStyleColor(ImGuiCol_Button, account_button_color);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(account_button_color.x + 0.1f, account_button_color.y + 0.1f, account_button_color.z + 0.1f, account_button_color.w));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(account_button_color.x - 0.1f, account_button_color.y - 0.1f, account_button_color.z - 0.1f, account_button_color.w));
+	if (ImGui::Button("Accounts", button_size))
+	{
+		accounts_dialog.init(account_model, transaction_total_amount);
+		ImGui::OpenPopup("Accounts##Dialog");
+	}
+	ImGui::PopStyleColor(3);
+	if (ImGui::BeginPopupModal("Accounts##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) accounts_dialog.draw(account_model);
 	ImGui::PopStyleColor(3);
 }

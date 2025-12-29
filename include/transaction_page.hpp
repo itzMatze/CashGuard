@@ -17,4 +17,5 @@ private:
 	TransactionTable transaction_table;
 	TransactionDialog transaction_dialog;
 	TransactionGroupDialog transaction_group_dialog;
+	AccountsDialog accounts_dialog;
 };

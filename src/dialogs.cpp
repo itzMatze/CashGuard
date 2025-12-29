@@ -180,3 +180,109 @@ void TransactionGroupDialog::draw_transaction_table(const TransactionModel& tran
 	ImGui::PopStyleColor(3);
 	ImGui::PopStyleVar();
 }
+
+void AccountsDialog::init(AccountModel& account_model, int64_t transaction_total_amount)
+{
+	this->transaction_total_amount = transaction_total_amount;
+	account_total_amount = account_model.get_total_amount().value;
+	selected_row = -1;
+	opened_row = -1;
+}
+
+void AccountsDialog::draw(AccountModel& account_model)
+{
+	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImGui::GetStyle().CellPadding);
+	const float row_height = ImGui::GetFrameHeight();
+	constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
+	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
+
+	ImGui::PushFont(NULL, 32.0f);
+	if (account_total_amount == transaction_total_amount) ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Accounts match!");
+	else ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Accounts don't match! Difference: %s", Amount(account_total_amount - transaction_total_amount).to_string_view().c_str());
+	ImGui::PopFont();
+	if (ImGui::BeginTable("Accounts", 3, flags))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
+		ImGui::TableSetupColumn("##Index", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn("Amount", ImGuiTableColumnFlags_None);
+		ImGui::TableHeadersRow();
+		for (int32_t row = 0; row < account_model.count(); row++)
+		{
+			Account& account = account_model.at(row);
+			ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
+			ImGui::TableSetColumnIndex(0);
+			// set up selection and highlighting
+			bool selected = (row == selected_row);
+			const bool is_edited = row == opened_row && opened_row == selected_row;
+			std::array<char, 32> label;
+			std::snprintf(label.data(), label.size(), "%u", row + 1);
+			ImGui::AlignTextToFramePadding();
+			if (ImGui::Selectable(label.data(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_DontClosePopups))
+			{
+				selected_row = row;
+				opened_row = -1;
+			}
+			bool hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+			{
+				opened_row = row;
+				name_input.init(account_model.at(opened_row).name);
+				amount_input.init(account_model.at(opened_row).amount);
+			}
+			ImGui::TableSetColumnIndex(1);
+			if (is_edited)
+			{
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (name_input.draw("##AccountName", "Name")) account_model.at(opened_row).name = name_input.get_result();
+			}
+			else
+			{
+				ImGui::AlignTextToFramePadding();
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
+				ImGui::Text("%s", account.name.c_str());
+			}
+			ImGui::TableSetColumnIndex(2);
+			if (is_edited)
+			{
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (amount_input.draw("##AccountAmount", "Amount"))
+				{
+					account_model.at(opened_row).amount = amount_input.get_result();
+					account_total_amount = account_model.get_total_amount().value;
+				}
+			}
+			else
+			{
+				ImGui::AlignTextToFramePadding();
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
+				ImGui::Text("%s", account.amount.to_string_view().c_str());
+			}
+			if (selected || hovered)
+			{
+				ImU32 highlight_color = IM_COL32(0, 255, 255, 128);
+				if (selected) highlight_color = IM_COL32(0, 255, 255, 255);
+				ImGuiTable* table = ImGui::GetCurrentTable();
+				ImVec2 min(ImGui::TableGetCellBgRect(table, 0).Min);
+				// last column is the group column which is not contained in field_names
+				ImVec2 max(ImGui::TableGetCellBgRect(table, 2).Max);
+				constexpr float border_thickness = 4.0f;
+				ImDrawList* dl = ImGui::GetWindowDrawList();
+				dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, max.y), highlight_color, 0.0f, 0, border_thickness);
+			}
+		}
+		ImGui::EndTable();
+	}
+	ImGui::PopStyleColor(3);
+	ImGui::PopStyleVar(2);
+	if (ImGui::Button("Add##AccountsDialog")) account_model.add(Account());
+	ImGui::SameLine();
+	if (ImGui::Button("Remove##AccountsDialog")) account_model.remove(selected_row);
+	ImGui::SameLine();
+	if (ImGui::Button("Close##AccountsDialog")) ImGui::CloseCurrentPopup();
+	ImGui::EndPopup();
+}
