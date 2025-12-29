@@ -27,7 +27,6 @@ public:
 	void add_category(const std::string& name, const Color& color);
 	const std::vector<std::string>& get_category_names() const;
 	const std::unordered_map<std::string, Color>& get_category_colors() const;
-	void set_categories(const std::vector<std::string>& category_names, const std::unordered_map<std::string, Color>& category_colors);
 	Amount get_filtered_total_amount() const;
 	Amount get_global_total_amount() const;
 

@@ -51,7 +51,7 @@ bool CGFileHandler::load_from_file(const std::string& file_path, TransactionMode
 		return false;
 	}
 
-	transaction_model.add_category("None", Color());
+	transaction_model.add_category("", Color());
 	for (const auto& rj_category : doc["Categories"].GetArray()) transaction_model.add_category(rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));
 	for (const auto& rj_account : doc["Accounts"].GetArray())
 	{
@@ -112,7 +112,7 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 	json_categories.SetArray();
 	for (const std::string& category : transaction_model.get_category_names())
 	{
-		if (category == "None") continue;
+		if (category.empty()) continue;
 		rapidjson::Value json_object;
 		json_object.SetObject();
 		{

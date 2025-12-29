@@ -11,7 +11,7 @@ public:
 
 	Date date_min = to_date(Clock::now()) - std::chrono::years(80);
 	Date date_max = to_date(Clock::now()) + std::chrono::years(1);
-	std::string category = "None";
+	std::string category = "";
 	Amount amount_min = std::numeric_limits<int64_t>::min();
 	Amount amount_max = std::numeric_limits<int64_t>::max();
 	std::string search_phrase = "";

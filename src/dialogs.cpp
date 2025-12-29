@@ -18,24 +18,21 @@ DialogResult TransactionDialog::draw(const std::string& label, const Transaction
 	{
 		transaction.description = description_input.get_result();
 		const bool amount_empty = transaction.amount.value == 0;
-		const bool category_empty = transaction.category.empty() || transaction.category == "None";
+		const bool category_empty = transaction.category.empty();
 		if (amount_empty || category_empty)
 		{
-			for (const std::shared_ptr<Transaction> t : transaction_model.get_unfiltered_transactions())
+			std::shared_ptr<const Transaction> matching_transaction;
+			if (transaction_model.get_auto_complete_transaction(transaction.description, matching_transaction))
 			{
-				if (transaction.description == t->description)
+				if (amount_empty)
 				{
-					if (amount_empty)
-					{
-						transaction.amount = t->amount;
-						amount_input.update(transaction.amount);
-					}
-					if (category_empty)
-					{
-						transaction.category = t->category;
-						category_dropdown.update(transaction.category);
-					}
-					break;
+					transaction.amount = matching_transaction->amount;
+					amount_input.update(transaction.amount);
+				}
+				if (category_empty)
+				{
+					transaction.category = matching_transaction->category;
+					category_dropdown.update(transaction.category);
 				}
 			}
 		}
@@ -70,16 +67,16 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	if (description_input.draw("##TransactionGroupDialogDescription", "Description"))
 	{
 		transaction_group.description = description_input.get_result();
-		const bool category_empty = transaction_group.category.empty() || transaction_group.category == "None";
+		const bool category_empty = transaction_group.category.empty();
 		if (category_empty)
 		{
-			for (const std::shared_ptr<Transaction> t : transaction_model.get_unfiltered_transactions())
+			std::shared_ptr<const Transaction> matching_transaction;
+			if (transaction_model.get_auto_complete_transaction(transaction_group.description, matching_transaction))
 			{
-				if (transaction_group.description == t->description)
+				if (category_empty)
 				{
-					transaction_group.category = t->category;
+					transaction_group.category = matching_transaction->category;
 					category_dropdown.update(transaction_group.category);
-					break;
 				}
 			}
 		}
