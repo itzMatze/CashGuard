@@ -160,15 +160,25 @@ bool Dropdown::draw(const std::string& label, const char* hint)
 	bool changed = false;
 	if (ImGui::BeginCombo(label.c_str(), (current_valid ? options[current].c_str() : "")))
 	{
+		if (ImGui::IsWindowAppearing())
+		{
+			ImGui::SetKeyboardFocusHere();
+			filter.Clear();
+		}
+		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_F);
+		filter.Draw("##Filter", -FLT_MIN);
 		for (int i = 0; i < options.size(); ++i)
 		{
-			bool selected = (i == current);
-			if (ImGui::Selectable((options[i] + "##" + std::to_string(i)).c_str(), selected))
+			if (filter.PassFilter(options[i].c_str()))
 			{
-				changed = true;
-				current = i;
+				bool selected = (i == current);
+				if (ImGui::Selectable((options[i] + "##" + std::to_string(i)).c_str(), selected))
+				{
+					changed = true;
+					current = i;
+				}
+				if (selected) ImGui::SetItemDefaultFocus();
 			}
-			if (selected) ImGui::SetItemDefaultFocus();
 		}
 		ImGui::EndCombo();
 	}

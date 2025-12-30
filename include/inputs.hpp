@@ -1,5 +1,6 @@
 #pragma once
 
+#include "imgui.h"
 #include "transaction.hpp"
 #include "util/timer.hpp"
 #include <array>
@@ -61,6 +62,7 @@ public:
 
 private:
 	std::vector<std::string> options;
+	ImGuiTextFilter filter;
 	int32_t current;
 	bool focused;
 };
