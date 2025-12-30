@@ -23,12 +23,14 @@ void TransactionModel::add(const std::shared_ptr<const Transaction> transaction)
 	index = 0;
 	while (index < filtered_transactions.size() && *transaction < *filtered_transactions[index]) index++;
 	filtered_transactions.insert(filtered_transactions.begin() + index, transaction);
+	dirty = true;
 }
 
 void TransactionModel::remove(int32_t index)
 {
 	transactions.erase(transactions.begin() + get_transaction_index(filtered_transactions.at(index)));
 	filtered_transactions.erase(filtered_transactions.begin() + index);
+	dirty = true;
 }
 
 void TransactionModel::set(int32_t index, const std::shared_ptr<const Transaction> transaction)
@@ -46,18 +48,19 @@ void TransactionModel::clear()
 {
 	transactions.clear();
 	filtered_transactions.clear();
+	dirty = true;
 }
 
 void TransactionModel::set_filter_active(bool active)
 {
 	filter.active = active;
-	reset();
+	reapply_filter();
 }
 
 void TransactionModel::set_filter(const TransactionFilter& filter)
 {
 	this->filter = filter;
-	reset();
+	reapply_filter();
 }
 
 const TransactionFilter& TransactionModel::get_filter() const
@@ -102,6 +105,7 @@ void TransactionModel::add_category(const std::string& name, const Color& color)
 {
 	category_names.push_back(name);
 	category_colors.emplace(name, color);
+	dirty = true;
 }
 
 const std::vector<std::string>& TransactionModel::get_category_names() const
@@ -128,13 +132,13 @@ Amount TransactionModel::get_global_total_amount() const
 	return Amount(total_amount);
 }
 
-int32_t TransactionModel::get_transaction_index(std::shared_ptr<const Transaction> transaction)
+int32_t TransactionModel::get_transaction_index(std::shared_ptr<const Transaction> transaction) const
 {
 	for (uint32_t i = 0; i < transactions.size(); i++) if (transactions.at(i) == transaction) return i;
 	return transactions.size();
 }
 
-void TransactionModel::reset()
+void TransactionModel::reapply_filter()
 {
 	std::vector<std::shared_ptr<const Transaction>> transactions_copy(transactions);
 	clear();

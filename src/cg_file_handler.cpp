@@ -85,6 +85,7 @@ bool CGFileHandler::load_from_file(const std::string& file_path, TransactionMode
 			transaction_model.add(std::make_shared<Transaction>(transaction));
 		}
 	}
+	transaction_model.dirty = false;
 	return true;
 }
 
@@ -207,5 +208,6 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 	out_file << output;
 	out_file.close();
 	cglog::debug("Wrote to \"{}\"", file_path);
+	transaction_model.dirty = false;
 	return true;
 }

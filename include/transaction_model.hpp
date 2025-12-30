@@ -30,6 +30,8 @@ public:
 	Amount get_filtered_total_amount() const;
 	Amount get_global_total_amount() const;
 
+	mutable bool dirty = false;
+
 private:
 	std::vector<std::string> category_names;
 	std::unordered_map<std::string, Color> category_colors;
@@ -37,6 +39,6 @@ private:
 	std::vector<std::shared_ptr<const Transaction>> filtered_transactions;
 	TransactionFilter filter;
 
-	int32_t get_transaction_index(std::shared_ptr<const Transaction> transaction);
-	void reset();
+	int32_t get_transaction_index(std::shared_ptr<const Transaction> transaction) const;
+	void reapply_filter();
 };

@@ -52,6 +52,11 @@ int32_t Application::run()
 			if (event.type == SDL_EVENT_QUIT) quit = true;
 			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == window.get_id()) quit = true;
 		}
+		if (transaction_model.dirty)
+		{
+			if (!cg_file_handler.save_to_file(file_path, transaction_model, account_model)) cglog::error("Failed to save file \"{}\".", file_path);
+			else transaction_model.dirty = false;
+		}
 	}
 	window.destruct();
 	if (!cg_file_handler.save_to_file(file_path, transaction_model, account_model))
