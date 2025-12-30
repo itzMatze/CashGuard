@@ -3,12 +3,12 @@
 #include "imgui.h"
 #include "transaction_model.hpp"
 
-class SmallTotalAmountGraph
+class TotalAmountGraph
 {
 public:
-	SmallTotalAmountGraph() = default;
+	TotalAmountGraph() = default;
 	void update_data(const TransactionModel& transaction_model);
-	void draw(ImVec2 available_space);
+	void draw_small_graph(ImVec2 available_space);
 
 private:
 	std::vector<double> time_points;

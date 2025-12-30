@@ -15,7 +15,7 @@ public:
 	void draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model);
 
 private:
-	SmallTotalAmountGraph small_total_amount_graph;
+	TotalAmountGraph total_amount_graph;
 	TransactionTable transaction_table;
 	TransactionDialog transaction_dialog;
 	TransactionGroupDialog transaction_group_dialog;

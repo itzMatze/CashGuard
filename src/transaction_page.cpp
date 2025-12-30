@@ -5,7 +5,7 @@
 
 void TransactionPage::init(TransactionModel& transaction_model, AccountModel& account_model)
 {
-	small_total_amount_graph.update_data(transaction_model);
+	total_amount_graph.update_data(transaction_model);
 }
 
 constexpr float graph_relative_height = 0.2f;
@@ -25,7 +25,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	ImGui::PopFont();
 	ImGui::SameLine();
 	ImGui::SetCursorPosY(cursor_pos_y);
-	small_total_amount_graph.draw(ImVec2(-1.0f, available_space.y * graph_relative_height));
+	total_amount_graph.draw_small_graph(ImVec2(-1.0f, available_space.y * graph_relative_height));
 	transaction_table.draw(ImVec2(available_space.x, available_space.y * table_relative_height - ImGui::GetStyle().ItemSpacing.y), transaction_model);
 	constexpr int32_t button_count = 5;
 	ImVec2 button_size(available_space.x * (1.0f / float(button_count)) - ImGui::GetStyle().ItemSpacing.x * float(button_count - 1) / float(button_count), available_space.y * buttons_relative_height - ImGui::GetStyle().ItemSpacing.y);
