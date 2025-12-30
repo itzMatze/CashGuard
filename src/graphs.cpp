@@ -34,17 +34,6 @@ void SmallTotalAmountGraph::update_data(const TransactionModel& transaction_mode
 	// make sure the min and max amount are visible
 	min_amount -= (std::abs(min_amount) * 0.05f);
 	max_amount += (std::abs(max_amount) * 0.05f);
-
-	// set up labels
-	Date current_date = to_date(Clock::now());
-	std::chrono::year_month current_month_date = current_date.year() / current_date.month();
-	for (int32_t i = 11; i >= 0; i--)
-	{
-		Date first_day{(current_month_date - std::chrono::months{i}) / std::chrono::day{1}};
-		std::chrono::sys_seconds tp{std::chrono::sys_days{first_day}};
-		month_time_points.push_back(tp.time_since_epoch().count());
-		month_labels.push_back(std::format("{:%B}", tp));
-	}
 }
 
 void SmallTotalAmountGraph::draw(ImVec2 available_space)
@@ -63,12 +52,16 @@ void SmallTotalAmountGraph::draw(ImVec2 available_space)
 		ImPlot::PopStyleColor();
 		// draw labels
 		ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-		for (int32_t i = 0; i < month_time_points.size(); i++)
+		Date current_date = to_date(Clock::now());
+		std::chrono::year_month current_month_date = current_date.year() / current_date.month();
+		for (int32_t i = 11; i >= 0; i--)
 		{
-			double x = month_time_points[i];
+			Date first_day{(current_month_date - std::chrono::months{i}) / std::chrono::day{1}};
+			std::chrono::sys_seconds tp{std::chrono::sys_days{first_day}};
+			double x = tp.time_since_epoch().count();
 			double y = min_amount;
 			ImVec2 screen_pos = ImPlot::PlotToPixels(x, y);
-			draw_list->AddText(ImVec2(screen_pos.x + 2, screen_pos.y), IM_COL32(255, 255, 255, 255), month_labels[i].c_str());
+			draw_list->AddText(ImVec2(screen_pos.x + 2, screen_pos.y), IM_COL32(255, 255, 255, 255), std::format("{:%B}", tp).c_str());
 		}
 		ImPlot::EndPlot();
 	}

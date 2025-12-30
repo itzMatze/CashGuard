@@ -13,8 +13,6 @@ public:
 private:
 	std::vector<double> time_points;
 	std::vector<double> data_points;
-	std::vector<double> month_time_points;
-	std::vector<std::string> month_labels;
 	double min_amount;
 	double max_amount;
 	int64_t unix_seconds_now;
