@@ -35,6 +35,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(button_color.x - 0.1f, button_color.y - 0.1f, button_color.z - 0.1f, button_color.w));
 
 	// Add
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
 	if (ImGui::Button("Add", button_size))
 	{
 		transaction_dialog.init(transaction_model);
@@ -58,6 +59,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	ImGui::SameLine();
 
 	// Add Group
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_G);
 	if (ImGui::Button("Add Group", button_size))
 	{
 		transaction_group_dialog.init(transaction_model);
@@ -81,6 +83,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	ImGui::SameLine();
 
 	// Edit
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_E);
 	if (ImGui::Button("Edit", button_size) && row_valid)
 	{
 		const std::shared_ptr<const Transaction> transaction = transaction_model.at(row_index);
@@ -124,16 +127,19 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	ImGui::SameLine();
 
 	// Remove
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
 	if (ImGui::Button("Remove", button_size) && row_valid) ImGui::OpenPopup("Transaction Remove##Dialog");
 	if (ImGui::BeginPopupModal("Transaction Remove##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::Text("Remove transaction with id %zu?", transaction_model.at(row_index)->id);
+		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
 		if (ImGui::Button("OK"))
 		{
 			transaction_model.remove(row_index);
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
+		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
 		if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
@@ -147,6 +153,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	ImGui::PushStyleColor(ImGuiCol_Button, account_button_color);
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(account_button_color.x + 0.1f, account_button_color.y + 0.1f, account_button_color.z + 0.1f, account_button_color.w));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(account_button_color.x - 0.1f, account_button_color.y - 0.1f, account_button_color.z - 0.1f, account_button_color.w));
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_A);
 	if (ImGui::Button("Accounts", button_size))
 	{
 		accounts_dialog.init(account_model, transaction_total_amount);

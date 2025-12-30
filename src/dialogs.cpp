@@ -39,8 +39,10 @@ DialogResult TransactionDialog::draw(const std::string& label, const Transaction
 	}
 	if (amount_input.draw("##TransactionDialogAmount")) transaction.amount = amount_input.get_result();
 	if (category_dropdown.draw("##TransactionDialogCategory")) transaction.category = category_dropdown.get_result_string();
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
 	if (ImGui::Button("OK##TransactionDialog")) return DialogResult::Accept;
 	ImGui::SameLine();
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
 	if (ImGui::Button("Cancel##TransactionDialog")) return DialogResult::Cancel;
 	return DialogResult::None;
 }
@@ -87,6 +89,7 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	const bool row_valid = selected_group_row > -1 && selected_group_row < transaction_group.get_transactions().size();
 
 	// Add
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
 	if (ImGui::Button("Add##TransactionGroupDialog"))
 	{
 		Transaction new_transaction = Transaction();
@@ -113,6 +116,7 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	ImGui::SameLine();
 
 	// Edit
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_E);
 	if (ImGui::Button("Edit##TransactionGroupDialog") && row_valid)
 	{
 		member_dialog.init(transaction_model, transaction_group.get_transactions()[selected_group_row]);
@@ -134,21 +138,26 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	ImGui::SameLine();
 
 	// Remove
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
 	if (ImGui::Button("Remove##TransactionGroupDialog") && row_valid) ImGui::OpenPopup("Transaction Remove##MemberDialog");
 	if (ImGui::BeginPopupModal("Transaction Remove##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::Text("Remove transaction with id %zu?", transaction_group.get_transactions()[selected_group_row].id);
+		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
 		if (ImGui::Button("OK##TransactionGroupDialogRemove"))
 		{
 			transaction_group.remove_transaction(selected_group_row);
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
+		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
 		if (ImGui::Button("Cancel##TransactionGroupDialogRemove")) ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
 	if (ImGui::Button("OK##TransactionGroupDialog")) return DialogResult::Accept;
 	ImGui::SameLine();
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
 	if (ImGui::Button("Cancel##TransactionGroupDialog")) return DialogResult::Cancel;
 	return DialogResult::None;
 }
@@ -317,10 +326,13 @@ void AccountsDialog::draw(AccountModel& account_model)
 	}
 	ImGui::PopStyleColor(3);
 	ImGui::PopStyleVar(2);
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_A);
 	if (ImGui::Button("Add##AccountsDialog")) account_model.add(Account());
 	ImGui::SameLine();
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
 	if (ImGui::Button("Remove##AccountsDialog")) account_model.remove(selected_row);
 	ImGui::SameLine();
+	ImGui::SetNextItemShortcut(ImGuiKey_Escape);
 	if (ImGui::Button("Close##AccountsDialog")) ImGui::CloseCurrentPopup();
 	ImGui::EndPopup();
 }
