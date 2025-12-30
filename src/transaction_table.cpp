@@ -5,7 +5,7 @@
 void TransactionTable::draw(ImVec2 available_space, const TransactionModel& transaction_model)
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
-	constexpr ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
+	constexpr ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
@@ -53,6 +53,7 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 					else ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
 				}
 				ImGui::TableSetColumnIndex(field_names.size());
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
 				ImGui::Text("%s", std::dynamic_pointer_cast<const TransactionGroup>(transaction_model.at(row)) ? "x" : " ");
 				if (selected || hovered)
 				{
