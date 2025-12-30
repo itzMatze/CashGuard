@@ -158,12 +158,12 @@ bool Dropdown::draw(const std::string& label, const char* hint)
 {
 	const bool current_valid = (current >= 0 && current < options.size());
 	bool changed = false;
-	if (ImGui::BeginCombo("##Category", (current_valid ? options[current].c_str() : "")))
+	if (ImGui::BeginCombo(label.c_str(), (current_valid ? options[current].c_str() : "")))
 	{
 		for (int i = 0; i < options.size(); ++i)
 		{
 			bool selected = (i == current);
-			if (ImGui::Selectable(options[i].c_str(), selected))
+			if (ImGui::Selectable((options[i] + "##" + std::to_string(i)).c_str(), selected))
 			{
 				changed = true;
 				current = i;
@@ -230,9 +230,9 @@ bool CompletionInput::draw(const std::string& label, const char* hint)
 		selected_index = -1;
 	}
 
-	if (lost_focus(is_input_focused, focused) && !filtered_completion_items.empty())
+	if (lost_focus(is_input_focused, focused))
 	{
-		if (selected_index != -1) std::snprintf(buffer.data(), buffer.size(), "%s", filtered_completion_items[selected_index].c_str());
+		if (selected_index != -1 && !filtered_completion_items.empty()) std::snprintf(buffer.data(), buffer.size(), "%s", filtered_completion_items[selected_index].c_str());
 		is_open = false;
 		return true;
 	}
