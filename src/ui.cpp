@@ -1,26 +1,53 @@
-#include "transaction_page.hpp"
+#include "ui.hpp"
 #include "account_model.hpp"
 #include "transaction_model.hpp"
 #include "util/random_generator.hpp"
 
-void TransactionPage::init(TransactionModel& transaction_model, AccountModel& account_model)
+void UI::init(TransactionModel& transaction_model, AccountModel& account_model)
 {
 	total_amount_graph.update_data(transaction_model);
 }
 
-constexpr float graph_relative_height = 0.2f;
-constexpr float table_relative_height = 0.75f;
-constexpr float buttons_relative_height = 1.0f - graph_relative_height - table_relative_height;
-
-void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
+void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
 {
+	static constexpr ImVec4 button_color(0.0f, 0.4f, 0.4f, 1.0f);
+	ImGui::PushStyleColor(ImGuiCol_Button, button_color);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(button_color.x + 0.2f, button_color.y + 0.2f, button_color.z + 0.2f, button_color.w));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(button_color.x + 0.2f, button_color.y + 0.2f, button_color.z + 0.2f, button_color.w));
+	ImGui::PushStyleColor(ImGuiCol_Tab, button_color);
+	ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(button_color.x + 0.2f, button_color.y + 0.2f, button_color.z + 0.2f, button_color.w));
+	ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(button_color.x + 0.2f, button_color.y + 0.2f, button_color.z + 0.2f, button_color.w));
+	available_space.y -= ImGui::GetFrameHeightWithSpacing();
+	if (ImGui::BeginTabBar("Main Tabs"))
+	{
+		if (ImGui::BeginTabItem("Transactions"))
+		{
+			draw_transaction_tab(available_space, transaction_model, account_model);
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Graph"))
+		{
+			draw_graph_tab(available_space, transaction_model, account_model);
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+	ImGui::PopStyleColor(6);
+}
+
+void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
+{
+	static constexpr float graph_relative_height = 0.2f;
+	static constexpr float table_relative_height = 0.75f;
+	static constexpr float buttons_relative_height = 1.0f - graph_relative_height - table_relative_height;
+
 	const int32_t row_index = transaction_table.get_selected_row();
 	const bool row_valid = row_index > -1 && row_index < transaction_model.count();
 	ImGui::PushFont(NULL, 64.0f);
 	// center text vertically
-	float cursor_pos_y = ImGui::GetCursorPosY();
 	const float text_height = ImGui::GetFrameHeight();
-	ImGui::SetCursorPosY((available_space.y * graph_relative_height - text_height) / 2.0f);
+	float cursor_pos_y = ImGui::GetCursorPosY();
+	ImGui::SetCursorPosY(cursor_pos_y + (available_space.y * graph_relative_height - text_height) / 2.0f);
 	ImGui::Text(" %s", transaction_model.get_total_amount().to_string_view().c_str());
 	ImGui::PopFont();
 	ImGui::SameLine();
@@ -29,10 +56,6 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	transaction_table.draw(ImVec2(available_space.x, available_space.y * table_relative_height - ImGui::GetStyle().ItemSpacing.y), transaction_model);
 	constexpr int32_t button_count = 5;
 	ImVec2 button_size(available_space.x * (1.0f / float(button_count)) - ImGui::GetStyle().ItemSpacing.x * float(button_count - 1) / float(button_count), available_space.y * buttons_relative_height - ImGui::GetStyle().ItemSpacing.y);
-	constexpr ImVec4 button_color(0.0f, 0.4f, 0.4f, 1.0f);
-	ImGui::PushStyleColor(ImGuiCol_Button, button_color);
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(button_color.x + 0.1f, button_color.y + 0.1f, button_color.z + 0.1f, button_color.w));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(button_color.x - 0.1f, button_color.y - 0.1f, button_color.z - 0.1f, button_color.w));
 
 	// Add
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
@@ -156,8 +179,8 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	const int64_t transaction_total_amount = transaction_model.get_total_amount().value;
 	if (account_total_amount != transaction_total_amount) account_button_color = ImVec4(0.7f, 0.0f, 0.0f, 1.0f);
 	ImGui::PushStyleColor(ImGuiCol_Button, account_button_color);
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(account_button_color.x + 0.1f, account_button_color.y + 0.1f, account_button_color.z + 0.1f, account_button_color.w));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(account_button_color.x - 0.1f, account_button_color.y - 0.1f, account_button_color.z - 0.1f, account_button_color.w));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(account_button_color.x + 0.2f, account_button_color.y + 0.2f, account_button_color.z + 0.2f, account_button_color.w));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(account_button_color.x + 0.2f, account_button_color.y + 0.2f, account_button_color.z + 0.2f, account_button_color.w));
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_A);
 	if (ImGui::Button("Accounts", button_size))
 	{
@@ -166,5 +189,9 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	}
 	ImGui::PopStyleColor(3);
 	if (ImGui::BeginPopupModal("Accounts##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) accounts_dialog.draw(account_model);
-	ImGui::PopStyleColor(3);
+}
+
+void UI::draw_graph_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
+{
+	total_amount_graph.draw_small_graph(ImVec2(-1.0f, available_space.y));
 }

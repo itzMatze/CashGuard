@@ -19,8 +19,8 @@ set(SOURCE_FILES
 	src/inputs.cpp
 	src/transaction.cpp
 	src/transaction_model.cpp
-	src/transaction_page.cpp
 	src/transaction_table.cpp
+	src/ui.cpp
 	src/window.cpp
 	src/util/color.cpp
 	src/util/random_generator.cpp

@@ -7,10 +7,10 @@
 class TransactionModel;
 class AccountModel;
 
-class TransactionPage
+class UI
 {
 public:
-	TransactionPage() = default;
+	UI() = default;
 	void init(TransactionModel& transaction_model, AccountModel& account_model);
 	void draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model);
 
@@ -20,4 +20,7 @@ private:
 	TransactionDialog transaction_dialog;
 	TransactionGroupDialog transaction_group_dialog;
 	AccountsDialog accounts_dialog;
+
+	void draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model);
+	void draw_graph_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model);
 };

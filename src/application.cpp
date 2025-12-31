@@ -32,14 +32,14 @@ int32_t Application::run()
 {
 	Window window;
 	if (!window.construct("CashGuard")) return 1;
-	transaction_page.init(transaction_model, account_model);
+	ui.init(transaction_model, account_model);
 	bool quit = false;
 	SDL_Event event;
 	while (!quit)
 	{
 		window.new_frame();
 		ImVec2 available_space = ImGui::GetContentRegionAvail();
-		transaction_page.draw(available_space, transaction_model, account_model);
+		ui.draw(available_space, transaction_model, account_model);
 		window.end_frame();
 		while (SDL_PollEvent(&event))
 		{
