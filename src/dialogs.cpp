@@ -47,8 +47,12 @@ DialogResult TransactionDialog::draw(const std::string& label, const Transaction
 	return DialogResult::None;
 }
 
-Transaction TransactionDialog::get_transaction() const
+Transaction TransactionDialog::get_transaction()
 {
+	transaction.date = date_input.get_result();
+	transaction.description = description_input.get_result();
+	transaction.amount = amount_input.get_result();
+	transaction.category = category_dropdown.get_result_string();
 	return transaction;
 }
 
@@ -162,8 +166,11 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	return DialogResult::None;
 }
 
-TransactionGroup TransactionGroupDialog::get_transaction_group() const
+TransactionGroup TransactionGroupDialog::get_transaction_group()
 {
+	transaction_group.date = date_input.get_result();
+	transaction_group.description = description_input.get_result();
+	transaction_group.category = category_dropdown.get_result_string();
 	return transaction_group;
 }
 

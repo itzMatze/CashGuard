@@ -17,7 +17,7 @@ public:
 	TransactionDialog() = default;
 	void init(const TransactionModel& transaction_model, const Transaction& transaction = Transaction());
 	DialogResult draw(const std::string& label, const TransactionModel& transaction_model);
-	Transaction get_transaction() const;
+	Transaction get_transaction();
 
 private:
 	DateInput date_input;
@@ -33,7 +33,7 @@ public:
 	TransactionGroupDialog() = default;
 	void init(const TransactionModel& transaction_model, const TransactionGroup& transaction_group = TransactionGroup());
 	DialogResult draw(const std::string& label, const TransactionModel& transaction_model);
-	TransactionGroup get_transaction_group() const;
+	TransactionGroup get_transaction_group();
 
 private:
 	TransactionDialog member_dialog;
