@@ -83,7 +83,7 @@ void TotalAmountGraph::draw_small_graph(ImVec2 available_space)
 			Date first_day{(current_month_date - std::chrono::months{i}) / std::chrono::day{1}};
 			std::chrono::sys_seconds tp{std::chrono::sys_days{first_day}};
 			double x = tp.time_since_epoch().count();
-			double y = min_amount;
+			double y = ImPlot::GetPlotLimits().Min().y;
 			ImVec2 screen_pos = ImPlot::PlotToPixels(x, y);
 			draw_list->AddText(ImVec2(screen_pos.x + 2, screen_pos.y), IM_COL32(255, 255, 255, 255), std::format("{:%B}", tp).c_str());
 		}
@@ -91,5 +91,5 @@ void TotalAmountGraph::draw_small_graph(ImVec2 available_space)
 	}
 	ImPlot::PopStyleColor(2);
 	ImPlot::PopStyleVar(2);
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetTextLineHeight());
+	ImGui::Dummy(ImVec2(0.0f, ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.y));
 }
