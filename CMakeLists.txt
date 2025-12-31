@@ -18,7 +18,6 @@ set(SOURCE_FILES
 	src/graphs.cpp
 	src/inputs.cpp
 	src/transaction.cpp
-	src/transaction_filter.cpp
 	src/transaction_model.cpp
 	src/transaction_page.cpp
 	src/transaction_table.cpp

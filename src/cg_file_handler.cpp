@@ -148,7 +148,7 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 
 	rapidjson::Value json_transactions;
 	json_transactions.SetArray();
-	for (const std::shared_ptr<const Transaction> transaction : transaction_model.get_unfiltered_transactions())
+	for (const std::shared_ptr<const Transaction> transaction : transaction_model.get_transactions())
 	{
 		if (std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
 		{

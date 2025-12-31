@@ -137,7 +137,7 @@ std::string Transaction::get_field(const std::string& field_name) const
 {
 	namespace tfn = TransactionFieldNames;
 	if (field_name == tfn::ID) return std::to_string(id);
-	else if (field_name == tfn::Date) return  std::format("{:%d.%m.%Y}", date);
+	else if (field_name == tfn::Date) return std::format("{:%d.%m.%Y}", date);
 	else if (field_name == tfn::Category) return category;
 	else if (field_name == tfn::Amount) return amount.to_string();
 	else if (field_name == tfn::Description) return description;

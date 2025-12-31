@@ -25,11 +25,6 @@ bool Application::init(const std::string& file_path)
 		cglog::error("Failed to load file \"{}\". Exiting.", file_path);
 		return false;
 	}
-	if (!transaction_model.is_empty())
-	{
-		transaction_model.get_filter().date_max = transaction_model.get_unfiltered_transactions().at(0)->date;
-		transaction_model.get_filter().date_min = transaction_model.get_unfiltered_transactions().back()->date;
-	}
 	return true;
 }
 

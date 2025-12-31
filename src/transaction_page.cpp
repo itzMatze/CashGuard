@@ -21,7 +21,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	float cursor_pos_y = ImGui::GetCursorPosY();
 	const float text_height = ImGui::GetFrameHeight();
 	ImGui::SetCursorPosY((available_space.y * graph_relative_height - text_height) / 2.0f);
-	ImGui::Text(" %s", transaction_model.get_filtered_total_amount().to_string_view().c_str());
+	ImGui::Text(" %s", transaction_model.get_total_amount().to_string_view().c_str());
 	ImGui::PopFont();
 	ImGui::SameLine();
 	ImGui::SetCursorPosY(cursor_pos_y);
@@ -148,7 +148,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 	// Accounts
 	ImVec4 account_button_color(0.0f, 0.7f, 0.0f, 1.0f);
 	const int64_t account_total_amount = account_model.get_total_amount().value;
-	const int64_t transaction_total_amount = transaction_model.get_global_total_amount().value;
+	const int64_t transaction_total_amount = transaction_model.get_total_amount().value;
 	if (account_total_amount != transaction_total_amount) account_button_color = ImVec4(0.7f, 0.0f, 0.0f, 1.0f);
 	ImGui::PushStyleColor(ImGuiCol_Button, account_button_color);
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(account_button_color.x + 0.1f, account_button_color.y + 0.1f, account_button_color.z + 0.1f, account_button_color.w));
