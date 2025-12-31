@@ -51,6 +51,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 			new_transaction.added = DateTime(Clock::now());
 			new_transaction.edited = DateTime(Clock::now());
 			transaction_model.add(std::make_shared<Transaction>(new_transaction));
+			total_amount_graph.update_data(transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
 		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
@@ -75,6 +76,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 			new_transaction_group.added = DateTime(Clock::now());
 			new_transaction_group.edited = DateTime(Clock::now());
 			transaction_model.add(std::make_shared<TransactionGroup>(new_transaction_group));
+			total_amount_graph.update_data(transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
 		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
@@ -106,6 +108,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 			TransactionGroup new_transaction_group = transaction_group_dialog.get_transaction_group();
 			new_transaction_group.edited = DateTime(Clock::now());
 			transaction_model.set(row_index, std::make_shared<TransactionGroup>(new_transaction_group));
+			total_amount_graph.update_data(transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
 		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
@@ -119,6 +122,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 			Transaction new_transaction = transaction_dialog.get_transaction();
 			new_transaction.edited = DateTime(Clock::now());
 			transaction_model.set(row_index, std::make_shared<Transaction>(new_transaction));
+			total_amount_graph.update_data(transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
 		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
@@ -136,6 +140,7 @@ void TransactionPage::draw(ImVec2 available_space, TransactionModel& transaction
 		if (ImGui::Button("OK"))
 		{
 			transaction_model.remove(row_index);
+			total_amount_graph.update_data(transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
