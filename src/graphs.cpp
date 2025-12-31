@@ -1,6 +1,7 @@
 #include "graphs.hpp"
 #include "implot.h"
 #include "implot_internal.h"
+#include "util/utils.hpp"
 
 constexpr int64_t year_second_count = 31536000;
 
@@ -35,13 +36,28 @@ void TotalAmountGraph::draw_small_graph(ImVec2 available_space)
 	ImPlot::PushStyleColor(ImPlotCol_AxisBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 	// keep space for custom drawn labels
 	available_space.y -= ImGui::GetTextLineHeight();
-	if (ImPlot::BeginPlot("##Small Total Amount Plot", available_space, ImPlotFlags_NoInputs | ImPlotFlags_NoLegend | ImPlotFlags_NoMenus))
+	if (ImPlot::BeginPlot("##Small Total Amount Plot", available_space, ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText))
 	{
 		ImPlot::SetupAxes("##Time", "##Amount", ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickLabels);
 		ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
 		ImPlot::SetupAxesLimits(double(unix_seconds_now - year_second_count), double(unix_seconds_now), min_amount - std::abs(min_amount) * 0.05f, max_amount + std::abs(max_amount) * 0.05f, ImGuiCond_Always);
 		if (ImPlot::BeginItem("##Small Total Amount Plot Item"))
 		{
+			if (ImPlot::IsPlotHovered())
+			{
+				ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+				// find mouse location index
+				int32_t idx = binary_search_less_equal(time_points.cbegin(), time_points.cend(), int64_t(mouse.x));
+				if (idx != -1)
+				{
+					ImGui::BeginTooltip();
+					std::string date = std::format("{:%d.%m.%Y}", Date(to_date(DateTime{std::chrono::seconds{int64_t(mouse.x)}})));
+					ImGui::Text("%s", date.c_str());
+					ImGui::Text("%s", Amount(int64_t(data_points[idx] * 100.0)).to_string_view().c_str());
+					ImGui::EndTooltip();
+					draw_list->AddCircleFilled(ImVec2(ImPlot::PlotToPixels(mouse.x, data_points[idx])), 6.0f, IM_COL32(255, 0, 0, 255));
+				}
+			}
 			// fit data if requested
 			if (ImPlot::FitThisFrame())
 			{
