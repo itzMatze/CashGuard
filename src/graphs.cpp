@@ -93,3 +93,71 @@ void TotalAmountGraph::draw_small_graph(ImVec2 available_space)
 	ImPlot::PopStyleVar(2);
 	ImGui::Dummy(ImVec2(0.0f, ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.y));
 }
+
+void TotalAmountGraph::draw_large_graph(ImVec2 available_space)
+{
+	static constexpr ImVec4 color(0.0f, 0.4f, 0.4f, 1.0f);
+	ImDrawList* draw_list = ImPlot::GetPlotDrawList();
+	ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0.0f, 0.0f));
+	ImPlot::PushStyleVar(ImPlotStyleVar_LabelPadding, ImVec2(0.0f, 0.0f));
+	ImPlot::PushStyleColor(ImPlotCol_PlotBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+	ImPlot::PushStyleColor(ImPlotCol_AxisBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+	ImPlot::PushStyleColor(ImPlotCol_LegendBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+	ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+	ImPlot::PushStyleColor(ImPlotCol_AxisBgHovered, ImVec4(color.x + 0.2f, color.y + 0.2f, color.z + 0.2f, color.w));
+	ImPlot::PushStyleColor(ImPlotCol_AxisBgActive, ImVec4(color.x + 0.2f, color.y + 0.2f, color.z + 0.2f, color.w));
+	if (ImPlot::BeginPlot("##Total Amount Plot", available_space, ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText))
+	{
+		ImPlot::SetupAxes("##Time", "##Amount", ImPlotAxisFlags_NoLabel, ImPlotAxisFlags_NoLabel);
+		ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+		ImPlot::SetupAxesLimits(double(unix_seconds_now - year_second_count), double(unix_seconds_now), min_amount - std::abs(min_amount) * 0.05f, max_amount + std::abs(max_amount) * 0.05f, ImGuiCond_Once);
+		if (ImPlot::BeginItem("##Total Amount Plot Item"))
+		{
+			if (ImPlot::IsPlotHovered())
+			{
+				ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+				// find mouse location index
+				int32_t idx = binary_search_less_equal(time_points.cbegin(), time_points.cend(), int64_t(mouse.x));
+				if (idx != -1)
+				{
+					ImGui::BeginTooltip();
+					std::string date = std::format("{:%d.%m.%Y}", Date(to_date(DateTime{std::chrono::seconds{int64_t(mouse.x)}})));
+					ImGui::Text("%s", date.c_str());
+					ImGui::Text("%s", Amount(int64_t(data_points[idx] * 100.0)).to_string_view().c_str());
+					ImGui::EndTooltip();
+					draw_list->AddCircleFilled(ImVec2(ImPlot::PlotToPixels(mouse.x, data_points[idx])), 8.0f, IM_COL32(255, 0, 0, 255));
+				}
+			}
+			// fit data if requested
+			if (ImPlot::FitThisFrame())
+			{
+				for (int32_t i = 0; i < time_points.size(); i++)
+				{
+					ImPlot::FitPoint(ImPlotPoint(time_points[i], data_points[i]));
+				}
+			}
+			ImVec2 previous_pos(0.0, 0.0);
+			for (int i = 0; i < time_points.size(); i++)
+			{
+				ImVec2 current_pos(time_points[i], data_points[i]);
+				if (previous_pos.x > 0.0) draw_list->AddLine(ImPlot::PlotToPixels(previous_pos), ImPlot::PlotToPixels(current_pos.x, previous_pos.y), IM_COL32(0, 255, 255, 255), 2.0f);
+				draw_list->AddLine(ImPlot::PlotToPixels(current_pos.x, previous_pos.y), ImPlot::PlotToPixels(current_pos), IM_COL32(0, 255, 255, 255), 2.0f);
+				previous_pos = current_pos;
+			}
+			ImPlot::EndItem();
+		}
+		Date current_date = to_date(Clock::now());
+		std::chrono::year_month current_month_date = current_date.year() / current_date.month();
+		for (int32_t i = 11; i >= 0; i--)
+		{
+			Date first_day{(current_month_date - std::chrono::months{i}) / std::chrono::day{1}};
+			std::chrono::sys_seconds tp{std::chrono::sys_days{first_day}};
+			double x = tp.time_since_epoch().count();
+			double y = ImPlot::GetPlotLimits().Min().y;
+			ImVec2 screen_pos = ImPlot::PlotToPixels(x, y);
+		}
+		ImPlot::EndPlot();
+	}
+	ImPlot::PopStyleColor(6);
+	ImPlot::PopStyleVar(2);
+}

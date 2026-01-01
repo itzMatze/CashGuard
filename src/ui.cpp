@@ -193,5 +193,5 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 
 void UI::draw_graph_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
 {
-	total_amount_graph.draw_small_graph(ImVec2(-1.0f, available_space.y));
+	total_amount_graph.draw_large_graph(ImVec2(-1.0f, available_space.y));
 }

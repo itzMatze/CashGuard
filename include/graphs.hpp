@@ -9,6 +9,7 @@ public:
 	TotalAmountGraph() = default;
 	void update_data(const TransactionModel& transaction_model);
 	void draw_small_graph(ImVec2 available_space);
+	void draw_large_graph(ImVec2 available_space);
 
 private:
 	std::vector<double> time_points;

@@ -1132,8 +1132,8 @@ int FormatDate(const ImPlotTime& t, char* buffer, int size, ImPlotDateFmt fmt, b
     }
     else {
         switch (fmt) {
-            case ImPlotDateFmt_DayMo:   return ImFormatString(buffer, size, "%d/%d", mon, day);
-            case ImPlotDateFmt_DayMoYr: return ImFormatString(buffer, size, "%d/%d/%02d", mon, day, yr);
+            case ImPlotDateFmt_DayMo:   return ImFormatString(buffer, size, "%d.%d", day, mon);
+            case ImPlotDateFmt_DayMoYr: return ImFormatString(buffer, size, "%d.%d.%02d", day, mon, yr);
             case ImPlotDateFmt_MoYr:    return ImFormatString(buffer, size, "%s %d", MONTH_ABRVS[Tm.tm_mon], year);
             case ImPlotDateFmt_Mo:      return ImFormatString(buffer, size, "%s", MONTH_ABRVS[Tm.tm_mon]);
             case ImPlotDateFmt_Yr:      return ImFormatString(buffer, size, "%d", year);
@@ -1173,8 +1173,8 @@ static const ImPlotDateTimeSpec TimeFormatLevel0[ImPlotTimeUnit_COUNT] = {
     ImPlotDateTimeSpec(ImPlotDateFmt_None,  ImPlotTimeFmt_SMs),
     ImPlotDateTimeSpec(ImPlotDateFmt_None,  ImPlotTimeFmt_S),
     ImPlotDateTimeSpec(ImPlotDateFmt_None,  ImPlotTimeFmt_HrMin),
-    ImPlotDateTimeSpec(ImPlotDateFmt_None,  ImPlotTimeFmt_Hr),
     ImPlotDateTimeSpec(ImPlotDateFmt_DayMo, ImPlotTimeFmt_None),
+    ImPlotDateTimeSpec(ImPlotDateFmt_Mo,    ImPlotTimeFmt_None),
     ImPlotDateTimeSpec(ImPlotDateFmt_Mo,    ImPlotTimeFmt_None),
     ImPlotDateTimeSpec(ImPlotDateFmt_Yr,    ImPlotTimeFmt_None)
 };
@@ -1184,8 +1184,8 @@ static const ImPlotDateTimeSpec TimeFormatLevel1[ImPlotTimeUnit_COUNT] = {
     ImPlotDateTimeSpec(ImPlotDateFmt_None,    ImPlotTimeFmt_HrMinS),
     ImPlotDateTimeSpec(ImPlotDateFmt_None,    ImPlotTimeFmt_HrMin),
     ImPlotDateTimeSpec(ImPlotDateFmt_None,    ImPlotTimeFmt_HrMin),
-    ImPlotDateTimeSpec(ImPlotDateFmt_DayMoYr, ImPlotTimeFmt_None),
-    ImPlotDateTimeSpec(ImPlotDateFmt_DayMoYr, ImPlotTimeFmt_None),
+    ImPlotDateTimeSpec(ImPlotDateFmt_MoYr,    ImPlotTimeFmt_None),
+    ImPlotDateTimeSpec(ImPlotDateFmt_MoYr,    ImPlotTimeFmt_None),
     ImPlotDateTimeSpec(ImPlotDateFmt_Yr,      ImPlotTimeFmt_None),
     ImPlotDateTimeSpec(ImPlotDateFmt_Yr,      ImPlotTimeFmt_None)
 };
@@ -1195,8 +1195,8 @@ static const ImPlotDateTimeSpec TimeFormatLevel1First[ImPlotTimeUnit_COUNT] = {
     ImPlotDateTimeSpec(ImPlotDateFmt_DayMoYr, ImPlotTimeFmt_HrMinS),
     ImPlotDateTimeSpec(ImPlotDateFmt_DayMoYr, ImPlotTimeFmt_HrMin),
     ImPlotDateTimeSpec(ImPlotDateFmt_DayMoYr, ImPlotTimeFmt_HrMin),
-    ImPlotDateTimeSpec(ImPlotDateFmt_DayMoYr, ImPlotTimeFmt_None),
-    ImPlotDateTimeSpec(ImPlotDateFmt_DayMoYr, ImPlotTimeFmt_None),
+    ImPlotDateTimeSpec(ImPlotDateFmt_MoYr,      ImPlotTimeFmt_None),
+    ImPlotDateTimeSpec(ImPlotDateFmt_MoYr,      ImPlotTimeFmt_None),
     ImPlotDateTimeSpec(ImPlotDateFmt_Yr,      ImPlotTimeFmt_None),
     ImPlotDateTimeSpec(ImPlotDateFmt_Yr,      ImPlotTimeFmt_None)
 };
@@ -1237,6 +1237,7 @@ void Locator_Time(ImPlotTicker& ticker, const ImPlotRange& range, float pixels, 
     const float max_density = 0.5f;
     // book keeping
     int last_major_offset = -1;
+    int last_minor_offset = -1;
     // formatter data
     Formatter_Time_Data ftd;
     ftd.UserFormatter = formatter;
@@ -1261,7 +1262,7 @@ void Locator_Time(ImPlotTicker& ticker, const ImPlotRange& range, float pixels, 
             if (t1 >= t_min && t1 <= t_max) {
                 // minor level 0 tick
                 ftd.Time = t1; ftd.Spec = fmt0;
-                ticker.AddTick(t1.ToDouble(), true, 0, true, Formatter_Time, &ftd);
+                last_minor_offset = ticker.AddTick(t1.ToDouble(), true, 0, true, Formatter_Time, &ftd).TextOffset;
                 // major level 1 tick
                 ftd.Time = t1; ftd.Spec = last_major_offset < 0 ? fmtf : fmt1;
                 ImPlotTick& tick_maj = ticker.AddTick(t1.ToDouble(), true, 1, true, Formatter_Time, &ftd);
@@ -1277,12 +1278,16 @@ void Locator_Time(ImPlotTicker& ticker, const ImPlotRange& range, float pixels, 
                     float px_to_t2 = (float)((t2 - t12).ToDouble()/range.Size()) * pixels;
                     if (t12 >= t_min && t12 <= t_max) {
                         ftd.Time = t12; ftd.Spec = fmt0;
-                        ticker.AddTick(t12.ToDouble(), false, 0, px_to_t2 >= fmt0_width, Formatter_Time, &ftd);
+                        ImPlotTick& tick_min = ticker.AddTick(t12.ToDouble(), false, 0, true, Formatter_Time, &ftd);
                         if (last_major_offset < 0 && px_to_t2 >= fmt0_width && px_to_t2 >= (fmt1_width + fmtf_width) / 2) {
                             ftd.Time = t12; ftd.Spec = fmtf;
                             ImPlotTick& tick_maj = ticker.AddTick(t12.ToDouble(), true, 1, true, Formatter_Time, &ftd);
                             last_major_offset = tick_maj.TextOffset;
                         }
+                        const char* this_minor = ticker.GetText(tick_min);
+                        if (last_minor_offset >= 0 && TimeLabelSame(ticker.TextBuffer.Buf.Data + last_minor_offset, this_minor))
+                            tick_min.ShowLabel = false;
+                        last_minor_offset = tick_min.TextOffset;
                     }
                     t12 = AddTime(t12, unit0, step);
                 }
