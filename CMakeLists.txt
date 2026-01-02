@@ -13,6 +13,7 @@ find_package(OpenGL REQUIRED)
 set(SOURCE_FILES
 	src/account_model.cpp
 	src/application.cpp
+	src/category_model.cpp
 	src/cg_file_handler.cpp
 	src/dialogs.cpp
 	src/graphs.cpp

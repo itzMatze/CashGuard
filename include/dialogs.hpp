@@ -1,8 +1,10 @@
 #pragma once
 
-#include "account_model.hpp"
 #include "inputs.hpp"
-#include "transaction_model.hpp"
+
+class TransactionModel;
+class AccountModel;
+class CategoryModel;
 
 enum class DialogResult
 {
@@ -15,7 +17,7 @@ class TransactionDialog
 {
 public:
 	TransactionDialog() = default;
-	void init(const TransactionModel& transaction_model, const Transaction& transaction = Transaction());
+	void init(const TransactionModel& transaction_model, const CategoryModel& category_model, const Transaction& transaction = Transaction());
 	DialogResult draw(const std::string& label, const TransactionModel& transaction_model);
 	Transaction get_transaction();
 
@@ -31,8 +33,8 @@ class TransactionGroupDialog
 {
 public:
 	TransactionGroupDialog() = default;
-	void init(const TransactionModel& transaction_model, const TransactionGroup& transaction_group = TransactionGroup());
-	DialogResult draw(const std::string& label, const TransactionModel& transaction_model);
+	void init(const TransactionModel& transaction_model, const CategoryModel& category_model, const TransactionGroup& transaction_group = TransactionGroup());
+	DialogResult draw(const std::string& label, const TransactionModel& transaction_model, const CategoryModel& category_model);
 	TransactionGroup get_transaction_group();
 
 private:
@@ -41,9 +43,9 @@ private:
 	CompletionInput description_input;
 	Dropdown category_dropdown;
 	TransactionGroup transaction_group;
-	int32_t selected_group_row = 0;
+	int32_t selected_group_row = -1;
 
-	void draw_transaction_table(const TransactionModel& transaction_model);
+	void draw_transaction_table(const TransactionModel& transaction_model, const CategoryModel& category_model);
 };
 
 class AccountsDialog

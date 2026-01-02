@@ -1,14 +1,15 @@
 #include "ui.hpp"
 #include "account_model.hpp"
 #include "transaction_model.hpp"
+#include "category_model.hpp"
 #include "util/random_generator.hpp"
 
-void UI::init(TransactionModel& transaction_model, AccountModel& account_model)
+void UI::init(const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
 	total_amount_graph.update_data(transaction_model);
 }
 
-void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
+void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
 {
 	static constexpr ImVec4 button_color(0.0f, 0.4f, 0.4f, 1.0f);
 	ImGui::PushStyleColor(ImGuiCol_Button, button_color);
@@ -22,12 +23,12 @@ void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, Accou
 	{
 		if (ImGui::BeginTabItem("Transactions"))
 		{
-			draw_transaction_tab(available_space, transaction_model, account_model);
+			draw_transaction_tab(available_space, transaction_model, account_model, category_model);
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Graph"))
 		{
-			draw_graph_tab(available_space, transaction_model, account_model);
+			draw_graph_tab(available_space, transaction_model, account_model, category_model);
 			ImGui::EndTabItem();
 		}
 		ImGui::EndTabBar();
@@ -35,14 +36,12 @@ void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, Accou
 	ImGui::PopStyleColor(6);
 }
 
-void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
+void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
 {
 	static constexpr float graph_relative_height = 0.2f;
 	static constexpr float table_relative_height = 0.75f;
 	static constexpr float buttons_relative_height = 1.0f - graph_relative_height - table_relative_height;
 
-	const int32_t row_index = transaction_table.get_selected_row();
-	const bool row_valid = row_index > -1 && row_index < transaction_model.count();
 	ImGui::PushFont(NULL, 64.0f);
 	// center text vertically
 	const float text_height = ImGui::GetFrameHeight();
@@ -53,7 +52,9 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	ImGui::SameLine();
 	ImGui::SetCursorPosY(cursor_pos_y);
 	total_amount_graph.draw_small_graph(ImVec2(-1.0f, available_space.y * graph_relative_height));
-	transaction_table.draw(ImVec2(available_space.x, available_space.y * table_relative_height - ImGui::GetStyle().ItemSpacing.y), transaction_model);
+	transaction_table.draw(ImVec2(available_space.x, available_space.y * table_relative_height - ImGui::GetStyle().ItemSpacing.y), transaction_model, category_model);
+	const int32_t row_index = transaction_table.get_selected_row();
+	const bool row_valid = row_index > -1 && row_index < transaction_model.count() && transaction_table.get_selected_transaction() != nullptr;
 	constexpr int32_t button_count = 5;
 	ImVec2 button_size(available_space.x * (1.0f / float(button_count)) - ImGui::GetStyle().ItemSpacing.x * float(button_count - 1) / float(button_count), available_space.y * buttons_relative_height - ImGui::GetStyle().ItemSpacing.y);
 
@@ -61,7 +62,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
 	if (ImGui::Button("Add", button_size))
 	{
-		transaction_dialog.init(transaction_model);
+		transaction_dialog.init(transaction_model, category_model);
 		ImGui::OpenPopup("Transaction Add##Dialog");
 	}
 	if (ImGui::BeginPopupModal("Transaction Add##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -86,12 +87,12 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_G);
 	if (ImGui::Button("Add Group", button_size))
 	{
-		transaction_group_dialog.init(transaction_model);
+		transaction_group_dialog.init(transaction_model, category_model);
 		ImGui::OpenPopup("Transaction Group Add##Dialog");
 	}
 	if (ImGui::BeginPopupModal("Transaction Group Add##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		DialogResult result = transaction_group_dialog.draw("Transaction Group Dialog", transaction_model);
+		DialogResult result = transaction_group_dialog.draw("Transaction Group Dialog", transaction_model, category_model);
 		if (result == DialogResult::Accept)
 		{
 			TransactionGroup new_transaction_group = transaction_group_dialog.get_transaction_group();
@@ -111,26 +112,26 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_E);
 	if (ImGui::Button("Edit", button_size) && row_valid)
 	{
-		const std::shared_ptr<const Transaction> transaction = transaction_model.at(row_index);
+		const std::shared_ptr<const Transaction> transaction = transaction_table.get_selected_transaction();
 		if (const std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
 		{
-			transaction_group_dialog.init(transaction_model, *transaction_group);
+			transaction_group_dialog.init(transaction_model, category_model, *transaction_group);
 			ImGui::OpenPopup("Transaction Group Edit##Dialog");
 		}
 		else
 		{
-			transaction_dialog.init(transaction_model, *transaction);
+			transaction_dialog.init(transaction_model, category_model, *transaction);
 			ImGui::OpenPopup("Transaction Edit##Dialog");
 		}
 	}
 	if (ImGui::BeginPopupModal("Transaction Group Edit##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		DialogResult result = transaction_group_dialog.draw("Transaction Group Dialog", transaction_model);
+		DialogResult result = transaction_group_dialog.draw("Transaction Group Dialog", transaction_model, category_model);
 		if (result == DialogResult::Accept)
 		{
 			TransactionGroup new_transaction_group = transaction_group_dialog.get_transaction_group();
 			new_transaction_group.edited = DateTime(Clock::now());
-			transaction_model.set(row_index, std::make_shared<TransactionGroup>(new_transaction_group));
+			transaction_model.set(transaction_table.get_selected_transaction(), std::make_shared<TransactionGroup>(new_transaction_group));
 			total_amount_graph.update_data(transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
@@ -144,7 +145,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 		{
 			Transaction new_transaction = transaction_dialog.get_transaction();
 			new_transaction.edited = DateTime(Clock::now());
-			transaction_model.set(row_index, std::make_shared<Transaction>(new_transaction));
+			transaction_model.set(transaction_table.get_selected_transaction(), std::make_shared<Transaction>(new_transaction));
 			total_amount_graph.update_data(transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
@@ -158,11 +159,11 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	if (ImGui::Button("Remove", button_size) && row_valid) ImGui::OpenPopup("Transaction Remove##Dialog");
 	if (ImGui::BeginPopupModal("Transaction Remove##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		ImGui::Text("Remove transaction with id %zu?", transaction_model.at(row_index)->id);
+		ImGui::Text("Remove transaction with id %zu?", transaction_table.get_selected_transaction()->id);
 		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
 		if (ImGui::Button("OK"))
 		{
-			transaction_model.remove(row_index);
+			transaction_model.remove(transaction_table.get_selected_transaction());
 			total_amount_graph.update_data(transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
@@ -191,7 +192,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	if (ImGui::BeginPopupModal("Accounts##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) accounts_dialog.draw(account_model);
 }
 
-void UI::draw_graph_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model)
+void UI::draw_graph_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
 {
 	total_amount_graph.draw_large_graph(ImVec2(-1.0f, available_space.y));
 }

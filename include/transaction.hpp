@@ -61,6 +61,7 @@ public:
 };
 
 bool operator<(const Transaction& a, const Transaction& b);
+bool operator>(const Transaction& a, const Transaction& b);
 bool operator==(const Transaction& a, const Transaction& b);
 
 class TransactionGroup : public Transaction

@@ -208,6 +208,16 @@ bool operator<(const Transaction& a, const Transaction& b)
 	else return a.date < b.date;
 }
 
+bool operator>(const Transaction& a, const Transaction& b)
+{
+	if (a.date == b.date)
+	{
+		if (a.added == b.added) return a.id > b.id;
+		else return a.added > b.added;
+	}
+	else return a.date > b.date;
+}
+
 bool operator==(const Transaction& a, const Transaction& b)
 {
 	std::vector<std::string> fields = Transaction::get_field_names();

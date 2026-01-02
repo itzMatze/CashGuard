@@ -6,13 +6,14 @@
 
 class TransactionModel;
 class AccountModel;
+class CategoryModel;
 
 class UI
 {
 public:
 	UI() = default;
-	void init(TransactionModel& transaction_model, AccountModel& account_model);
-	void draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model);
+	void init(const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model);
+	void draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model);
 
 private:
 	TotalAmountGraph total_amount_graph;
@@ -21,6 +22,6 @@ private:
 	TransactionGroupDialog transaction_group_dialog;
 	AccountsDialog accounts_dialog;
 
-	void draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model);
-	void draw_graph_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model);
+	void draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model);
+	void draw_graph_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model);
 };

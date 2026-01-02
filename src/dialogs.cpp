@@ -1,14 +1,17 @@
 #include "dialogs.hpp"
+#include "account_model.hpp"
+#include "category_model.hpp"
 #include "imgui_internal.h"
+#include "transaction_model.hpp"
 #include "util/random_generator.hpp"
 
-void TransactionDialog::init(const TransactionModel& transaction_model, const Transaction& transaction)
+void TransactionDialog::init(const TransactionModel& transaction_model, const CategoryModel& category_model, const Transaction& transaction)
 {
 	this->transaction = transaction;
 	date_input.init(transaction.date);
 	description_input.init(transaction_model.get_unique_value_list(TransactionFieldNames::Description), transaction.description);
 	amount_input.init(transaction.amount);
-	category_dropdown.init(transaction_model.get_category_names(), transaction.category);
+	category_dropdown.init(category_model.get_names(), transaction.category);
 }
 
 DialogResult TransactionDialog::draw(const std::string& label, const TransactionModel& transaction_model)
@@ -56,15 +59,15 @@ Transaction TransactionDialog::get_transaction()
 	return transaction;
 }
 
-void TransactionGroupDialog::init(const TransactionModel& transaction_model, const TransactionGroup& transaction_group)
+void TransactionGroupDialog::init(const TransactionModel& transaction_model, const CategoryModel& category_model, const TransactionGroup& transaction_group)
 {
 	this->transaction_group = transaction_group;
 	date_input.init(transaction_group.date);
 	description_input.init(transaction_model.get_unique_value_list(TransactionFieldNames::Description), transaction_group.description);
-	category_dropdown.init(transaction_model.get_category_names(), transaction_group.category);
+	category_dropdown.init(category_model.get_names(), transaction_group.category);
 }
 
-DialogResult TransactionGroupDialog::draw(const std::string& label, const TransactionModel& transaction_model)
+DialogResult TransactionGroupDialog::draw(const std::string& label, const TransactionModel& transaction_model, const CategoryModel& category_model)
 {
 	ImGui::PushFont(NULL, 32.0f);
 	ImGui::Text(" %s", transaction_group.amount.to_string_view().c_str());
@@ -89,7 +92,7 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	}
 	if (category_dropdown.draw("##TransactionGroupDialogCategory")) transaction_group.category = category_dropdown.get_result_string();
 	ImGui::SeparatorText("Transactions");
-	draw_transaction_table(transaction_model);
+	draw_transaction_table(transaction_model, category_model);
 	const bool row_valid = selected_group_row > -1 && selected_group_row < transaction_group.get_transactions().size();
 
 	// Add
@@ -99,7 +102,7 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 		Transaction new_transaction = Transaction();
 		new_transaction.category = transaction_group.category;
 		new_transaction.date = transaction_group.date;
-		member_dialog.init(transaction_model, new_transaction);
+		member_dialog.init(transaction_model, category_model, new_transaction);
 		ImGui::OpenPopup("Transaction Add##MemberDialog");
 	}
 	if (ImGui::BeginPopupModal("Transaction Add##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -123,7 +126,7 @@ DialogResult TransactionGroupDialog::draw(const std::string& label, const Transa
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_E);
 	if (ImGui::Button("Edit##TransactionGroupDialog") && row_valid)
 	{
-		member_dialog.init(transaction_model, transaction_group.get_transactions()[selected_group_row]);
+		member_dialog.init(transaction_model, category_model, transaction_group.get_transactions()[selected_group_row]);
 		ImGui::OpenPopup("Transaction Edit##MemberDialog");
 	}
 	if (ImGui::BeginPopupModal("Transaction Edit##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -174,7 +177,7 @@ TransactionGroup TransactionGroupDialog::get_transaction_group()
 	return transaction_group;
 }
 
-void TransactionGroupDialog::draw_transaction_table(const TransactionModel& transaction_model)
+void TransactionGroupDialog::draw_transaction_table(const TransactionModel& transaction_model, const CategoryModel& category_model)
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
 	constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
@@ -205,7 +208,7 @@ void TransactionGroupDialog::draw_transaction_table(const TransactionModel& tran
 			{
 				const std::string& field_name = field_names[column];
 				ImGui::TableSetColumnIndex(column);
-				if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction.category).get_ImU32());
+				if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, category_model.get_colors().at(transaction.category).get_ImU32());
 				else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
 				// set up selection and highlighting
 				if (column == 0)
@@ -267,7 +270,6 @@ void AccountsDialog::draw(AccountModel& account_model)
 		ImGui::TableHeadersRow();
 		for (int32_t row = 0; row < account_model.count(); row++)
 		{
-			Account& account = account_model.at(row);
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
 			ImGui::TableSetColumnIndex(0);
 			// set up selection and highlighting
@@ -292,13 +294,13 @@ void AccountsDialog::draw(AccountModel& account_model)
 			if (is_edited)
 			{
 				ImGui::SetNextItemWidth(-FLT_MIN);
-				if (name_input.draw("##AccountName", "Name")) account_model.at(opened_row).name = name_input.get_result();
+				if (name_input.draw("##AccountName", "Name")) account_model.set_name(opened_row, name_input.get_result());
 			}
 			else
 			{
 				ImGui::AlignTextToFramePadding();
 				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
-				ImGui::Text("%s", account.name.c_str());
+				ImGui::Text("%s", account_model.at(row).name.c_str());
 			}
 			ImGui::TableSetColumnIndex(2);
 			if (is_edited)
@@ -306,7 +308,7 @@ void AccountsDialog::draw(AccountModel& account_model)
 				ImGui::SetNextItemWidth(-FLT_MIN);
 				if (amount_input.draw("##AccountAmount", "Amount"))
 				{
-					account_model.at(opened_row).amount = amount_input.get_result();
+					account_model.set_amount(opened_row, amount_input.get_result());
 					account_total_amount = account_model.get_total_amount().value;
 				}
 			}
@@ -314,7 +316,7 @@ void AccountsDialog::draw(AccountModel& account_model)
 			{
 				ImGui::AlignTextToFramePadding();
 				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
-				ImGui::Text("%s", account.amount.to_string_view().c_str());
+				ImGui::Text("%s", account_model.at(row).amount.to_string_view().c_str());
 			}
 			if (selected || hovered)
 			{

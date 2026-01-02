@@ -1,8 +1,9 @@
 #include "transaction_table.hpp"
+#include "category_model.hpp"
 #include "imgui_internal.h"
 #include "transaction_model.hpp"
 
-void TransactionTable::draw(ImVec2 available_space, const TransactionModel& transaction_model)
+void TransactionTable::draw(ImVec2 available_space, const TransactionModel& transaction_model, const CategoryModel& category_model)
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
 	constexpr ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
@@ -40,13 +41,17 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 				{
 					const std::string& field_name = field_names[column];
 					ImGui::TableSetColumnIndex(column);
-					if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, transaction_model.get_category_colors().at(transaction->category).get_ImU32());
+					if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, category_model.get_colors().at(transaction->category).get_ImU32());
 					else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
 					// set up selection and highlighting
 					if (column == 0)
 					{
 						selected = (row == selected_row);
-						if (ImGui::Selectable(transaction->get_field_view(field_name).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap)) selected_row = row;
+						if (ImGui::Selectable(transaction->get_field_view(field_name).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
+						{
+							selected_row = row;
+							selected_transaction = transaction;
+						}
 						hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 						ImGui::SameLine();
 					}
@@ -64,7 +69,11 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 					constexpr float border_thickness = 4.0f;
 					ImDrawList* dl = ImGui::GetWindowDrawList();
 					ImU32 color = IM_COL32(0, 255, 255, 128);
-					if (selected) color = IM_COL32(0, 255, 255, 255);
+					if (selected)
+					{
+						selected_transaction = transaction;
+						color = IM_COL32(0, 255, 255, 255);
+					}
 					dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, max.y), color, 0.0f, 0, border_thickness);
 				}
 			}
@@ -78,4 +87,9 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 int32_t TransactionTable::get_selected_row() const
 {
 	return selected_row;
+}
+
+std::shared_ptr<const Transaction> TransactionTable::get_selected_transaction() const
+{
+	return selected_transaction;
 }

@@ -28,10 +28,37 @@ void TransactionModel::remove(int32_t index)
 	dirty = true;
 }
 
+int32_t binary_search_index(std::vector<std::shared_ptr<const Transaction>>& transactions, const std::shared_ptr<const Transaction> value)
+{
+	int32_t l = 0;
+	int32_t r = transactions.size() - 1;
+
+	while (l < r)
+	{
+		int32_t m = (l + r) / 2;
+		if (*transactions[m] > *(value)) l = m + 1;
+		else r = m;
+	}
+	return l;
+}
+
+void TransactionModel::remove(const std::shared_ptr<const Transaction> transaction)
+{
+	int32_t index = binary_search_index(transactions, transaction);
+	remove(index);
+	dirty = true;
+}
+
 void TransactionModel::set(int32_t index, const std::shared_ptr<const Transaction> transaction)
 {
 	remove(index);
 	add(transaction);
+}
+
+void TransactionModel::set(const std::shared_ptr<const Transaction> old_transaction, const std::shared_ptr<const Transaction> new_transaction)
+{
+	remove(old_transaction);
+	add(new_transaction);
 }
 
 const std::vector<std::shared_ptr<const Transaction>>& TransactionModel::get_transactions() const
@@ -71,23 +98,6 @@ bool TransactionModel::get_auto_complete_transaction(const std::string& descript
 		}
 	}
 	return false;
-}
-
-void TransactionModel::add_category(const std::string& name, const Color& color)
-{
-	category_names.push_back(name);
-	category_colors.emplace(name, color);
-	dirty = true;
-}
-
-const std::vector<std::string>& TransactionModel::get_category_names() const
-{
-	return category_names;
-}
-
-const std::unordered_map<std::string, Color>& TransactionModel::get_category_colors() const
-{
-	return category_colors;
 }
 
 Amount TransactionModel::get_total_amount() const

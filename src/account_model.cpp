@@ -10,25 +10,35 @@ const Account& AccountModel::at(int32_t index) const
 	return accounts[index];
 }
 
-Account& AccountModel::at(int32_t index)
-{
-	return accounts[index];
-}
-
 void AccountModel::set(int32_t index, const Account& account)
 {
 	accounts[index] = account;
+	dirty = true;
+}
+
+void AccountModel::set_name(int32_t index, const std::string& name)
+{
+	accounts[index].name = name;
+	dirty = true;
+}
+
+void AccountModel::set_amount(int32_t index, const Amount& amount)
+{
+	accounts[index].amount = amount;
+	dirty = true;
 }
 
 void AccountModel::add(const Account& account)
 {
 	accounts.push_back(account);
+	dirty = true;
 }
 
 void AccountModel::remove(int32_t index)
 {
 	if (index < 0 || index >= accounts.size()) return;
 	accounts.erase(accounts.begin() + index);
+	dirty = true;
 }
 
 const std::vector<Account>& AccountModel::get_data() const

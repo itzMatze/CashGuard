@@ -1,4 +1,5 @@
 #pragma once
+#include "category_model.hpp"
 #include "cg_file_handler.hpp"
 #include "ui.hpp"
 #include "transaction_model.hpp"
@@ -16,5 +17,6 @@ private:
 	CGFileHandler cg_file_handler;
 	TransactionModel transaction_model;
 	AccountModel account_model;
+	CategoryModel category_model;
 	UI ui;
 };

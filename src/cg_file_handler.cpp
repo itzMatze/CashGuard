@@ -21,7 +21,7 @@ Transaction parse_transaction(const auto& rj_transaction)
 	return transaction;
 }
 
-bool CGFileHandler::load_from_file(const std::string& file_path, TransactionModel& transaction_model, AccountModel& account_model)
+bool CGFileHandler::load_from_file(const std::string& file_path, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
 {
 	cglog::debug("Loading file \"{}\"", file_path);
 	transaction_model.clear();
@@ -51,8 +51,8 @@ bool CGFileHandler::load_from_file(const std::string& file_path, TransactionMode
 		return false;
 	}
 
-	transaction_model.add_category("", Color());
-	for (const auto& rj_category : doc["Categories"].GetArray()) transaction_model.add_category(rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));
+	category_model.add("", Color());
+	for (const auto& rj_category : doc["Categories"].GetArray()) category_model.add(rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));
 	for (const auto& rj_account : doc["Accounts"].GetArray())
 	{
 		Account account{.name = rj_account["Name"].GetString()};
@@ -86,6 +86,8 @@ bool CGFileHandler::load_from_file(const std::string& file_path, TransactionMode
 		}
 	}
 	transaction_model.dirty = false;
+	account_model.dirty = false;
+	category_model.dirty = false;
 	return true;
 }
 
@@ -101,7 +103,7 @@ void serialize_transaction(const Transaction& transaction, rapidjson::Value& jso
 	}
 }
 
-bool CGFileHandler::save_to_file(const std::string& file_path, const TransactionModel& transaction_model, const AccountModel& account_model)
+bool CGFileHandler::save_to_file(const std::string& file_path, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
 	rapidjson::Document doc;
 	doc.SetObject();
@@ -111,7 +113,7 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 
 	rapidjson::Value json_categories;
 	json_categories.SetArray();
-	for (const std::string& category : transaction_model.get_category_names())
+	for (const std::string& category : category_model.get_names())
 	{
 		if (category.empty()) continue;
 		rapidjson::Value json_object;
@@ -121,7 +123,7 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 			json_object.AddMember("Name", value, allocator);
 		}
 		{
-			rapidjson::Value value(transaction_model.get_category_colors().at(category).to_string().c_str(), allocator);
+			rapidjson::Value value(category_model.get_colors().at(category).to_string().c_str(), allocator);
 			json_object.AddMember("Color", value, allocator);
 		}
 		json_categories.PushBack(json_object, allocator);
@@ -209,5 +211,7 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 	out_file.close();
 	cglog::debug("Wrote to \"{}\"", file_path);
 	transaction_model.dirty = false;
+	account_model.dirty = false;
+	category_model.dirty = false;
 	return true;
 }
