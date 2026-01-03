@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
 project(CashGuard)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 set(SDL3_DIR "${PROJECT_SOURCE_DIR}/dependencies/SDL3")
 set(SPDLOG_DIR "${PROJECT_SOURCE_DIR}/dependencies/spdlog")
