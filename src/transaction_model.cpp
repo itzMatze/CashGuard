@@ -39,12 +39,13 @@ int32_t binary_search_index(std::vector<std::shared_ptr<const Transaction>>& tra
 		if (*transactions[m] > *(value)) l = m + 1;
 		else r = m;
 	}
-	return l;
+	return *transactions[l] == *value ? l : -1;
 }
 
 void TransactionModel::remove(const std::shared_ptr<const Transaction> transaction)
 {
 	int32_t index = binary_search_index(transactions, transaction);
+	if (index == -1) return;
 	remove(index);
 	dirty = true;
 }

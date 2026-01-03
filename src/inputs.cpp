@@ -38,8 +38,9 @@ void StringInput::update(const std::string& new_text)
 	std::snprintf(buffer.data(), buffer.size(), "%s", new_text.c_str());
 }
 
-bool StringInput::draw(const std::string& label, const char* hint)
+bool StringInput::draw(const std::string& label, const char* hint, bool set_focus)
 {
+	if (set_focus) ImGui::SetKeyboardFocusHere();
 	ImGui::InputTextWithHint(label.c_str(), hint, buffer.data(), buffer.size());
 	return lost_focus(ImGui::IsItemFocused(), focused);
 }

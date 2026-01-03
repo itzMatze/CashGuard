@@ -12,7 +12,7 @@ public:
 	StringInput() = default;
 	void init(const std::string& initial_text = "");
 	void update(const std::string& new_text);
-	bool draw(const std::string& label, const char* hint = "");
+	bool draw(const std::string& label, const char* hint = "", bool set_focus = false);
 	std::string get_result();
 
 private:
