@@ -1,4 +1,5 @@
 #include "cg_file_handler.hpp"
+#include <filesystem>
 #include <fstream>
 #include <set>
 #include "transaction_model.hpp"
@@ -6,6 +7,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 #include "util/log.hpp"
+#include "util/random_generator.hpp"
 
 const char* version_string = "0.2.0";
 
@@ -199,16 +201,18 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 	}
 	in_file.close();
 	// write file
-	std::ofstream out_file(file_path);
+	const std::string tmp_file_path = file_path + ".tmp" + std::to_string(uint32_t(rng::random_int32()));
+	std::ofstream out_file(tmp_file_path);
 	if (!out_file.is_open())
 	{
-		cglog::error("Failed to open file \"{}\"", file_path);
+		cglog::error("Failed to open file \"{}\"", tmp_file_path);
 		return false;
 	}
 	std::string output = buffer.GetString();
 	hash = std::hash<std::string>{}(output);
 	out_file << output;
 	out_file.close();
+	std::filesystem::rename(tmp_file_path, file_path);
 	cglog::debug("Wrote to \"{}\"", file_path);
 	transaction_model.dirty = false;
 	account_model.dirty = false;
