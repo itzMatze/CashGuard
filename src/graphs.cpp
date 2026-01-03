@@ -25,6 +25,13 @@ void TotalAmountGraph::update_data(const TransactionModel& transaction_model)
 		min_amount = std::min(min_amount, amount_data);
 		max_amount = std::max(max_amount, amount_data);
 	}
+	if (transaction_model.is_empty())
+	{
+		time_points.push_back(unix_seconds_now);
+		data_points.push_back(0.0);
+		min_amount = 0.0;
+		max_amount = 0.0;
+	}
 }
 
 void TotalAmountGraph::draw_small_graph(ImVec2 available_space)
@@ -56,14 +63,6 @@ void TotalAmountGraph::draw_small_graph(ImVec2 available_space)
 					ImGui::Text("%s", Amount(int64_t(data_points[idx] * 100.0)).to_string_view().c_str());
 					ImGui::EndTooltip();
 					draw_list->AddCircleFilled(ImVec2(ImPlot::PlotToPixels(mouse.x, data_points[idx])), 6.0f, IM_COL32(255, 0, 0, 255));
-				}
-			}
-			// fit data if requested
-			if (ImPlot::FitThisFrame())
-			{
-				for (int32_t i = 0; i < time_points.size(); i++)
-				{
-					ImPlot::FitPoint(ImPlotPoint(time_points[i], data_points[i]));
 				}
 			}
 			ImVec2 previous_pos(0.0, 0.0);
