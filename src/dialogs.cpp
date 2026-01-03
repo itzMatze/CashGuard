@@ -248,9 +248,10 @@ void AccountsDialog::init(AccountModel& account_model, int64_t transaction_total
 
 void AccountsDialog::draw(AccountModel& account_model)
 {
-	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImGui::GetStyle().CellPadding);
-	const float row_height = ImGui::GetFrameHeight();
+	constexpr ImVec2 padding(8.0f, 6.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, padding);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, padding);
+	const float row_height = ImGui::GetFrameHeight() + padding.y * 2.0f;
 	constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
@@ -324,11 +325,10 @@ void AccountsDialog::draw(AccountModel& account_model)
 				if (selected) highlight_color = IM_COL32(0, 255, 255, 255);
 				ImGuiTable* table = ImGui::GetCurrentTable();
 				ImVec2 min(ImGui::TableGetCellBgRect(table, 0).Min);
-				// last column is the group column which is not contained in field_names
 				ImVec2 max(ImGui::TableGetCellBgRect(table, 2).Max);
 				constexpr float border_thickness = 4.0f;
 				ImDrawList* dl = ImGui::GetWindowDrawList();
-				dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, max.y), highlight_color, 0.0f, 0, border_thickness);
+				dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, min.y + row_height), highlight_color, 0.0f, 0, border_thickness);
 			}
 		}
 		ImGui::EndTable();
