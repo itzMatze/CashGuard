@@ -56,10 +56,5 @@ int32_t Application::run()
 		}
 	}
 	window.destruct();
-	if (!cg_file_handler.save_to_file(file_path, transaction_model, account_model, category_model))
-	{
-		cglog::error("Failed to save file \"{}\".", file_path);
-		return 1;
-	}
 	return 0;
 }
