@@ -35,12 +35,15 @@ namespace TransactionFieldNames
 
 using Clock = std::chrono::system_clock;
 using Date = std::chrono::year_month_day;
-std::string to_string(const Date& date);
 using DateTime = Clock::time_point;
-std::string to_string(const DateTime& time_point);
 
-Date to_date(DateTime time_point);
-Date to_date(int32_t day, int32_t month, int32_t year);
+namespace DateUtils
+{
+	std::string to_string(const Date& date);
+	std::string to_string(const DateTime& time_point);
+	Date to_date(DateTime time_point);
+	Date to_date(int32_t day, int32_t month, int32_t year);
+}
 
 class Transaction
 {

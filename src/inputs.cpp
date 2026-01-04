@@ -73,10 +73,10 @@ Date DateInput::get_result()
 {
 	// clamp date
 	month = std::clamp(month, 1, 12);
-	Date new_date = to_date(day, month, year);
+	Date new_date = DateUtils::to_date(day, month, year);
 	std::chrono::year_month_day_last day_last(new_date.year(), std::chrono::month_day_last(new_date.month()));
 	day = std::clamp(day, 1, int32_t(uint32_t(day_last.day())));
-	return to_date(day, month, year);
+	return DateUtils::to_date(day, month, year);
 }
 
 bool DateInput::is_active() const

@@ -101,19 +101,32 @@ bool operator>(const Amount& a, const Amount& b)
 	return a.value > b.value;
 }
 
-Date to_date(DateTime time_point)
+namespace DateUtils
 {
-	return std::chrono::floor<std::chrono::days>(time_point);
-}
+	std::string to_string(const Date& date)
+	{
+		return std::format("{:%d.%m.%Y}", date);
+	}
 
-Date to_date(int32_t day, int32_t month, int32_t year)
-{
-	return Date(std::chrono::year{year}, std::chrono::month{uint32_t(month)}, std::chrono::day{uint32_t(day)});
+	std::string to_string(const DateTime& time_point)
+	{
+		return std::format("{:%d.%m.%Y %H:%M:%S}", std::chrono::time_point_cast<std::chrono::seconds>(time_point));
+	}
+
+	Date to_date(DateTime time_point)
+	{
+		return std::chrono::floor<std::chrono::days>(time_point);
+	}
+
+	Date to_date(int32_t day, int32_t month, int32_t year)
+	{
+		return Date(std::chrono::year{year}, std::chrono::month{uint32_t(month)}, std::chrono::day{uint32_t(day)});
+	}
 }
 
 Transaction::Transaction() :
 	id(0),
-	date(to_date(Clock::now())),
+	date(DateUtils::to_date(Clock::now())),
 	amount(0),
 	description(""),
 	added(Clock::now()),
@@ -137,12 +150,12 @@ std::string Transaction::get_field(const std::string& field_name) const
 {
 	namespace tfn = TransactionFieldNames;
 	if (field_name == tfn::ID) return std::to_string(id);
-	else if (field_name == tfn::Date) return std::format("{:%d.%m.%Y}", date);
+	else if (field_name == tfn::Date) return DateUtils::to_string(date);
 	else if (field_name == tfn::Category) return category;
 	else if (field_name == tfn::Amount) return amount.to_string();
 	else if (field_name == tfn::Description) return description;
-	else if (field_name == tfn::Added) return std::format("{:%d.%m.%Y %H:%M:%S}", std::chrono::time_point_cast<std::chrono::seconds>(added));
-	else if (field_name == tfn::Edited) return std::format("{:%d.%m.%Y %H:%M:%S}", std::chrono::time_point_cast<std::chrono::seconds>(edited));
+	else if (field_name == tfn::Added) return DateUtils::to_string(added);
+	else if (field_name == tfn::Edited) return DateUtils::to_string(edited);
 	else CG_THROW("Invalid transaction field name!");
 }
 
@@ -162,7 +175,7 @@ void Transaction::set_field(const std::string& field_name, const std::string& va
 		std::istringstream iss(value);
 		DateTime date_time;
 		iss >> std::chrono::parse("%d.%m.%Y", date_time);
-		if (!iss.fail()) date = to_date(date_time);
+		if (!iss.fail()) date = DateUtils::to_date(date_time);
 	}
 	else if (field_name == tfn::Category) category = value;
 	else if (field_name == tfn::Amount)
