@@ -3,34 +3,10 @@
 #include "util/log.hpp"
 #include "util/utils.hpp"
 
-bool lost_focus(bool has_focus, bool& had_focus)
-{
-	bool focus_lost;
-	if (has_focus)
-	{
-		had_focus = true;
-		focus_lost = false;
-	}
-	else
-	{
-		if (had_focus)
-		{
-			had_focus = false;
-			focus_lost = true;
-		}
-		else
-		{
-			// never had focus
-			focus_lost = false;
-		}
-	}
-	return focus_lost;
-}
-
 void StringInput::init(const std::string& initial_text)
 {
 	std::snprintf(buffer.data(), buffer.size(), "%s", initial_text.c_str());
-	focused = false;
+	active = false;
 }
 
 void StringInput::update(const std::string& new_text)
@@ -42,7 +18,7 @@ bool StringInput::draw(const std::string& label, const char* hint, bool set_focu
 {
 	if (set_focus) ImGui::SetKeyboardFocusHere();
 	ImGui::InputTextWithHint(label.c_str(), hint, buffer.data(), buffer.size());
-	return lost_focus(ImGui::IsItemFocused(), focused);
+	return lost_active(ImGui::IsItemActive(), active);
 }
 
 std::string StringInput::get_result()
@@ -55,7 +31,7 @@ void DateInput::init(const Date& initial_date)
 	day = uint32_t(initial_date.day());
 	month = uint32_t(initial_date.month());
 	year = int32_t(initial_date.year());
-	focused = false;
+	active = false;
 }
 
 void DateInput::update(const Date& new_date)
@@ -67,24 +43,24 @@ void DateInput::update(const Date& new_date)
 
 bool DateInput::draw(const std::string& label, const char* hint)
 {
-	bool any_has_focus = false;
+	bool any_is_active = false;
 	ImGui::PushItemWidth(50.0f);
 	ImGui::InputInt(std::string(label + "##Day").c_str(), &day, 0, 0);
-	any_has_focus |= ImGui::IsItemFocused();
+	any_is_active |= ImGui::IsItemActive();
 	ImGui::SameLine();
 	ImGui::Text(".");
 	ImGui::SameLine();
 	ImGui::InputInt(std::string(label + "##Month").c_str(), &month, 0, 0);
-	any_has_focus |= ImGui::IsItemFocused();
+	any_is_active |= ImGui::IsItemActive();
 	ImGui::SameLine();
 	ImGui::Text(".");
 	ImGui::SameLine();
 	ImGui::PopItemWidth();
 	ImGui::PushItemWidth(100.0f);
 	ImGui::InputInt(std::string(label + "##Year").c_str(), &year, 0, 0);
-	any_has_focus |= ImGui::IsItemFocused();
+	any_is_active |= ImGui::IsItemActive();
 	ImGui::PopItemWidth();
-	return lost_focus(any_has_focus, focused);
+	return lost_active(any_is_active, active);
 }
 
 Date DateInput::get_result()
@@ -127,7 +103,7 @@ void Dropdown::init(const std::vector<std::string>& options, int32_t initial_opt
 	this->options.reserve(options.size());
 	for (const std::string& option : options) this->options.push_back(option);
 	current = initial_option;
-	focused = false;
+	active = false;
 }
 
 void Dropdown::init(const std::vector<std::string>& options, const std::string& initial_option)
@@ -219,7 +195,7 @@ void CompletionInput::init(const std::vector<std::string>& completion_items, con
 	this->completion_items.clear();
 	filtered_completion_items.clear();
 	std::snprintf(buffer.data(), buffer.size(), "%s", initial_text.c_str());
-	focused = false;
+	active = false;
 	filtered_completion_items.reserve(result_count);
 	for (const std::string& item : completion_items) this->completion_items.push_back(item);
 	update_filter();
@@ -231,7 +207,7 @@ bool CompletionInput::draw(const std::string& label, const char* hint)
 	int32_t local_selected_index = selected_index;
 	bool input_changed = ImGui::InputTextWithHint(label.c_str(), hint, buffer.data(), buffer.size(), ImGuiInputTextFlags_CallbackHistory, &input_callback, (void*)(&local_selected_index));
 	selected_index = std::max(std::min(local_selected_index, int32_t(filtered_completion_items.size()) - 1), -1);
-	bool is_input_focused = ImGui::IsItemFocused();
+	bool is_input_active = ImGui::IsItemActive();
 
 	if (input_changed)
 	{
@@ -241,7 +217,7 @@ bool CompletionInput::draw(const std::string& label, const char* hint)
 		selected_index = -1;
 	}
 
-	if (lost_focus(is_input_focused, focused))
+	if (lost_active(is_input_active, active))
 	{
 		if (selected_index != -1 && !filtered_completion_items.empty()) std::snprintf(buffer.data(), buffer.size(), "%s", filtered_completion_items[selected_index].c_str());
 		is_open = false;
@@ -265,7 +241,7 @@ bool CompletionInput::draw(const std::string& label, const char* hint)
 		}
 
 		if (filtered_completion_items.empty()) ImGui::TextDisabled("No results");
-		if (!is_input_focused && !ImGui::IsWindowFocused()) is_open = false;
+		if (!is_input_active && !ImGui::IsWindowFocused()) is_open = false;
 		ImGui::EndTooltip();
 	}
 	return false;

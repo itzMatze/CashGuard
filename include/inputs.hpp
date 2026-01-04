@@ -6,6 +6,30 @@
 #include <array>
 #include <string>
 
+inline bool lost_active(bool has_active, bool& had_active)
+{
+	bool active_lost;
+	if (has_active)
+	{
+		had_active = true;
+		active_lost = false;
+	}
+	else
+	{
+		if (had_active)
+		{
+			had_active = false;
+			active_lost = true;
+		}
+		else
+		{
+			// never had active
+			active_lost = false;
+		}
+	}
+	return active_lost;
+}
+
 class StringInput
 {
 public:
@@ -17,7 +41,7 @@ public:
 
 private:
 	std::array<char, 1024> buffer;
-	bool focused;
+	bool active;
 };
 
 class DateInput
@@ -33,7 +57,7 @@ private:
 	int32_t day;
 	int32_t month;
 	int32_t year;
-	bool focused;
+	bool active;
 };
 
 class AmountInput
@@ -64,7 +88,7 @@ private:
 	std::vector<std::string> options;
 	ImGuiTextFilter filter;
 	int32_t current;
-	bool focused;
+	bool active;
 };
 
 class CompletionInput
@@ -76,7 +100,7 @@ public:
 
 private:
 	std::array<char, 1024> buffer;
-	bool focused;
+	bool active;
 	std::vector<std::string> completion_items;
 	std::vector<std::string> filtered_completion_items;
 	bool is_filter_updated = false;
