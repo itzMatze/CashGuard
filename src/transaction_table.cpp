@@ -5,7 +5,10 @@
 
 void TransactionTable::draw(ImVec2 available_space, const TransactionModel& transaction_model, const CategoryModel& category_model)
 {
-	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
+	constexpr ImVec2 padding(8.0f, 6.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, padding);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+	const float row_height = ImGui::GetFrameHeight() + padding.y * 2.0f;
 	constexpr ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
@@ -29,7 +32,7 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 		{
 			for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
 			{
-				ImGui::TableNextRow();
+				ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
 				const std::shared_ptr<const Transaction> transaction = transaction_model.at(row);
 				ImU32 background_color = IM_COL32(0, 0, 0, 255);
 				const uint32_t intensity = std::min(uint64_t(std::abs(transaction->amount.value)) / 40ull + 20ull, 255ull);
@@ -68,20 +71,20 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 					ImVec2 max(ImGui::TableGetCellBgRect(table, field_names.size()).Max);
 					constexpr float border_thickness = 4.0f;
 					ImDrawList* dl = ImGui::GetWindowDrawList();
-					ImU32 color = IM_COL32(0, 255, 255, 128);
+					ImU32 highlight_color = IM_COL32(0, 255, 255, 128);
 					if (selected)
 					{
 						selected_transaction = transaction;
-						color = IM_COL32(0, 255, 255, 255);
+						highlight_color = IM_COL32(0, 255, 255, 255);
 					}
-					dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, max.y), color, 0.0f, 0, border_thickness);
+					dl->AddRect(ImVec2(min.x + border_thickness, min.y + border_thickness), ImVec2(max.x - border_thickness, min.y + row_height - border_thickness), highlight_color, 0.0f, 0, border_thickness);
 				}
 			}
 		}
 		ImGui::EndTable();
 	}
 	ImGui::PopStyleColor(3);
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(2);
 }
 
 int32_t TransactionTable::get_selected_row() const

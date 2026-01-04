@@ -179,7 +179,10 @@ TransactionGroup TransactionGroupDialog::get_transaction_group()
 
 void TransactionGroupDialog::draw_transaction_table(const TransactionModel& transaction_model, const CategoryModel& category_model)
 {
-	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 6.0f));
+	constexpr ImVec2 padding(8.0f, 6.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, padding);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+	const float row_height = ImGui::GetFrameHeight() + padding.y * 2.0f;
 	constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
@@ -196,7 +199,7 @@ void TransactionGroupDialog::draw_transaction_table(const TransactionModel& tran
 		ImGui::TableHeadersRow();
 		for (int32_t row = 0; row < transaction_group.get_transactions().size(); row++)
 		{
-			ImGui::TableNextRow(ImGuiTableRowFlags_None);
+			ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
 			const Transaction& transaction = transaction_group.get_transactions()[row];
 			ImU32 background_color = IM_COL32(0, 0, 0, 255);
 			const uint32_t intensity = std::min(uint64_t(std::abs(transaction.amount.value)) / 40ull + 20ull, 255ull);
@@ -229,7 +232,7 @@ void TransactionGroupDialog::draw_transaction_table(const TransactionModel& tran
 				ImVec2 max(ImGui::TableGetCellBgRect(table, field_names.size() - 1).Max);
 				constexpr float border_thickness = 4.0f;
 				ImDrawList* dl = ImGui::GetWindowDrawList();
-				dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, max.y), highlight_color, 0.0f, 0, border_thickness);
+				dl->AddRect(ImVec2(min.x + border_thickness, min.y + border_thickness), ImVec2(max.x - border_thickness, min.y + row_height - border_thickness), highlight_color, 0.0f, 0, border_thickness);
 			}
 		}
 		ImGui::EndTable();
