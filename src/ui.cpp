@@ -7,6 +7,7 @@
 void UI::init(const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
 	total_amount_graph.update_data(transaction_model);
+	transaction_filter.init(category_model);
 	filtered_transaction_model.clear();
 	for (const std::shared_ptr<const Transaction> t : transaction_model.get_transactions())
 	{
