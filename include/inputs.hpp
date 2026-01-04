@@ -38,6 +38,7 @@ public:
 	void update(const std::string& new_text);
 	bool draw(const std::string& label, const char* hint = "", bool set_focus = false);
 	std::string get_result();
+	bool is_active() const;
 
 private:
 	std::array<char, 1024> buffer;
@@ -50,8 +51,9 @@ public:
 	DateInput() = default;
 	void init(const Date& initial_date = Date());
 	void update(const Date& new_date);
-	bool draw(const std::string& label, const char* hint = "");
+	bool draw(const std::string& label, const char* hint = "", bool set_focus = false);
 	Date get_result();
+	bool is_active() const;
 
 private:
 	int32_t day;
@@ -66,8 +68,9 @@ public:
 	AmountInput() = default;
 	void init(const Amount& initial_amount = Amount());
 	void update(const Amount& new_amount);
-	bool draw(const std::string& label, const char* hint = "");
+	bool draw(const std::string& label, const char* hint = "", bool set_focus = false);
 	Amount get_result();
+	bool is_active() const;
 
 private:
 	StringInput input;

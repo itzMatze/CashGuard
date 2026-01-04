@@ -26,6 +26,11 @@ std::string StringInput::get_result()
 	return std::string(buffer.data(), strnlen(buffer.data(), buffer.size()));
 }
 
+bool StringInput::is_active() const
+{
+	return active;
+}
+
 void DateInput::init(const Date& initial_date)
 {
 	day = uint32_t(initial_date.day());
@@ -41,10 +46,11 @@ void DateInput::update(const Date& new_date)
 	year = int32_t(new_date.year());
 }
 
-bool DateInput::draw(const std::string& label, const char* hint)
+bool DateInput::draw(const std::string& label, const char* hint, bool set_focus)
 {
 	bool any_is_active = false;
 	ImGui::PushItemWidth(50.0f);
+	if (set_focus) ImGui::SetKeyboardFocusHere();
 	ImGui::InputInt(std::string(label + "##Day").c_str(), &day, 0, 0);
 	any_is_active |= ImGui::IsItemActive();
 	ImGui::SameLine();
@@ -73,6 +79,11 @@ Date DateInput::get_result()
 	return to_date(day, month, year);
 }
 
+bool DateInput::is_active() const
+{
+	return active;
+}
+
 void AmountInput::init(const Amount& initial_amount)
 {
 	input.init(initial_amount.to_string_view());
@@ -83,9 +94,9 @@ void AmountInput::update(const Amount& new_amount)
 	input.update(new_amount.to_string_view());
 }
 
-bool AmountInput::draw(const std::string& label, const char* hint)
+bool AmountInput::draw(const std::string& label, const char* hint, bool set_focus)
 {
-	return input.draw(label);
+	return input.draw(label, "", set_focus);
 }
 
 Amount AmountInput::get_result()
@@ -95,6 +106,11 @@ Amount AmountInput::get_result()
 	to_amount(result, amount);
 	input.init(amount.to_string_view());
 	return amount;
+}
+
+bool AmountInput::is_active() const
+{
+	return input.is_active();
 }
 
 void Dropdown::init(const std::vector<std::string>& options, int32_t initial_option)
