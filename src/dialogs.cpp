@@ -238,7 +238,7 @@ void TransactionGroupDialog::draw_transaction_table(const TransactionModel& tran
 		ImGui::EndTable();
 	}
 	ImGui::PopStyleColor(3);
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(2);
 }
 
 void AccountsDialog::init(AccountModel& account_model, int64_t transaction_total_amount)
