@@ -14,10 +14,13 @@ void TransactionFilter::init(const CategoryModel& category_model)
 		category_entries.push_back(CategoryEntry(category, category_model.get_colors().at(category), true));
 	}
 	reset();
+	show_advanced = false;
+	simple_window_appeared = true;
 }
 
 void TransactionFilter::reset()
 {
+	simple_input.init();
 	search_phrases_table.init();
 	ignore_phrases_table.init();
 	for (CategoryEntry& entry : category_entries) entry.selected = true;
@@ -26,6 +29,50 @@ void TransactionFilter::reset()
 }
 
 DialogResult TransactionFilter::draw(const std::string& label)
+{
+	if (show_advanced) draw_advanced(label);
+	else draw_simple(label);
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
+	if (ImGui::Button("OK##TransactionFilter"))
+	{
+		if (show_advanced)
+		{
+			search_phrases_table.obtain_results();
+			ignore_phrases_table.obtain_results();
+			date_range_table.obtain_results();
+			amount_range_table.obtain_results();
+		}
+		else
+		{
+			simple_phrase = simple_input.get_result();
+		}
+		simple_window_appeared = true;
+		return DialogResult::Accept;
+	}
+	ImGui::SameLine();
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
+	if (ImGui::Button("Reset##TransactionFilter")) reset();
+	ImGui::SameLine();
+	const char* advanced_button_label = show_advanced ? "Hide Advanced##TransactionFilter" : "Show Advanced##TransactionFilter";
+	if (ImGui::Button(advanced_button_label))
+	{
+		show_advanced = !show_advanced;
+		if (!show_advanced) simple_window_appeared = true;
+		reset();
+	}
+	return DialogResult::None;
+}
+
+void TransactionFilter::draw_simple(const std::string& label)
+{
+	if (simple_input.draw("##Search Phrase", "Search Phrase", simple_window_appeared))
+	{
+		simple_phrase = simple_input.get_result();
+	}
+	simple_window_appeared = false;
+}
+
+void TransactionFilter::draw_advanced(const std::string& label)
 {
 	ImVec2 window_size(1000.0f, 800.0f);
 	static constexpr float description_filter_relative_size = 0.2f;
@@ -61,79 +108,67 @@ DialogResult TransactionFilter::draw(const std::string& label)
 	ImGui::BeginChild("Amount Child", ImVec2(window_size.x, window_size.y * amount_filter_relative_size));
 	amount_range_table.draw("Amount Ranges##" + label);
 	ImGui::EndChild();
-	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
-	if (ImGui::Button("OK##TransactionFilter"))
-	{
-		search_phrases_table.obtain_results();
-		ignore_phrases_table.obtain_results();
-		date_range_table.obtain_results();
-		amount_range_table.obtain_results();
-		return DialogResult::Accept;
-	}
-	ImGui::SameLine();
-	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
-	if (ImGui::Button("Cancel##TransactionFilter")) return DialogResult::Cancel;
-	ImGui::SameLine();
-	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
-	if (ImGui::Button("Reset##TransactionFilter")) reset();
-	return DialogResult::None;
 }
 
 bool TransactionFilter::check(const std::shared_ptr<const Transaction> transaction) const
 {
-	bool search_phrase_match = false;
-	if (search_phrases_table.strings.empty()) search_phrase_match = true;
-	for (const std::string& s : search_phrases_table.strings)
+	if (show_advanced)
 	{
-		if (contains_substring_case_insensitive(transaction->description, s))
+		bool search_phrase_match = false;
+		if (search_phrases_table.strings.empty()) search_phrase_match = true;
+		for (const std::string& s : search_phrases_table.strings)
 		{
-			search_phrase_match = true;
-			break;
-		}
-	}
-	bool ignore_phrase_match = false;
-	for (const std::string& s : ignore_phrases_table.strings)
-	{
-		if (contains_substring_case_insensitive(transaction->description, s))
-		{
-			ignore_phrase_match = true;
-			break;
-		}
-	}
-	bool category_match = false;
-	if (transaction->category.empty()) category_match = true;
-	else
-	{
-		for (const CategoryEntry& entry : category_entries)
-		{
-			if (entry.selected && entry.name == transaction->category)
+			if (contains_substring_case_insensitive(transaction->description, s))
 			{
-				category_match = true;
+				search_phrase_match = true;
 				break;
 			}
 		}
-	}
-	bool date_range_match = false;
-	if (date_range_table.date_ranges.empty()) date_range_match = true;
-	for (const DateRangeTable::DateRange& date_range : date_range_table.date_ranges)
-	{
-		if (transaction->date >= date_range.begin && transaction->date <= date_range.end )
+		bool ignore_phrase_match = false;
+		for (const std::string& s : ignore_phrases_table.strings)
 		{
-			date_range_match = true;
-			break;
+			if (contains_substring_case_insensitive(transaction->description, s))
+			{
+				ignore_phrase_match = true;
+				break;
+			}
 		}
-	}
-	bool amount_range_match = false;
-	if (amount_range_table.amount_ranges.empty()) amount_range_match = true;
-	for (const AmountRangeTable::AmountRange& amount_range : amount_range_table.amount_ranges)
-	{
-		if (transaction->amount.value >= amount_range.lower.value && transaction->amount.value <= amount_range.upper.value)
+		bool category_match = false;
+		if (transaction->category.empty()) category_match = true;
+		else
 		{
-			amount_range_match = true;
-			break;
+			for (const CategoryEntry& entry : category_entries)
+			{
+				if (entry.selected && entry.name == transaction->category)
+				{
+					category_match = true;
+					break;
+				}
+			}
 		}
+		bool date_range_match = false;
+		if (date_range_table.date_ranges.empty()) date_range_match = true;
+		for (const DateRangeTable::DateRange& date_range : date_range_table.date_ranges)
+		{
+			if (transaction->date >= date_range.begin && transaction->date <= date_range.end )
+			{
+				date_range_match = true;
+				break;
+			}
+		}
+		bool amount_range_match = false;
+		if (amount_range_table.amount_ranges.empty()) amount_range_match = true;
+		for (const AmountRangeTable::AmountRange& amount_range : amount_range_table.amount_ranges)
+		{
+			if (transaction->amount.value >= amount_range.lower.value && transaction->amount.value <= amount_range.upper.value)
+			{
+				amount_range_match = true;
+				break;
+			}
+		}
+		return search_phrase_match && !ignore_phrase_match && category_match && date_range_match && amount_range_match;
 	}
-	return search_phrase_match && !ignore_phrase_match && category_match && date_range_match && amount_range_match;
+	else return contains_substring_case_insensitive(transaction->description, simple_phrase);
 }
 
 void TransactionFilter::StringEditTable::init()

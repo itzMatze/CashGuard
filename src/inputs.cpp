@@ -17,7 +17,7 @@ void StringInput::update(const std::string& new_text)
 bool StringInput::draw(const std::string& label, const char* hint, bool set_focus)
 {
 	if (set_focus) ImGui::SetKeyboardFocusHere();
-	ImGui::InputTextWithHint(label.c_str(), hint, buffer.data(), buffer.size());
+	ImGui::InputTextWithHint(label.c_str(), hint, buffer.data(), buffer.size(), ImGuiInputTextFlags_AutoSelectAll);
 	return lost_active(ImGui::IsItemActive(), active);
 }
 

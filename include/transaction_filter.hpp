@@ -16,6 +16,13 @@ public:
 	bool check(const std::shared_ptr<const Transaction> transaction) const;
 
 private:
+	bool show_advanced;
+	bool simple_window_appeared;
+	void draw_advanced(const std::string& label);
+	void draw_simple(const std::string& label);
+	StringInput simple_input;
+	std::string simple_phrase;
+
 	// Description
 	struct StringEditTable
 	{
