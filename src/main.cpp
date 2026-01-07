@@ -51,7 +51,18 @@ int main(int argc, char** argv)
 	int parse_status = parse_args(argc, argv, program);
 	if (parse_status != 0) return parse_status;
 
-	std::filesystem::path file_path = getenv("HOME");
+	std::filesystem::path file_path;
+#ifdef _WIN32
+	if (const char* user_profile = std::getenv("USERPROFILE")) file_path = user_profile;
+	else
+	{
+		const char* home_drive = std::getenv("HOMEDRIVE");
+		const char* home_path  = std::getenv("HOMEPATH");
+		if (home_drive && home_path) file_path = std::string(home_drive) + home_path;
+	}
+#else
+	if (const char* home = std::getenv("HOME")) file_path = home;
+#endif
 	file_path /= std::filesystem::path("Sync/Private/CashGuardTransactions.json");
 
 	if (program.is_used("--file")) file_path = program.get<std::string>("--file");

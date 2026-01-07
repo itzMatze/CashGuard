@@ -51,3 +51,11 @@ target_link_libraries(CashGuard
 	SDL3::SDL3
 	spdlog::spdlog
 )
+if (CMAKE_IMPORT_LIBRARY_SUFFIX)
+	add_custom_command(TARGET CashGuard POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		$<TARGET_RUNTIME_DLLS:CashGuard>
+		$<TARGET_FILE_DIR:CashGuard>
+		COMMAND_EXPAND_LISTS
+	)
+endif()

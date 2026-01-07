@@ -24,13 +24,13 @@ bool operator>(const Amount& a, const Amount& b);
 
 namespace TransactionFieldNames
 {
-	constexpr std::string ID = "ID";
-	constexpr std::string Date = "Date";
-	constexpr std::string Category = "Category";
-	constexpr std::string Amount = "Amount";
-	constexpr std::string Description = "Description";
-	constexpr std::string Added = "Added";
-	constexpr std::string Edited = "Edited";
+	const std::string ID = "ID";
+	const std::string Date = "Date";
+	const std::string Category = "Category";
+	const std::string Amount = "Amount";
+	const std::string Description = "Description";
+	const std::string Added = "Added";
+	const std::string Edited = "Edited";
 }
 
 using Clock = std::chrono::system_clock;

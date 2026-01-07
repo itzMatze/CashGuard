@@ -7,22 +7,25 @@
 #include <filesystem>
 #include <fstream>
 
-bool Application::init(const std::string& file_path)
+bool Application::init(const std::filesystem::path& file_path)
 {
 	this->file_path = file_path;
 	if (!std::filesystem::exists(file_path))
 	{
-		cglog::info("Failed to find file \"{}\". Creating new file.", file_path);
-		bool success = std::filesystem::create_directories(file_path);
-		CG_ASSERT(success, "Failed to create directories!");
-		std::ifstream file(file_path);
+		cglog::info("Failed to find file \"{}\". Creating new file.", file_path.string());
+		if (file_path.has_parent_path() && !std::filesystem::exists(file_path.parent_path()))
+		{
+			bool success = std::filesystem::create_directories(file_path.parent_path());
+			CG_ASSERT(success, "Failed to create directories!");
+		}
+		std::ofstream file(file_path);
 		CG_ASSERT(file.is_open(), "Failed to open file!");
 		file.close();
 	}
 
 	if (!cg_file_handler.load_from_file(file_path, transaction_model, account_model, category_model))
 	{
-		cglog::error("Failed to load file \"{}\". Exiting.", file_path);
+		cglog::error("Failed to load file \"{}\". Exiting.", file_path.string());
 		return false;
 	}
 	return true;
@@ -49,7 +52,7 @@ int32_t Application::run()
 		}
 		if (transaction_model.dirty || account_model.dirty || category_model.dirty)
 		{
-			if (!cg_file_handler.save_to_file(file_path, transaction_model, account_model, category_model)) cglog::error("Failed to save file \"{}\".", file_path);
+			if (!cg_file_handler.save_to_file(file_path, transaction_model, account_model, category_model)) cglog::error("Failed to save file \"{}\".", file_path.string());
 			transaction_model.dirty = false;
 			account_model.dirty = false;
 			category_model.dirty = false;

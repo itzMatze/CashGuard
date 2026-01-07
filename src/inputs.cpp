@@ -4,6 +4,8 @@
 #include "util/log.hpp"
 #include "util/utils.hpp"
 
+#include <algorithm>
+
 void StringInput::init(const std::string& initial_text)
 {
 	std::snprintf(buffer.data(), buffer.size(), "%s", initial_text.c_str());

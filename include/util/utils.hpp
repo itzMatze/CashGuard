@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <string>
 
 inline bool contains_substring_case_insensitive(const std::string& text, const std::string& substring)

@@ -1,5 +1,4 @@
 #include "cg_file_handler.hpp"
-#include <filesystem>
 #include <fstream>
 #include <set>
 #include "transaction_model.hpp"
@@ -23,14 +22,14 @@ Transaction parse_transaction(const auto& rj_transaction)
 	return transaction;
 }
 
-bool CGFileHandler::load_from_file(const std::string& file_path, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
+bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
 {
-	cglog::debug("Loading file \"{}\"", file_path);
+	cglog::debug("Loading file \"{}\"", file_path.string());
 	transaction_model.clear();
 	std::ifstream file(file_path);
 	if (!file.is_open())
 	{
-		cglog::error("Failed to open file \"{}\"", file_path);
+		cglog::error("Failed to open file \"{}\"", file_path.string());
 		return false;
 	}
 	std::stringstream file_stream;
@@ -43,13 +42,13 @@ bool CGFileHandler::load_from_file(const std::string& file_path, TransactionMode
 	doc.Parse(file_content.c_str());
 	if (doc.HasParseError())
 	{
-		cglog::error("Failed to parse file \"{}\"", file_path);
+		cglog::error("Failed to parse file \"{}\"", file_path.string());
 		return false;
 	}
 
 	if (std::string(doc["Version"].GetString()) != std::string(version_string))
 	{
-		cglog::error("Unsupported version in file \"{}\"", file_path);
+		cglog::error("Unsupported version in file \"{}\"", file_path.string());
 		return false;
 	}
 
@@ -105,7 +104,7 @@ void serialize_transaction(const Transaction& transaction, rapidjson::Value& jso
 	}
 }
 
-bool CGFileHandler::save_to_file(const std::string& file_path, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
+bool CGFileHandler::save_to_file(const std::filesystem::path& file_path, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
 	rapidjson::Document doc;
 	doc.SetObject();
@@ -186,7 +185,7 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 	std::ifstream in_file(file_path);
 	if (!in_file.is_open())
 	{
-		cglog::error("Failed to open file \"{}\"", file_path);
+		cglog::error("Failed to open file \"{}\"", file_path.string());
 		return false;
 	}
 	std::stringstream file_stream;
@@ -196,12 +195,12 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 	std::size_t new_hash = std::hash<std::string>{}(file_content);
 	if (new_hash != hash)
 	{
-		cglog::error("Failed to save file! \"{}\" has been modified outside this program!", file_path);
+		cglog::error("Failed to save file! \"{}\" has been modified outside this program!", file_path.string());
 		return false;
 	}
 	in_file.close();
 	// write file
-	const std::string tmp_file_path = file_path + ".tmp" + std::to_string(uint32_t(rng::random_int32()));
+	const std::string tmp_file_path = file_path.string() + ".tmp" + std::to_string(uint32_t(rng::random_int32()));
 	std::ofstream out_file(tmp_file_path);
 	if (!out_file.is_open())
 	{
@@ -213,7 +212,7 @@ bool CGFileHandler::save_to_file(const std::string& file_path, const Transaction
 	out_file << output;
 	out_file.close();
 	std::filesystem::rename(tmp_file_path, file_path);
-	cglog::debug("Wrote to \"{}\"", file_path);
+	cglog::debug("Wrote to \"{}\"", file_path.string());
 	transaction_model.dirty = false;
 	account_model.dirty = false;
 	category_model.dirty = false;
