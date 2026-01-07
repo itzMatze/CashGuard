@@ -12,7 +12,7 @@ class TransactionTable
 {
 public:
 	TransactionTable() = default;
-	void draw(ImVec2 available_space, const TransactionModel& transaction_model, const CategoryModel& category_model);
+	void draw(ImVec2 available_space, const TransactionModel& transaction_model, const CategoryModel& category_model, bool show_amounts);
 	int32_t get_selected_row() const;
 	std::shared_ptr<const Transaction> get_selected_transaction() const;
 

@@ -34,7 +34,7 @@ void TotalAmountGraph::update_data(const TransactionModel& transaction_model)
 	}
 }
 
-void TotalAmountGraph::draw_small_graph(ImVec2 available_space)
+void TotalAmountGraph::draw_small_graph(ImVec2 available_space, bool show_amounts)
 {
 	ImDrawList* draw_list = ImPlot::GetPlotDrawList();
 	ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0.0f, 0.0f));
@@ -50,28 +50,31 @@ void TotalAmountGraph::draw_small_graph(ImVec2 available_space)
 		ImPlot::SetupAxesLimits(double(unix_seconds_now - year_second_count), double(unix_seconds_now), min_amount - std::abs(min_amount) * 0.05f, max_amount + std::abs(max_amount) * 0.05f, ImGuiCond_Always);
 		if (ImPlot::BeginItem("##Small Total Amount Plot Item"))
 		{
-			if (ImPlot::IsPlotHovered())
+			if (show_amounts)
 			{
-				ImPlotPoint mouse = ImPlot::GetPlotMousePos();
-				// find mouse location index
-				int32_t idx = binary_search_less_equal(time_points.cbegin(), time_points.cend(), int64_t(mouse.x));
-				if (idx != -1)
+				if (ImPlot::IsPlotHovered())
 				{
-					ImGui::BeginTooltip();
-					std::string date = DateUtils::to_string(DateUtils::to_date(DateTime{std::chrono::seconds{int64_t(mouse.x)}}));
-					ImGui::Text("%s", date.c_str());
-					ImGui::Text("%s", Amount(int64_t(data_points[idx] * 100.0)).to_string_view().c_str());
-					ImGui::EndTooltip();
-					draw_list->AddCircleFilled(ImVec2(ImPlot::PlotToPixels(mouse.x, data_points[idx])), 6.0f, IM_COL32(255, 0, 0, 255));
+					ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+					// find mouse location index
+					int32_t idx = binary_search_less_equal(time_points.cbegin(), time_points.cend(), int64_t(mouse.x));
+					if (idx != -1)
+					{
+						ImGui::BeginTooltip();
+						std::string date = DateUtils::to_string(DateUtils::to_date(DateTime{std::chrono::seconds{int64_t(mouse.x)}}));
+						ImGui::Text("%s", date.c_str());
+						ImGui::Text("%s", Amount(int64_t(data_points[idx] * 100.0)).to_string_view().c_str());
+						ImGui::EndTooltip();
+						draw_list->AddCircleFilled(ImVec2(ImPlot::PlotToPixels(mouse.x, data_points[idx])), 6.0f, IM_COL32(255, 0, 0, 255));
+					}
 				}
-			}
-			ImVec2 previous_pos(0.0, 0.0);
-			for (int i = 0; i < time_points.size(); i++)
-			{
-				ImVec2 current_pos(time_points[i], data_points[i]);
-				if (previous_pos.x > 0.0) draw_list->AddLine(ImPlot::PlotToPixels(previous_pos), ImPlot::PlotToPixels(current_pos.x, previous_pos.y), IM_COL32(0, 255, 255, 255), 2.0f);
-				draw_list->AddLine(ImPlot::PlotToPixels(current_pos.x, previous_pos.y), ImPlot::PlotToPixels(current_pos), IM_COL32(0, 255, 255, 255), 2.0f);
-				previous_pos = current_pos;
+				ImVec2 previous_pos(0.0, 0.0);
+				for (int i = 0; i < time_points.size(); i++)
+				{
+					ImVec2 current_pos(time_points[i], data_points[i]);
+					if (previous_pos.x > 0.0) draw_list->AddLine(ImPlot::PlotToPixels(previous_pos), ImPlot::PlotToPixels(current_pos.x, previous_pos.y), IM_COL32(0, 255, 255, 255), 2.0f);
+					draw_list->AddLine(ImPlot::PlotToPixels(current_pos.x, previous_pos.y), ImPlot::PlotToPixels(current_pos), IM_COL32(0, 255, 255, 255), 2.0f);
+					previous_pos = current_pos;
+				}
 			}
 			ImPlot::EndItem();
 		}

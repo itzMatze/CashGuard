@@ -61,15 +61,16 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	const float text_height = ImGui::GetFrameHeight();
 	float cursor_pos_y = ImGui::GetCursorPosY();
 	ImGui::SetCursorPosY(cursor_pos_y + (available_space.y * graph_relative_height - text_height) / 2.0f);
-	ImGui::Text(" %s", filtered_transaction_model.get_total_amount().to_string_view().c_str());
+	if (show_amounts) ImGui::Text(" %s", filtered_transaction_model.get_total_amount().to_string_view().c_str());
+	else ImGui::Text(" X €");
 	ImGui::PopFont();
 	ImGui::SameLine();
 	ImGui::SetCursorPosY(cursor_pos_y);
-	total_amount_graph.draw_small_graph(ImVec2(-1.0f, available_space.y * graph_relative_height));
-	transaction_table.draw(ImVec2(available_space.x, available_space.y * table_relative_height - ImGui::GetStyle().ItemSpacing.y), filtered_transaction_model, category_model);
+	total_amount_graph.draw_small_graph(ImVec2(-1.0f, available_space.y * graph_relative_height), show_amounts);
+	transaction_table.draw(ImVec2(available_space.x, available_space.y * table_relative_height - ImGui::GetStyle().ItemSpacing.y), filtered_transaction_model, category_model, show_amounts);
 	const int32_t row_index = transaction_table.get_selected_row();
 	const bool row_valid = row_index > -1 && row_index < filtered_transaction_model.count() && transaction_table.get_selected_transaction() != nullptr;
-	constexpr int32_t button_count = 6;
+	constexpr int32_t button_count = 7;
 	ImVec2 button_size(available_space.x * (1.0f / float(button_count)) - ImGui::GetStyle().ItemSpacing.x * float(button_count - 1) / float(button_count), available_space.y * buttons_relative_height - ImGui::GetStyle().ItemSpacing.y);
 
 	// Add
@@ -235,6 +236,15 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
+	}
+	ImGui::SameLine();
+
+	// show / hide amounts
+	ImGui::SetNextItemShortcut(ImGuiKey_Space);
+	const char* label = show_amounts ? "Hide Amounts" : "Show Amounts";
+	if (ImGui::Button(label, button_size))
+	{
+		show_amounts = !show_amounts;
 	}
 	ImGui::SameLine();
 

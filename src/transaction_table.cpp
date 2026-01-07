@@ -3,7 +3,7 @@
 #include "imgui_internal.h"
 #include "transaction_model.hpp"
 
-void TransactionTable::draw(ImVec2 available_space, const TransactionModel& transaction_model, const CategoryModel& category_model)
+void TransactionTable::draw(ImVec2 available_space, const TransactionModel& transaction_model, const CategoryModel& category_model, bool show_amounts)
 {
 	constexpr ImVec2 padding(8.0f, 6.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, padding);
@@ -58,7 +58,11 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 						hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 						ImGui::SameLine();
 					}
-					else ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
+					else
+					{
+						if (field_name != TransactionFieldNames::Amount || show_amounts) ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
+						else ImGui::Text(" X €");
+					}
 				}
 				ImGui::TableSetColumnIndex(field_names.size());
 				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
