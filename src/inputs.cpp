@@ -1,5 +1,6 @@
 #include "inputs.hpp"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "util/log.hpp"
 #include "util/utils.hpp"
 
@@ -113,26 +114,29 @@ bool AmountInput::is_active() const
 	return input.is_active();
 }
 
-void Dropdown::init(const std::vector<std::string>& options, int32_t initial_option)
+void Dropdown::init(const std::vector<std::string>& options, int32_t initial_option, const std::unordered_map<std::string, Color>& colors)
 {
 	this->options.clear();
 	this->options.reserve(options.size());
 	for (const std::string& option : options) this->options.push_back(option);
+	this->colors.clear();
+	this->colors.reserve(colors.size());
+	for (const std::pair<std::string, Color>& entry : colors) this->colors.insert(entry);
 	current = initial_option;
 	active = false;
 }
 
-void Dropdown::init(const std::vector<std::string>& options, const std::string& initial_option)
+void Dropdown::init(const std::vector<std::string>& options, const std::string& initial_option, const std::unordered_map<std::string, Color>& colors)
 {
 	for (int32_t i = 0; i < options.size(); i++)
 	{
 		if (options[i] == initial_option)
 		{
-			init(options, i);
+			init(options, i, colors);
 			return;
 		}
 	}
-	init(options);
+	init(options, -1, colors);
 }
 
 void Dropdown::update(const std::string& new_selected_option)
@@ -151,8 +155,12 @@ bool Dropdown::draw(const std::string& label, const char* hint)
 {
 	const bool current_valid = (current >= 0 && current < options.size());
 	bool changed = false;
+	const ImU32 selected_category_color = (!current_valid || colors.empty()) ? IM_COL32(0, 0, 0, 255) : colors.at(options[current]).get_ImU32();
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, selected_category_color);
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, selected_category_color);
 	if (ImGui::BeginCombo(label.c_str(), (current_valid ? options[current].c_str() : "")))
 	{
+		ImGui::PopStyleColor(2);
 		if (ImGui::IsWindowAppearing())
 		{
 			ImGui::SetKeyboardFocusHere();
@@ -160,21 +168,44 @@ bool Dropdown::draw(const std::string& label, const char* hint)
 		}
 		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_F);
 		filter.Draw("##Filter", -FLT_MIN);
-		for (int i = 0; i < options.size(); ++i)
+		for (int i = 0; i < options.size(); i++)
 		{
 			if (filter.PassFilter(options[i].c_str()))
 			{
+				const ImU32 category_color = colors.empty() ? IM_COL32(0, 0, 0, 255) : colors.at(options[i]).get_ImU32();
+				ImGui::PushStyleColor(ImGuiCol_Header, category_color);
+				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, category_color);
+				ImGui::PushStyleColor(ImGuiCol_HeaderActive, category_color);
 				bool selected = (i == current);
+				constexpr float marker_size = 8.0f;
+				constexpr float marker_padding = 2.0f;
+				ImGui::Dummy(ImVec2(marker_size + marker_padding, 0.0f));
+				float min_x = ImGui::GetItemRectMin().x;
+				ImGui::SameLine();
 				if (ImGui::Selectable((options[i] + "##" + std::to_string(i)).c_str(), selected))
 				{
 					changed = true;
 					current = i;
 				}
+
+				bool hovered = ImGui::IsItemHovered();
+				ImU32 highlight_color = IM_COL32(0, 255, 255, 128);
+				if (selected) highlight_color = IM_COL32(0, 255, 255, 255);
+				ImGuiTable* table = ImGui::GetCurrentTable();
+				float min_y = ImGui::GetItemRectMin().y;
+				ImVec2 max(ImGui::GetItemRectMax());
+				constexpr float border_thickness = 4.0f;
+				ImDrawList* dl = ImGui::GetWindowDrawList();
+				dl->AddRectFilled(ImVec2(min_x + marker_size, min_y), ImVec2(min_x + marker_size + marker_padding + ImGui::GetStyle().ItemInnerSpacing.x, max.y), ImGui::ColorConvertFloat4ToU32(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg)));
+				dl->AddRectFilled(ImVec2(min_x, min_y), ImVec2(min_x + marker_size, max.y), IM_COL32(0, 0, 0, 255));
+				if (selected || hovered) dl->AddRectFilled(ImVec2(min_x, min_y), ImVec2(min_x + marker_size, max.y), highlight_color);
+				ImGui::PopStyleColor(3);
 				if (selected) ImGui::SetItemDefaultFocus();
 			}
 		}
 		ImGui::EndCombo();
 	}
+	else ImGui::PopStyleColor(2);
 	return changed;
 }
 

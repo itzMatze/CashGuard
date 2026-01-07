@@ -53,7 +53,7 @@ bool CGFileHandler::load_from_file(const std::string& file_path, TransactionMode
 		return false;
 	}
 
-	category_model.add("", Color());
+	category_model.add("", Color(0.0f, 0.0f, 0.0f, 1.0f));
 	for (const auto& rj_category : doc["Categories"].GetArray()) category_model.add(rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));
 	for (const auto& rj_account : doc["Accounts"].GetArray())
 	{

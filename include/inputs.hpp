@@ -2,9 +2,11 @@
 
 #include "imgui.h"
 #include "transaction.hpp"
+#include "util/color.hpp"
 #include "util/timer.hpp"
 #include <array>
 #include <string>
+#include <unordered_map>
 
 inline bool lost_active(bool has_active, bool& had_active)
 {
@@ -80,8 +82,8 @@ class Dropdown
 {
 public:
 	Dropdown() = default;
-	void init(const std::vector<std::string>& options, int32_t initial_option = -1);
-	void init(const std::vector<std::string>& options, const std::string& initial_option);
+	void init(const std::vector<std::string>& options, int32_t initial_option = -1, const std::unordered_map<std::string, Color>& colors = {});
+	void init(const std::vector<std::string>& options, const std::string& initial_option, const std::unordered_map<std::string, Color>& colors = {});
 	void update(const std::string& new_selected_option);
 	bool draw(const std::string& label, const char* hint = "");
 	int32_t get_result();
@@ -89,6 +91,7 @@ public:
 
 private:
 	std::vector<std::string> options;
+	std::unordered_map<std::string, Color> colors;
 	ImGuiTextFilter filter;
 	int32_t current;
 	bool active;

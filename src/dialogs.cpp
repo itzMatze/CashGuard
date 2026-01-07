@@ -11,7 +11,7 @@ void TransactionDialog::init(const TransactionModel& transaction_model, const Ca
 	date_input.init(transaction.date);
 	description_input.init(transaction_model.get_unique_value_list(TransactionFieldNames::Description), transaction.description);
 	amount_input.init(transaction.amount);
-	category_dropdown.init(category_model.get_names(), transaction.category);
+	category_dropdown.init(category_model.get_names(), transaction.category, category_model.get_colors());
 }
 
 DialogResult TransactionDialog::draw(const std::string& label, const TransactionModel& transaction_model)
@@ -64,7 +64,7 @@ void TransactionGroupDialog::init(const TransactionModel& transaction_model, con
 	this->transaction_group = transaction_group;
 	date_input.init(transaction_group.date);
 	description_input.init(transaction_model.get_unique_value_list(TransactionFieldNames::Description), transaction_group.description);
-	category_dropdown.init(category_model.get_names(), transaction_group.category);
+	category_dropdown.init(category_model.get_names(), transaction_group.category, category_model.get_colors());
 }
 
 DialogResult TransactionGroupDialog::draw(const std::string& label, const TransactionModel& transaction_model, const CategoryModel& category_model)

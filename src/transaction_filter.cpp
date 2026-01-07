@@ -50,6 +50,13 @@ DialogResult TransactionFilter::draw(const std::string& label)
 		return DialogResult::Accept;
 	}
 	ImGui::SameLine();
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
+	if (ImGui::Button("Cancel##TransactionFilter"))
+	{
+		reset();
+		return DialogResult::Cancel;
+	}
+	ImGui::SameLine();
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
 	if (ImGui::Button("Reset##TransactionFilter")) reset();
 	ImGui::SameLine();
@@ -273,40 +280,32 @@ void TransactionFilter::draw_category_table(const std::string& label)
 	constexpr ImVec2 padding(8.0f, 4.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, padding);
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
-	const float row_height = ImGui::GetFrameHeight() + padding.y * 2.0f;
-	constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_NoHostExtendX;
-	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.0f , 0.0f, 0.0f, 0.0f));
-	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
-	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
-
-	if (ImGui::BeginTable(("Categories##Table" + label).c_str(), 1, flags))
+	for (int32_t row = 0; row < category_entries.size(); row++)
 	{
-		ImGui::TableSetupScrollFreeze(0, 1);
-		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
-		ImGui::TableSetupColumn(("Categories##" + label).c_str(), ImGuiTableColumnFlags_None);
-		ImGui::TableHeadersRow();
-		for (int32_t row = 0; row < category_entries.size(); row++)
-		{
-			ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
-			ImGui::TableSetColumnIndex(0);
-			CategoryEntry& entry = category_entries[row];
-			// set up selection and highlighting
-			if (ImGui::Selectable((entry.name + "##" + std::to_string(row)).c_str(), entry.selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_DontClosePopups)) entry.selected = !entry.selected;
-			if (entry.selected)
-			{
-				ImU32 highlight_color = IM_COL32(0, 255, 255, 128);
-				if (entry.selected) highlight_color = IM_COL32(0, 255, 255, 255);
-				ImGuiTable* table = ImGui::GetCurrentTable();
-				ImVec2 min(ImGui::TableGetCellBgRect(table, 0).Min);
-				ImVec2 max(ImGui::TableGetCellBgRect(table, 0).Max);
-				constexpr float border_thickness = 4.0f;
-				ImDrawList* dl = ImGui::GetWindowDrawList();
-				dl->AddRect(ImVec2(min.x + border_thickness, min.y + border_thickness), ImVec2(max.x - border_thickness, min.y + row_height - border_thickness), highlight_color, 0.0f, 0, border_thickness);
-			}
-		}
-		ImGui::EndTable();
+		CategoryEntry& entry = category_entries[row];
+		ImGui::PushStyleColor(ImGuiCol_Header, entry.color.get_ImU32());
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, entry.color.get_ImU32());
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, entry.color.get_ImU32());
+		constexpr float marker_size = 8.0f;
+		constexpr float marker_padding = 2.0f;
+		ImGui::Dummy(ImVec2(marker_size + marker_padding, 0.0f));
+		float min_x = ImGui::GetItemRectMin().x;
+		ImGui::SameLine();
+		if (ImGui::Selectable((entry.name + "##" + std::to_string(row)).c_str(), entry.selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_DontClosePopups)) entry.selected = !entry.selected;
+
+		bool hovered = ImGui::IsItemHovered();
+		ImU32 highlight_color = IM_COL32(0, 255, 255, 128);
+		if (entry.selected) highlight_color = IM_COL32(0, 255, 255, 255);
+		ImGuiTable* table = ImGui::GetCurrentTable();
+		float min_y = ImGui::GetItemRectMin().y;
+		ImVec2 max(ImGui::GetItemRectMax());
+		constexpr float border_thickness = 4.0f;
+		ImDrawList* dl = ImGui::GetWindowDrawList();
+		dl->AddRectFilled(ImVec2(min_x + marker_size, min_y), ImVec2(min_x + marker_size + marker_padding + ImGui::GetStyle().ItemInnerSpacing.x, max.y), ImGui::ColorConvertFloat4ToU32(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg)));
+		dl->AddRectFilled(ImVec2(min_x, min_y), ImVec2(min_x + marker_size, max.y), IM_COL32(0, 0, 0, 255));
+		if (entry.selected || hovered) dl->AddRectFilled(ImVec2(min_x, min_y), ImVec2(min_x + marker_size, max.y), highlight_color);
+		ImGui::PopStyleColor(3);
 	}
-	ImGui::PopStyleColor(3);
 	ImGui::PopStyleVar(2);
 }
 

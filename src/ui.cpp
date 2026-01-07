@@ -24,6 +24,14 @@ void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, Accou
 	ImGui::PushStyleColor(ImGuiCol_Tab, button_color);
 	ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(button_color.x + 0.2f, button_color.y + 0.2f, button_color.z + 0.2f, button_color.w));
 	ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(button_color.x + 0.2f, button_color.y + 0.2f, button_color.z + 0.2f, button_color.w));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_Border, button_color);
+	ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_TitleBg, button_color);
+	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, button_color);
+	ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, button_color);
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 	available_space.y -= ImGui::GetFrameHeightWithSpacing();
 	if (ImGui::BeginTabBar("Main Tabs"))
 	{
@@ -39,7 +47,7 @@ void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, Accou
 		}
 		ImGui::EndTabBar();
 	}
-	ImGui::PopStyleColor(6);
+	ImGui::PopStyleColor(14);
 }
 
 void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
@@ -216,7 +224,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	if (ImGui::BeginPopupModal("Filter##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		DialogResult result = transaction_filter.draw("Transaction Filter");
-		if (result == DialogResult::Accept)
+		if (result == DialogResult::Accept || result == DialogResult::Cancel)
 		{
 			filtered_transaction_model.clear();
 			for (const std::shared_ptr<const Transaction> t : transaction_model.get_transactions())
@@ -226,7 +234,6 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 			total_amount_graph.update_data(filtered_transaction_model);
 			ImGui::CloseCurrentPopup();
 		}
-		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
 	ImGui::SameLine();
