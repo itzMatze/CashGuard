@@ -7,6 +7,13 @@ void CategoryModel::add(const std::string& name, const Color& color)
 	dirty = true;
 }
 
+void CategoryModel::clear()
+{
+	category_names.clear();
+	category_colors.clear();
+	dirty = true;
+}
+
 const std::vector<std::string>& CategoryModel::get_names() const
 {
 	return category_names;

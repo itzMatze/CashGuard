@@ -43,6 +43,7 @@ target_include_directories(CashGuard PRIVATE
 	"${PROJECT_SOURCE_DIR}/dependencies/"
 	"${PROJECT_SOURCE_DIR}/dependencies/imgui/"
 	"${PROJECT_SOURCE_DIR}/dependencies/implot/"
+	"${PROJECT_SOURCE_DIR}/dependencies/portable-file-dialogs/"
 	"${SDL3_DIR}/include/"
 	"${SPDLOG_DIR}/include")
 

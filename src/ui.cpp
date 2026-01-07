@@ -15,7 +15,7 @@ void UI::init(const TransactionModel& transaction_model, const AccountModel& acc
 	}
 }
 
-void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
+void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model, bool valid_file)
 {
 	static constexpr ImVec4 button_color(0.0f, 0.4f, 0.4f, 1.0f);
 	ImGui::PushStyleColor(ImGuiCol_Button, button_color);
@@ -37,7 +37,7 @@ void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, Accou
 	{
 		if (ImGui::BeginTabItem("Transactions"))
 		{
-			draw_transaction_tab(available_space, transaction_model, account_model, category_model);
+			draw_transaction_tab(available_space, transaction_model, account_model, category_model, valid_file);
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Graph"))
@@ -50,10 +50,10 @@ void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, Accou
 	ImGui::PopStyleColor(14);
 }
 
-void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
+void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model, bool valid_file)
 {
 	static constexpr float graph_relative_height = 0.2f;
-	static constexpr float table_relative_height = 0.75f;
+	static constexpr float table_relative_height = 0.7f;
 	static constexpr float buttons_relative_height = 1.0f - graph_relative_height - table_relative_height;
 
 	ImGui::PushFont(NULL, 64.0f);
@@ -70,9 +70,11 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	transaction_table.draw(ImVec2(available_space.x, available_space.y * table_relative_height - ImGui::GetStyle().ItemSpacing.y), filtered_transaction_model, category_model, show_amounts);
 	const int32_t row_index = transaction_table.get_selected_row();
 	const bool row_valid = row_index > -1 && row_index < filtered_transaction_model.count() && transaction_table.get_selected_transaction() != nullptr;
-	constexpr int32_t button_count = 7;
-	ImVec2 button_size(available_space.x * (1.0f / float(button_count)) - ImGui::GetStyle().ItemSpacing.x * float(button_count - 1) / float(button_count), available_space.y * buttons_relative_height - ImGui::GetStyle().ItemSpacing.y);
+	constexpr int32_t button_count_x = 4;
+	constexpr int32_t button_count_y = 2;
+	ImVec2 button_size(available_space.x * (1.0f / float(button_count_x)) - ImGui::GetStyle().ItemSpacing.x * float(button_count_x - 1) / float(button_count_x), (available_space.y * buttons_relative_height - ImGui::GetStyle().ItemSpacing.y) / float(button_count_y));
 
+	if (!valid_file) ImGui::BeginDisabled();
 	// Add
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
 	if (ImGui::Button("Add", button_size))
@@ -214,8 +216,30 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 		if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
+	if (!valid_file) ImGui::EndDisabled();
+
+	// Open File
+	if (ImGui::Button("Select File", button_size)) ImGui::OpenPopup("File##Dialog");
+	if (ImGui::BeginPopupModal("File##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		if (ImGui::Button("New File"))
+		{
+			create_new_file = true;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Open File"))
+		{
+			open_existing_file = true;
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
+		ImGui::EndPopup();
+	}
 	ImGui::SameLine();
 
+	if (!valid_file) ImGui::BeginDisabled();
 	// Filter
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_F);
 	if (ImGui::Button(std::format("Filter ({} / {})", filtered_transaction_model.count(), transaction_model.count()).c_str(), button_size))
@@ -264,6 +288,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	}
 	ImGui::PopStyleColor(3);
 	if (ImGui::BeginPopupModal("Accounts##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) accounts_dialog.draw(account_model);
+	if (!valid_file) ImGui::EndDisabled();
 }
 
 void UI::draw_graph_tab(ImVec2 available_space, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)

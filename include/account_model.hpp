@@ -22,6 +22,7 @@ public:
 	void set_amount(int32_t index, const Amount& amount);
 	void add(const Account& account);
 	void remove(int32_t index);
+	void clear();
 	const std::vector<Account>& get_data() const;
 	Amount get_total_amount() const;
 

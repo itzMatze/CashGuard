@@ -26,6 +26,8 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 {
 	cglog::debug("Loading file \"{}\"", file_path.string());
 	transaction_model.clear();
+	account_model.clear();
+	category_model.clear();
 	std::ifstream file(file_path);
 	if (!file.is_open())
 	{

@@ -41,6 +41,12 @@ void AccountModel::remove(int32_t index)
 	dirty = true;
 }
 
+void AccountModel::clear()
+{
+	accounts.clear();
+	dirty = true;
+}
+
 const std::vector<Account>& AccountModel::get_data() const
 {
 	return accounts;

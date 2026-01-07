@@ -2,32 +2,54 @@
 
 #include "SDL3/SDL_events.h"
 #include "backends/imgui_impl_sdl3.h"
+#include "portable-file-dialogs.h"
 #include "util/log.hpp"
 #include "window.hpp"
 #include <filesystem>
 #include <fstream>
 
-bool Application::init(const std::filesystem::path& file_path)
+bool Application::load_file(const std::string& file_path)
 {
-	this->file_path = file_path;
-	if (!std::filesystem::exists(file_path))
+	std::filesystem::path file(file_path);
+	if (!std::filesystem::exists(file))
 	{
-		cglog::info("Failed to find file \"{}\". Creating new file.", file_path.string());
-		if (file_path.has_parent_path() && !std::filesystem::exists(file_path.parent_path()))
+		cglog::info("Failed to find file \"{}\". Creating new file.", file_path);
+		if (file.has_parent_path() && !std::filesystem::exists(file.parent_path()))
 		{
-			bool success = std::filesystem::create_directories(file_path.parent_path());
+			bool success = std::filesystem::create_directories(file.parent_path());
 			CG_ASSERT(success, "Failed to create directories!");
 		}
-		std::ofstream file(file_path);
-		CG_ASSERT(file.is_open(), "Failed to open file!");
-		file.close();
+		std::ofstream out_file(file);
+		CG_ASSERT(out_file.is_open(), "Failed to open file!");
+		out_file.close();
 	}
-
-	if (!cg_file_handler.load_from_file(file_path, transaction_model, account_model, category_model))
+	if (!cg_file_handler.load_from_file(file, transaction_model, account_model, category_model))
 	{
-		cglog::error("Failed to load file \"{}\". Exiting.", file_path.string());
+		cglog::error("Failed to load file \"{}\". Exiting.", file_path);
 		return false;
 	}
+	this->file_path = file_path;
+	file_path_valid = true;
+	return true;
+}
+
+bool Application::prompt_new_file()
+{
+	pfd::save_file file = pfd::save_file("Select directory and filename to create", pfd::path::home(), { "CGT File", "*.cgt" }, pfd::opt::none);
+	if (file.result().empty()) return false;
+	std::filesystem::path path(file.result());
+	if (path.extension() != ".cgt") path.replace_extension(".cgt");
+	load_file(path);
+	return true;
+}
+
+bool Application::prompt_open_file()
+{
+	pfd::open_file file = pfd::open_file("Select file to open", pfd::path::home(), { "CGT File", "*.cgt" }, pfd::opt::none);
+	if (file.result().empty()) return false;
+	std::filesystem::path path(file.result().at(0));
+	if (path.extension() != ".cgt") path.replace_extension(".cgt");
+	load_file(path);
 	return true;
 }
 
@@ -40,9 +62,21 @@ int32_t Application::run()
 	SDL_Event event;
 	while (!quit)
 	{
+		if (ui.create_new_file)
+		{
+			ui.create_new_file = false;
+			if (!prompt_new_file()) cglog::debug("Failed to create new file!");
+			ui.init(transaction_model, account_model, category_model);
+		}
+		if (ui.open_existing_file)
+		{
+			ui.open_existing_file = false;
+			if (!prompt_open_file()) cglog::debug("Failed to open file!");
+			ui.init(transaction_model, account_model, category_model);
+		}
 		window.new_frame();
 		ImVec2 available_space = ImGui::GetContentRegionAvail();
-		ui.draw(available_space, transaction_model, account_model, category_model);
+		ui.draw(available_space, transaction_model, account_model, category_model, file_path_valid);
 		window.end_frame();
 		while (SDL_PollEvent(&event))
 		{

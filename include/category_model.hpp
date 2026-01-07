@@ -11,6 +11,7 @@ public:
 	CategoryModel() = default;
 
 	void add(const std::string& name, const Color& color);
+	void clear();
 	const std::vector<std::string>& get_names() const;
 	const std::unordered_map<std::string, Color>& get_colors() const;
 
