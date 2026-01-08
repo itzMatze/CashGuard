@@ -39,9 +39,8 @@ Application::~Application()
 		cglog::debug("Failed to open cache file for writing!");
 		return;
 	}
-	cache_file << file_path.string() << "\n";
+	if (file_path_valid) cache_file << file_path.string() << "\n";
 	cache_file.close();
-	if (!file_path_valid) return;
 }
 
 bool Application::load_file(const std::string& file_path, bool create)

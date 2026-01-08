@@ -34,8 +34,15 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 	std::stringstream file_stream;
 	file_stream << file.rdbuf();
 	std::string file_content = file_stream.str();
-	if (file_content.size() == 0) return true;
 	hash = std::hash<std::string>{}(file_content);
+	transaction_model.clear();
+	account_model.clear();
+	category_model.clear();
+	category_model.add("", Color(0.0f, 0.0f, 0.0f, 1.0f));
+	transaction_model.dirty = false;
+	account_model.dirty = false;
+	category_model.dirty = false;
+	if (file_content.size() == 0) return true;
 
 	rapidjson::Document doc;
 	doc.Parse(file_content.c_str());
@@ -51,11 +58,6 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 		return false;
 	}
 
-	transaction_model.clear();
-	account_model.clear();
-	category_model.clear();
-
-	category_model.add("", Color(0.0f, 0.0f, 0.0f, 1.0f));
 	for (const auto& rj_category : doc["Categories"].GetArray()) category_model.add(rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));
 	for (const auto& rj_account : doc["Accounts"].GetArray())
 	{
@@ -194,12 +196,14 @@ bool CGFileHandler::save_to_file(const std::filesystem::path& file_path, const T
 	std::stringstream file_stream;
 	file_stream << in_file.rdbuf();
 	std::string file_content = file_stream.str();
-	if (file_content.size() == 0) return true;
-	std::size_t new_hash = std::hash<std::string>{}(file_content);
-	if (new_hash != hash)
+	if (file_content.size() > 0)
 	{
-		cglog::error("Failed to save file! \"{}\" has been modified outside this program!", file_path.string());
-		return false;
+		std::size_t new_hash = std::hash<std::string>{}(file_content);
+		if (new_hash != hash)
+		{
+			cglog::error("Failed to save file! \"{}\" has been modified outside this program!", file_path.string());
+			return false;
+		}
 	}
 	in_file.close();
 	// write file
