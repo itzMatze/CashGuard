@@ -175,7 +175,7 @@ bool TransactionFilter::check(const std::shared_ptr<const Transaction> transacti
 		}
 		return search_phrase_match && !ignore_phrase_match && category_match && date_range_match && amount_range_match;
 	}
-	else return contains_substring_case_insensitive(transaction->description, simple_phrase);
+	else return simple_phrase.empty() || contains_substring_case_insensitive(transaction->description, simple_phrase);
 }
 
 void TransactionFilter::StringEditTable::init()
