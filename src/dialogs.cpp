@@ -5,7 +5,7 @@
 #include "transaction_model.hpp"
 #include "util/random_generator.hpp"
 
-void TransactionDialog::init(const TransactionModel& transaction_model, const CategoryModel& category_model, const Transaction& transaction)
+void TransactionMemberDialog::init(const TransactionModel& transaction_model, const CategoryModel& category_model, const Transaction& transaction)
 {
 	this->transaction = transaction;
 	date_input.init(transaction.date);
@@ -14,10 +14,10 @@ void TransactionDialog::init(const TransactionModel& transaction_model, const Ca
 	category_dropdown.init(category_model.get_names(), transaction.category, category_model.get_colors());
 }
 
-DialogResult TransactionDialog::draw(const std::string& label, const TransactionModel& transaction_model)
+DialogResult TransactionMemberDialog::draw(const std::string& label, const TransactionModel& transaction_model)
 {
-	if (date_input.draw("##TransactionDialogDate")) transaction.date = date_input.get_result();
-	if (description_input.draw("##TransactionDialogDescription", "Description"))
+	if (date_input.draw("##TransactionMemberDialogDate")) transaction.date = date_input.get_result();
+	if (description_input.draw("##TransactionMemberDialogDescription", "Description"))
 	{
 		transaction.description = description_input.get_result();
 		const bool amount_empty = transaction.amount.value == 0;
@@ -40,17 +40,17 @@ DialogResult TransactionDialog::draw(const std::string& label, const Transaction
 			}
 		}
 	}
-	if (amount_input.draw("##TransactionDialogAmount")) transaction.amount = amount_input.get_result();
-	if (category_dropdown.draw("##TransactionDialogCategory")) transaction.category = category_dropdown.get_result_string();
+	if (amount_input.draw("##TransactionMemberDialogAmount")) transaction.amount = amount_input.get_result();
+	if (category_dropdown.draw("##TransactionMemberDialogCategory")) transaction.category = category_dropdown.get_result_string();
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
-	if (ImGui::Button("OK##TransactionDialog")) return DialogResult::Accept;
+	if (ImGui::Button("OK##TransactionMemberDialog")) return DialogResult::Accept;
 	ImGui::SameLine();
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
-	if (ImGui::Button("Cancel##TransactionDialog")) return DialogResult::Cancel;
+	if (ImGui::Button("Cancel##TransactionMemberDialog")) return DialogResult::Cancel;
 	return DialogResult::None;
 }
 
-Transaction TransactionDialog::get_transaction()
+Transaction TransactionMemberDialog::get_transaction()
 {
 	transaction.date = date_input.get_result();
 	transaction.description = description_input.get_result();
@@ -59,126 +59,210 @@ Transaction TransactionDialog::get_transaction()
 	return transaction;
 }
 
-void TransactionGroupDialog::init(const TransactionModel& transaction_model, const CategoryModel& category_model, const TransactionGroup& transaction_group)
+void TransactionDialog::init(const TransactionModel& transaction_model, const CategoryModel& category_model, const Transaction& transaction)
 {
-	this->transaction_group = transaction_group;
+	this->transaction = std::make_shared<Transaction>(transaction);
+	date_input.init(transaction.date);
+	description_input.init(transaction_model.get_unique_value_list(TransactionFieldNames::Description), transaction.description);
+	amount_input.init(transaction.amount);
+	category_dropdown.init(category_model.get_names(), transaction.category, category_model.get_colors());
+}
+
+void TransactionDialog::init(const TransactionModel& transaction_model, const CategoryModel& category_model, const TransactionGroup& transaction_group)
+{
+	this->transaction = std::make_shared<TransactionGroup>(transaction_group);
 	date_input.init(transaction_group.date);
 	description_input.init(transaction_model.get_unique_value_list(TransactionFieldNames::Description), transaction_group.description);
 	category_dropdown.init(category_model.get_names(), transaction_group.category, category_model.get_colors());
 }
 
-DialogResult TransactionGroupDialog::draw(const std::string& label, const TransactionModel& transaction_model, const CategoryModel& category_model)
+DialogResult TransactionDialog::draw(const std::string& label, const TransactionModel& transaction_model, const CategoryModel& category_model)
 {
-	ImGui::PushFont(NULL, 32.0f);
-	ImGui::Text(" %s", transaction_group.amount.to_string_view().c_str());
-	ImGui::PopFont();
-	if (date_input.draw("##TransactionGroupDialogDate")) transaction_group.date = date_input.get_result();
-	if (description_input.draw("##TransactionGroupDialogDescription", "Description"))
+	if (std::shared_ptr<TransactionGroup> transaction_group = std::dynamic_pointer_cast<TransactionGroup>(transaction))
 	{
-		transaction_group.description = description_input.get_result();
-		const bool category_empty = transaction_group.category.empty();
-		if (category_empty)
+		ImGui::PushFont(NULL, 32.0f);
+		ImGui::Text(" %s", transaction_group->amount.to_string_view().c_str());
+		ImGui::PopFont();
+		if (date_input.draw("##TransactionDialogDate")) transaction_group->date = date_input.get_result();
+		if (description_input.draw("##TransactionDialogDescription", "Description"))
 		{
-			std::shared_ptr<const Transaction> matching_transaction;
-			if (transaction_model.get_auto_complete_transaction(transaction_group.description, matching_transaction))
+			transaction_group->description = description_input.get_result();
+			const bool category_empty = transaction_group->category.empty();
+			if (category_empty)
 			{
-				if (category_empty)
+				std::shared_ptr<const Transaction> matching_transaction;
+				if (transaction_model.get_auto_complete_transaction(transaction_group->description, matching_transaction))
 				{
-					transaction_group.category = matching_transaction->category;
-					category_dropdown.update(transaction_group.category);
+					if (category_empty)
+					{
+						transaction_group->category = matching_transaction->category;
+						category_dropdown.update(transaction_group->category);
+					}
 				}
 			}
 		}
-	}
-	if (category_dropdown.draw("##TransactionGroupDialogCategory")) transaction_group.category = category_dropdown.get_result_string();
-	ImGui::SeparatorText("Transactions");
-	draw_transaction_table(transaction_model, category_model);
-	const bool row_valid = selected_group_row > -1 && selected_group_row < transaction_group.get_transactions().size();
+		if (category_dropdown.draw("##TransactionDialogCategory")) transaction_group->category = category_dropdown.get_result_string();
+		ImGui::SeparatorText("Transactions");
+		draw_transaction_table(transaction_model, category_model);
+		const bool row_valid = selected_group_row > -1 && selected_group_row < transaction_group->get_transactions().size();
 
-	// Add
-	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
-	if (ImGui::Button("Add##TransactionGroupDialog"))
-	{
-		Transaction new_transaction = Transaction();
-		new_transaction.category = transaction_group.category;
-		new_transaction.date = transaction_group.date;
-		member_dialog.init(transaction_model, category_model, new_transaction);
-		ImGui::OpenPopup("Transaction Add##MemberDialog");
-	}
-	if (ImGui::BeginPopupModal("Transaction Add##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		DialogResult result = member_dialog.draw("Member Transaction Dialog", transaction_model);
-		if (result == DialogResult::Accept)
+		// Add
+		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
+		if (ImGui::Button("Add##TransactionDialog"))
 		{
-			Transaction new_transaction = member_dialog.get_transaction();
-			new_transaction.id = rng::random_int64();
-			new_transaction.added = DateTime(Clock::now());
-			new_transaction.edited = DateTime(Clock::now());
-			transaction_group.add_transaction(new_transaction);
-			ImGui::CloseCurrentPopup();
+			Transaction new_transaction = Transaction();
+			new_transaction.category = transaction_group->category;
+			new_transaction.date = transaction_group->date;
+			member_dialog.init(transaction_model, category_model, new_transaction);
+			ImGui::OpenPopup("Transaction Add##MemberDialog");
 		}
-		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
-		ImGui::EndPopup();
-	}
-	ImGui::SameLine();
-
-	// Edit
-	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_E);
-	if (ImGui::Button("Edit##TransactionGroupDialog") && row_valid)
-	{
-		member_dialog.init(transaction_model, category_model, transaction_group.get_transactions()[selected_group_row]);
-		ImGui::OpenPopup("Transaction Edit##MemberDialog");
-	}
-	if (ImGui::BeginPopupModal("Transaction Edit##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		DialogResult result = member_dialog.draw("Member Transaction Dialog", transaction_model);
-		if (result == DialogResult::Accept)
+		if (ImGui::BeginPopupModal("Transaction Add##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 		{
-			Transaction new_transaction = member_dialog.get_transaction();
-			new_transaction.edited = DateTime(Clock::now());
-			transaction_group.set_transaction(selected_group_row, new_transaction);
-			ImGui::CloseCurrentPopup();
-		}
-		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
-		ImGui::EndPopup();
-	}
-	ImGui::SameLine();
-
-	// Remove
-	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
-	if (ImGui::Button("Remove##TransactionGroupDialog") && row_valid) ImGui::OpenPopup("Transaction Remove##MemberDialog");
-	if (ImGui::BeginPopupModal("Transaction Remove##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		ImGui::Text("Remove transaction with id %zu?", transaction_group.get_transactions()[selected_group_row].id);
-		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
-		if (ImGui::Button("OK##TransactionGroupDialogRemove"))
-		{
-			transaction_group.remove_transaction(selected_group_row);
-			ImGui::CloseCurrentPopup();
+			DialogResult result = member_dialog.draw("Member Transaction Dialog", transaction_model);
+			if (result == DialogResult::Accept)
+			{
+				Transaction new_transaction = member_dialog.get_transaction();
+				new_transaction.id = rng::random_int64();
+				new_transaction.added = DateTime(Clock::now());
+				new_transaction.edited = DateTime(Clock::now());
+				transaction_group->add_transaction(new_transaction);
+				ImGui::CloseCurrentPopup();
+			}
+			else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
+			ImGui::EndPopup();
 		}
 		ImGui::SameLine();
-		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
-		if (ImGui::Button("Cancel##TransactionGroupDialogRemove")) ImGui::CloseCurrentPopup();
-		ImGui::EndPopup();
+
+		// Edit
+		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_E);
+		if (ImGui::Button("Edit##TransactionDialog") && row_valid)
+		{
+			member_dialog.init(transaction_model, category_model, transaction_group->get_transactions()[selected_group_row]);
+			ImGui::OpenPopup("Transaction Edit##MemberDialog");
+		}
+		if (ImGui::BeginPopupModal("Transaction Edit##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			DialogResult result = member_dialog.draw("Member Transaction Dialog", transaction_model);
+			if (result == DialogResult::Accept)
+			{
+				Transaction new_transaction = member_dialog.get_transaction();
+				new_transaction.edited = DateTime(Clock::now());
+				transaction_group->set_transaction(selected_group_row, new_transaction);
+				ImGui::CloseCurrentPopup();
+			}
+			else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
+			ImGui::EndPopup();
+		}
+		ImGui::SameLine();
+
+		// Remove
+		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
+		if (ImGui::Button("Remove##TransactionDialog") && row_valid) ImGui::OpenPopup("Transaction Remove##MemberDialog");
+		if (ImGui::BeginPopupModal("Transaction Remove##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text("Remove transaction with id %zu?", transaction_group->get_transactions()[selected_group_row].id);
+			ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
+			if (ImGui::Button("OK##TransactionDialogRemove"))
+			{
+				transaction_group->remove_transaction(selected_group_row);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
+			if (ImGui::Button("Cancel##TransactionDialogRemove")) ImGui::CloseCurrentPopup();
+			ImGui::EndPopup();
+		}
 	}
+	else
+	{
+		if (date_input.draw("##TransactionDialogDate")) transaction->date = date_input.get_result();
+		if (description_input.draw("##TransactionDialogDescription", "Description"))
+		{
+			transaction->description = description_input.get_result();
+			const bool amount_empty = transaction->amount.value == 0;
+			const bool category_empty = transaction->category.empty();
+			if (amount_empty || category_empty)
+			{
+				std::shared_ptr<const Transaction> matching_transaction;
+				if (transaction_model.get_auto_complete_transaction(transaction->description, matching_transaction))
+				{
+					if (amount_empty)
+					{
+						transaction->amount = matching_transaction->amount;
+						amount_input.update(transaction->amount);
+					}
+					if (category_empty)
+					{
+						transaction->category = matching_transaction->category;
+						category_dropdown.update(transaction->category);
+					}
+				}
+			}
+		}
+		if (amount_input.draw("##TransactionDialogAmount")) transaction->amount = amount_input.get_result();
+		if (category_dropdown.draw("##TransactionDialogCategory")) transaction->category = category_dropdown.get_result_string();
+	}
+
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
-	if (ImGui::Button("OK##TransactionGroupDialog")) return DialogResult::Accept;
+	if (ImGui::Button("OK##TransactionDialog")) return DialogResult::Accept;
 	ImGui::SameLine();
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_C);
-	if (ImGui::Button("Cancel##TransactionGroupDialog")) return DialogResult::Cancel;
+	if (ImGui::Button("Cancel##TransactionDialog")) return DialogResult::Cancel;
+	ImGui::SameLine();
+	if (std::shared_ptr<TransactionGroup> transaction_group = std::dynamic_pointer_cast<TransactionGroup>(transaction))
+	{
+		if (ImGui::Button("Demote to Transaction"))
+		{
+			std::shared_ptr<Transaction> new_transaction = std::make_shared<Transaction>();
+			new_transaction->id = transaction_group->id;
+			new_transaction->date = transaction_group->date;
+			new_transaction->category = transaction_group->category;
+			new_transaction->amount = transaction_group->amount;
+			new_transaction->description = transaction_group->description;
+			new_transaction->added = transaction_group->added;
+			new_transaction->edited = transaction_group->edited;
+			transaction = new_transaction;
+			update_ui();
+		}
+	}
+	else
+	{
+		if (ImGui::Button("Promote to Transaction Group"))
+		{
+			std::shared_ptr<TransactionGroup> new_transaction_group = std::make_shared<TransactionGroup>();
+			new_transaction_group->id = transaction->id;
+			new_transaction_group->date = transaction->date;
+			new_transaction_group->category = transaction->category;
+			new_transaction_group->description = transaction->description;
+			new_transaction_group->added = transaction->added;
+			new_transaction_group->edited = transaction->edited;
+			Transaction member_transaction;
+			member_transaction.id = rng::random_int64();
+			member_transaction.date = transaction->date;
+			member_transaction.category = transaction->category;
+			member_transaction.amount = transaction->amount;
+			member_transaction.added = transaction->added;
+			member_transaction.edited = transaction->edited;
+			new_transaction_group->add_transaction(member_transaction);
+			transaction = new_transaction_group;
+			update_ui();
+		}
+	}
 	return DialogResult::None;
 }
 
-TransactionGroup TransactionGroupDialog::get_transaction_group()
+std::shared_ptr<Transaction> TransactionDialog::get_transaction()
 {
-	transaction_group.date = date_input.get_result();
-	transaction_group.description = description_input.get_result();
-	transaction_group.category = category_dropdown.get_result_string();
-	return transaction_group;
+	transaction->date = date_input.get_result();
+	transaction->description = description_input.get_result();
+	transaction->category = category_dropdown.get_result_string();
+	if (!std::dynamic_pointer_cast<TransactionGroup>(transaction)) transaction->amount = amount_input.get_result();
+	return transaction;
 }
 
-void TransactionGroupDialog::draw_transaction_table(const TransactionModel& transaction_model, const CategoryModel& category_model)
+void TransactionDialog::draw_transaction_table(const TransactionModel& transaction_model, const CategoryModel& category_model)
 {
+	std::shared_ptr<TransactionGroup> transaction_group = std::dynamic_pointer_cast<TransactionGroup>(transaction);
 	constexpr ImVec2 padding(8.0f, 6.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, padding);
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
@@ -188,7 +272,7 @@ void TransactionGroupDialog::draw_transaction_table(const TransactionModel& tran
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 	const std::vector<std::string>& field_names = Transaction::get_field_names();
-	if (ImGui::BeginTable("Transactions##TransactionGroupDialog", field_names.size(), flags))
+	if (ImGui::BeginTable("Transactions##TransactionDialog", field_names.size(), flags))
 	{
 		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
 		ImGui::TableSetupScrollFreeze(0, 1);
@@ -197,10 +281,10 @@ void TransactionGroupDialog::draw_transaction_table(const TransactionModel& tran
 			ImGui::TableSetupColumn(field_name.c_str(), ImGuiTableColumnFlags_None);
 		}
 		ImGui::TableHeadersRow();
-		for (int32_t row = 0; row < transaction_group.get_transactions().size(); row++)
+		for (int32_t row = 0; row < transaction_group->get_transactions().size(); row++)
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, row_height);
-			const Transaction& transaction = transaction_group.get_transactions()[row];
+			const Transaction& transaction = transaction_group->get_transactions()[row];
 			ImU32 background_color = IM_COL32(0, 0, 0, 255);
 			const uint32_t intensity = std::min(uint64_t(std::abs(transaction.amount.value)) / 40ull + 20ull, 255ull);
 			if (transaction.amount.is_negative()) background_color = IM_COL32(intensity, 0, 0, 150);
@@ -239,6 +323,14 @@ void TransactionGroupDialog::draw_transaction_table(const TransactionModel& tran
 	}
 	ImGui::PopStyleColor(3);
 	ImGui::PopStyleVar(2);
+}
+
+void TransactionDialog::update_ui()
+{
+	date_input.update(transaction->date);
+	description_input.update(transaction->description);
+	amount_input.update(transaction->amount);
+	category_dropdown.update(transaction->category);
 }
 
 void AccountsDialog::init(AccountModel& account_model, int64_t transaction_total_amount)

@@ -13,10 +13,10 @@ enum class DialogResult
 	None
 };
 
-class TransactionDialog
+class TransactionMemberDialog
 {
 public:
-	TransactionDialog() = default;
+	TransactionMemberDialog() = default;
 	void init(const TransactionModel& transaction_model, const CategoryModel& category_model, const Transaction& transaction = Transaction());
 	DialogResult draw(const std::string& label, const TransactionModel& transaction_model);
 	Transaction get_transaction();
@@ -29,22 +29,25 @@ private:
 	Transaction transaction;
 };
 
-class TransactionGroupDialog
+class TransactionDialog
 {
 public:
-	TransactionGroupDialog() = default;
-	void init(const TransactionModel& transaction_model, const CategoryModel& category_model, const TransactionGroup& transaction_group = TransactionGroup());
+	TransactionDialog() = default;
+	void init(const TransactionModel& transaction_model, const CategoryModel& category_model, const TransactionGroup& transaction_group);
+	void init(const TransactionModel& transaction_model, const CategoryModel& category_model, const Transaction& transaction);
 	DialogResult draw(const std::string& label, const TransactionModel& transaction_model, const CategoryModel& category_model);
-	TransactionGroup get_transaction_group();
+	std::shared_ptr<Transaction> get_transaction();
 
 private:
-	TransactionDialog member_dialog;
+	TransactionMemberDialog member_dialog;
 	DateInput date_input;
 	CompletionInput description_input;
+	AmountInput amount_input;
 	Dropdown category_dropdown;
-	TransactionGroup transaction_group;
+	std::shared_ptr<Transaction> transaction;
 	int32_t selected_group_row = -1;
 
+	void update_ui();
 	void draw_transaction_table(const TransactionModel& transaction_model, const CategoryModel& category_model);
 };
 

@@ -296,6 +296,11 @@ bool CompletionInput::draw(const std::string& label, const char* hint)
 	return false;
 }
 
+void CompletionInput::update(const std::string& new_text)
+{
+	std::snprintf(buffer.data(), buffer.size(), "%s", new_text.c_str());
+}
+
 std::string CompletionInput::get_result()
 {
 	return std::string(buffer.data(), strnlen(buffer.data(), buffer.size()));

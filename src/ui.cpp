@@ -81,15 +81,15 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
 	if (ImGui::Button("Add", button_size))
 	{
-		transaction_dialog.init(filtered_transaction_model, category_model);
+		transaction_dialog.init(filtered_transaction_model, category_model, Transaction());
 		ImGui::OpenPopup("Transaction Add##Dialog");
 	}
 	if (ImGui::BeginPopupModal("Transaction Add##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		DialogResult result = transaction_dialog.draw("Transaction Dialog", filtered_transaction_model);
+		DialogResult result = transaction_dialog.draw("Transaction Dialog", filtered_transaction_model, category_model);
 		if (result == DialogResult::Accept)
 		{
-			std::shared_ptr<Transaction> new_transaction = std::make_shared<Transaction>(transaction_dialog.get_transaction());
+			std::shared_ptr<Transaction> new_transaction = transaction_dialog.get_transaction();
 			new_transaction->id = rng::random_int64();
 			new_transaction->added = DateTime(Clock::now());
 			new_transaction->edited = DateTime(Clock::now());
@@ -107,78 +107,27 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	}
 	ImGui::SameLine();
 
-	// Add Group
-	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_G);
-	if (ImGui::Button("Add Group", button_size))
-	{
-		transaction_group_dialog.init(filtered_transaction_model, category_model);
-		ImGui::OpenPopup("Transaction Group Add##Dialog");
-	}
-	if (ImGui::BeginPopupModal("Transaction Group Add##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		DialogResult result = transaction_group_dialog.draw("Transaction Group Dialog", filtered_transaction_model, category_model);
-		if (result == DialogResult::Accept)
-		{
-			std::shared_ptr<TransactionGroup> new_transaction_group = std::make_shared<TransactionGroup>(transaction_group_dialog.get_transaction_group());
-			new_transaction_group->id = rng::random_int64();
-			new_transaction_group->added = DateTime(Clock::now());
-			new_transaction_group->edited = DateTime(Clock::now());
-			transaction_model.add(new_transaction_group);
-			if (transaction_filter.check(new_transaction_group))
-			{
-				filtered_transaction_model.add(new_transaction_group);
-				total_amount_graph.update_data(filtered_transaction_model);
-				filtered_transaction_model.dirty = false;
-			}
-			ImGui::CloseCurrentPopup();
-		}
-		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
-		ImGui::EndPopup();
-	}
-	ImGui::SameLine();
-
 	// Edit
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_E);
 	if (ImGui::Button("Edit", button_size) && row_valid)
 	{
 		const std::shared_ptr<const Transaction> transaction = transaction_table.get_selected_transaction();
-		if (const std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
+		if (std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
 		{
-			transaction_group_dialog.init(filtered_transaction_model, category_model, *transaction_group);
-			ImGui::OpenPopup("Transaction Group Edit##Dialog");
+			transaction_dialog.init(filtered_transaction_model, category_model, *transaction_group);
 		}
 		else
 		{
 			transaction_dialog.init(filtered_transaction_model, category_model, *transaction);
-			ImGui::OpenPopup("Transaction Edit##Dialog");
 		}
-	}
-	if (ImGui::BeginPopupModal("Transaction Group Edit##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		DialogResult result = transaction_group_dialog.draw("Transaction Group Dialog", filtered_transaction_model, category_model);
-		if (result == DialogResult::Accept)
-		{
-			std::shared_ptr<TransactionGroup> new_transaction_group = std::make_shared<TransactionGroup>(transaction_group_dialog.get_transaction_group());
-			new_transaction_group->edited = DateTime(Clock::now());
-			transaction_model.set(transaction_table.get_selected_transaction(), new_transaction_group);
-			filtered_transaction_model.remove(transaction_table.get_selected_transaction());
-			if (transaction_filter.check(new_transaction_group)) filtered_transaction_model.add(new_transaction_group);
-			if (filtered_transaction_model.dirty)
-			{
-				total_amount_graph.update_data(filtered_transaction_model);
-				filtered_transaction_model.dirty = false;
-			}
-			ImGui::CloseCurrentPopup();
-		}
-		else if (result == DialogResult::Cancel) ImGui::CloseCurrentPopup();
-		ImGui::EndPopup();
+		ImGui::OpenPopup("Transaction Edit##Dialog");
 	}
 	if (ImGui::BeginPopupModal("Transaction Edit##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		DialogResult result = transaction_dialog.draw("Transaction Dialog", filtered_transaction_model);
+		DialogResult result = transaction_dialog.draw("Transaction Dialog", filtered_transaction_model, category_model);
 		if (result == DialogResult::Accept)
 		{
-			std::shared_ptr<Transaction> new_transaction = std::make_shared<Transaction>(transaction_dialog.get_transaction());
+			std::shared_ptr<Transaction> new_transaction = transaction_dialog.get_transaction();
 			new_transaction->edited = DateTime(Clock::now());
 			transaction_model.set(transaction_table.get_selected_transaction(), new_transaction);
 			filtered_transaction_model.remove(transaction_table.get_selected_transaction());

@@ -102,6 +102,7 @@ class CompletionInput
 public:
 	void init(const std::vector<std::string>& completion_items, const std::string& initial_text = "");
 	bool draw(const std::string& label, const char* hint = "");
+	void update(const std::string& new_text);
 	std::string get_result();
 
 private:
