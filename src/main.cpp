@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <vector>
+#include "SDL3/SDL_filesystem.h"
 #include "application.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -7,6 +8,11 @@
 
 int main(int argc, char** argv)
 {
+	char* sdl_pref_file_path = SDL_GetPrefPath("itzMatze", "CashGuard");
+	if (!sdl_pref_file_path) return 10;
+	std::filesystem::path pref_file_path = std::filesystem::path(std::string(sdl_pref_file_path));
+	SDL_free(sdl_pref_file_path);
+
 	std::vector<spdlog::sink_ptr> sinks;
 	sinks.push_back(std::make_shared<spdlog::sinks::stderr_color_sink_mt>());
 	sinks[0]->set_pattern("%^[%Y-%m-%d %T.%e] [%L]%$ %v");
@@ -23,6 +29,6 @@ int main(int argc, char** argv)
 #endif
 
 	cglog::info("Starting");
-	Application app;
+	Application app(pref_file_path);
 	return app.run();
 }

@@ -25,9 +25,6 @@ Transaction parse_transaction(const auto& rj_transaction)
 bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model)
 {
 	cglog::debug("Loading file \"{}\"", file_path.string());
-	transaction_model.clear();
-	account_model.clear();
-	category_model.clear();
 	std::ifstream file(file_path);
 	if (!file.is_open())
 	{
@@ -53,6 +50,10 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 		cglog::error("Unsupported version in file \"{}\"", file_path.string());
 		return false;
 	}
+
+	transaction_model.clear();
+	account_model.clear();
+	category_model.clear();
 
 	category_model.add("", Color(0.0f, 0.0f, 0.0f, 1.0f));
 	for (const auto& rj_category : doc["Categories"].GetArray()) category_model.add(rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));

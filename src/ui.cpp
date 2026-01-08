@@ -6,6 +6,8 @@
 
 void UI::init(const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
+	open_existing_file = false;
+	create_new_file = false;
 	total_amount_graph.update_data(transaction_model);
 	transaction_filter.init(category_model);
 	filtered_transaction_model.clear();

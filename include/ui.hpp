@@ -15,8 +15,8 @@ public:
 	UI() = default;
 	void init(const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model);
 	void draw(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model, bool valid_file);
-	bool open_existing_file = false;
-	bool create_new_file = false;
+	bool open_existing_file;
+	bool create_new_file;
 
 private:
 	TransactionModel filtered_transaction_model;

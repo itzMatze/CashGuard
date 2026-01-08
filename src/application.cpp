@@ -8,27 +8,71 @@
 #include <filesystem>
 #include <fstream>
 
-bool Application::load_file(const std::string& file_path)
+Application::Application(std::filesystem::path pref_path)
+{
+	cache_file_path = pref_path / "cache";
+	if (!std::filesystem::exists(cache_file_path))
+	{
+		cglog::debug("Didn't find an existing cache file.");
+		return;
+	}
+	std::ifstream cache_file(cache_file_path, std::ios::binary);
+	if (!cache_file.is_open())
+	{
+		cglog::debug("Failed to open cache file for reading!");
+		return;
+	}
+	std::string file_path;
+	std::getline(cache_file, file_path);
+	cache_file.close();
+	if (!load_file(file_path, false))
+	{
+		cglog::debug("Failed to open file from cache!");
+	}
+}
+
+Application::~Application()
+{
+	std::ofstream cache_file(cache_file_path, std::ios::binary | std::ios::trunc);
+	if (!cache_file.is_open())
+	{
+		cglog::debug("Failed to open cache file for writing!");
+		return;
+	}
+	cache_file << file_path.string() << "\n";
+	cache_file.close();
+	if (!file_path_valid) return;
+}
+
+bool Application::load_file(const std::string& file_path, bool create)
 {
 	std::filesystem::path file(file_path);
-	if (!std::filesystem::exists(file))
+	if (create)
 	{
-		cglog::info("Failed to find file \"{}\". Creating new file.", file_path);
+		if (std::filesystem::exists(file))
+		{
+			cglog::error("Failed to create file \"{}\". It already exists.", file_path);
+			return false;
+		}
 		if (file.has_parent_path() && !std::filesystem::exists(file.parent_path()))
 		{
 			bool success = std::filesystem::create_directories(file.parent_path());
-			CG_ASSERT(success, "Failed to create directories!");
+			if (!success)
+			{
+				cglog::error("Failed to create directories!");
+				return false;
+			}
 		}
 		std::ofstream out_file(file);
-		CG_ASSERT(out_file.is_open(), "Failed to open file!");
+		if (!out_file.is_open())
+		{
+			cglog::error("Failed to create file!");
+			return false;
+		}
 		out_file.close();
 	}
-	if (!cg_file_handler.load_from_file(file, transaction_model, account_model, category_model))
-	{
-		cglog::error("Failed to load file \"{}\". Exiting.", file_path);
-		return false;
-	}
-	this->file_path = file_path;
+	if (!cg_file_handler.load_from_file(file, transaction_model, account_model, category_model)) return false;
+	this->file_path = std::filesystem::absolute(file);
 	file_path_valid = true;
 	return true;
 }
@@ -39,8 +83,7 @@ bool Application::prompt_new_file()
 	if (file.result().empty()) return false;
 	std::filesystem::path path(file.result());
 	if (path.extension() != ".cgt") path.replace_extension(".cgt");
-	load_file(path);
-	return true;
+	return load_file(path, true);
 }
 
 bool Application::prompt_open_file()
@@ -49,8 +92,7 @@ bool Application::prompt_open_file()
 	if (file.result().empty()) return false;
 	std::filesystem::path path(file.result().at(0));
 	if (path.extension() != ".cgt") path.replace_extension(".cgt");
-	load_file(path);
-	return true;
+	return load_file(path, false);
 }
 
 int32_t Application::run()
