@@ -22,16 +22,17 @@ bool to_amount(const std::string& string_value, Amount& amount);
 bool operator<(const Amount& a, const Amount& b);
 bool operator>(const Amount& a, const Amount& b);
 
-namespace TransactionFieldNames
+enum TransactionFieldIndices : uint32_t
 {
-	const std::string ID = "ID";
-	const std::string Date = "Date";
-	const std::string Category = "Category";
-	const std::string Amount = "Amount";
-	const std::string Description = "Description";
-	const std::string Added = "Added";
-	const std::string Edited = "Edited";
-}
+	TRANSACTION_FIELD_ID = 0,
+	TRANSACTION_FIELD_DATE = 1,
+	TRANSACTION_FIELD_CATEGORY = 2,
+	TRANSACTION_FIELD_AMOUNT = 3,
+	TRANSACTION_FIELD_DESCRIPTION = 4,
+	TRANSACTION_FIELD_ADDED = 5,
+	TRANSACTION_FIELD_EDITED = 6,
+	TRANSACTION_FIELD_COUNT
+};
 
 using Clock = std::chrono::system_clock;
 using Date = std::chrono::year_month_day;
@@ -50,15 +51,12 @@ class Transaction
 public:
 	Transaction();
 	virtual ~Transaction() = default;
-	static std::vector<std::string> get_field_names();
-	std::string get_field(const std::string& field_name) const;
-	std::string get_field_view(const std::string& field_name) const;
-	void set_field(const std::string& field_name, const std::string& value);
-	virtual std::string to_string() const;
+	std::string get_field(int32_t field_index) const;
+	void set_field(int32_t field_index, const std::string& value);
 
-	size_t id;
+	uint64_t id;
 	Date date;
-	std::string category;
+	uint64_t category_id;
 	Amount amount;
 	std::string description;
 	DateTime added;
@@ -78,7 +76,6 @@ public:
 	void add_transaction(const Transaction& transaction);
 	void remove_transaction(int32_t index);
 	const std::vector<Transaction>& get_transactions() const;
-	std::string to_string() const override;
 	void update_amount();
 
 private:

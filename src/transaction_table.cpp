@@ -14,15 +14,14 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f));
 
-	const std::vector<std::string>& field_names = Transaction::get_field_names();
 	// show additional group field
-	if (ImGui::BeginTable("Transactions", field_names.size() + 1, flags, available_space))
+	if (ImGui::BeginTable("Transactions", TRANSACTION_FIELD_COUNT + 1, flags, available_space))
 	{
 		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
 		ImGui::TableSetupScrollFreeze(0, 1);
-		for (const std::string& field_name : field_names)
+		for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
 		{
-			ImGui::TableSetupColumn(field_name.c_str(), ImGuiTableColumnFlags_None);
+			ImGui::TableSetupColumn(std::to_string(i).c_str(), ImGuiTableColumnFlags_None);
 		}
 		ImGui::TableSetupColumn("Group", ImGuiTableColumnFlags_None);
 		ImGui::TableHeadersRow();
@@ -40,31 +39,35 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 				else background_color = IM_COL32(0, intensity, 0, 150);
 				bool hovered = false;
 				bool selected = false;
-				for (int32_t column = 0; column < field_names.size(); column++)
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
+				selected = (row == selected_row);
+				if (ImGui::Selectable(std::to_string(transaction->id).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
 				{
-					const std::string& field_name = field_names[column];
-					ImGui::TableSetColumnIndex(column);
-					if (field_name == TransactionFieldNames::Category) ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, category_model.get_colors().at(transaction->category).get_ImU32());
-					else ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
-					// set up selection and highlighting
-					if (column == 0)
-					{
-						selected = (row == selected_row);
-						if (ImGui::Selectable(transaction->get_field_view(field_name).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
-						{
-							selected_row = row;
-							selected_transaction = transaction;
-						}
-						hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
-						ImGui::SameLine();
-					}
-					else
-					{
-						if (field_name != TransactionFieldNames::Amount || show_amounts) ImGui::Text("%s", transaction->get_field_view(field_name).c_str());
-						else ImGui::Text(" X €");
-					}
+					selected_row = row;
+					selected_transaction = transaction;
 				}
-				ImGui::TableSetColumnIndex(field_names.size());
+				hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+				ImGui::TableSetColumnIndex(1);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
+				ImGui::Text("%s", DateUtils::to_string(transaction->date).c_str());
+				ImGui::TableSetColumnIndex(2);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, category_model.get_category(transaction->category_id).color.get_ImU32());
+				ImGui::Text("%s", category_model.get_category(transaction->category_id).name.c_str());
+				ImGui::TableSetColumnIndex(3);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
+				if (show_amounts) ImGui::Text("%s", transaction->amount.to_string_view().c_str());
+				else ImGui::Text(" X €");
+				ImGui::TableSetColumnIndex(4);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
+				ImGui::Text("%s", transaction->description.c_str());
+				ImGui::TableSetColumnIndex(5);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
+				ImGui::Text("%s", DateUtils::to_string(transaction->added).c_str());
+				ImGui::TableSetColumnIndex(6);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
+				ImGui::Text("%s", DateUtils::to_string(transaction->edited).c_str());
+				ImGui::TableSetColumnIndex(7);
 				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
 				ImGui::Text("%s", std::dynamic_pointer_cast<const TransactionGroup>(transaction_model.at(row)) ? "x" : " ");
 				if (selected || hovered)
@@ -72,7 +75,7 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 					ImGuiTable* table = ImGui::GetCurrentTable();
 					ImVec2 min(ImGui::TableGetCellBgRect(table, 0).Min);
 					// last column is the group column which is not contained in field_names
-					ImVec2 max(ImGui::TableGetCellBgRect(table, field_names.size()).Max);
+					ImVec2 max(ImGui::TableGetCellBgRect(table, TRANSACTION_FIELD_COUNT).Max);
 					constexpr float border_thickness = 4.0f;
 					ImDrawList* dl = ImGui::GetWindowDrawList();
 					ImU32 highlight_color = IM_COL32(0, 255, 255, 128);

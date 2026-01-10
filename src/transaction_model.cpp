@@ -78,10 +78,10 @@ bool TransactionModel::is_empty() const
 	return transactions.size() == 0;
 }
 
-std::vector<std::string> TransactionModel::get_unique_value_list(const std::string& field_name) const
+std::vector<std::string> TransactionModel::get_unique_value_list(int32_t field_index) const
 {
 	std::set<std::string> unique_values;
-	for (const std::shared_ptr<const Transaction> transaction : transactions) unique_values.emplace(transaction->get_field(field_name));
+	for (const std::shared_ptr<const Transaction> transaction : transactions) unique_values.emplace(transaction->get_field(field_index));
 	std::vector<std::string> values;
 	for (const std::string& value : unique_values) values.push_back(value);
 	return values;
@@ -92,7 +92,7 @@ bool TransactionModel::get_auto_complete_transaction(const std::string& descript
 	completedTransaction = nullptr;
 	for (const std::shared_ptr<const Transaction> transaction : transactions)
 	{
-		if (transaction->get_field(TransactionFieldNames::Description) == description)
+		if (transaction->get_field(TRANSACTION_FIELD_DESCRIPTION) == description)
 		{
 			completedTransaction = transaction;
 			return true;

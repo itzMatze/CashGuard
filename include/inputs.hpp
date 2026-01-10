@@ -1,5 +1,6 @@
 #pragma once
 
+#include "category_model.hpp"
 #include "imgui.h"
 #include "transaction.hpp"
 #include "util/color.hpp"
@@ -78,22 +79,20 @@ private:
 	StringInput input;
 };
 
-class Dropdown
+class CategoryDropdown
 {
 public:
-	Dropdown() = default;
-	void init(const std::vector<std::string>& options, int32_t initial_option = -1, const std::unordered_map<std::string, Color>& colors = {});
-	void init(const std::vector<std::string>& options, const std::string& initial_option, const std::unordered_map<std::string, Color>& colors = {});
-	void update(const std::string& new_selected_option);
+	CategoryDropdown() = default;
+	void init(const std::vector<Category>& categories, uint64_t selected_category_id);
+	void update(uint64_t new_selected_category_id);
 	bool draw(const std::string& label, const char* hint = "");
-	int32_t get_result();
-	std::string get_result_string();
+	Category get_result();
 
 private:
-	std::vector<std::string> options;
-	std::unordered_map<std::string, Color> colors;
+	std::vector<Category> categories;
 	ImGuiTextFilter filter;
-	int32_t current;
+	uint64_t current_id;
+	int32_t current_index;
 	bool active;
 };
 

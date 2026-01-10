@@ -133,65 +133,43 @@ Transaction::Transaction() :
 	edited(Clock::now())
 {}
 
-std::vector<std::string> Transaction::get_field_names()
+std::string Transaction::get_field(int32_t field_index) const
 {
-	namespace tfn = TransactionFieldNames;
-	return std::vector<std::string>({
-		tfn::ID,
-		tfn::Date,
-		tfn::Category,
-		tfn::Amount,
-		tfn::Description,
-		tfn::Added,
-		tfn::Edited});
-}
-
-std::string Transaction::get_field(const std::string& field_name) const
-{
-	namespace tfn = TransactionFieldNames;
-	if (field_name == tfn::ID) return std::to_string(id);
-	else if (field_name == tfn::Date) return DateUtils::to_string(date);
-	else if (field_name == tfn::Category) return category;
-	else if (field_name == tfn::Amount) return amount.to_string();
-	else if (field_name == tfn::Description) return description;
-	else if (field_name == tfn::Added) return DateUtils::to_string(added);
-	else if (field_name == tfn::Edited) return DateUtils::to_string(edited);
+	if (field_index == TRANSACTION_FIELD_ID) return std::to_string(id);
+	else if (field_index == TRANSACTION_FIELD_DATE) return DateUtils::to_string(date);
+	else if (field_index == TRANSACTION_FIELD_CATEGORY) return std::to_string(category_id);
+	else if (field_index == TRANSACTION_FIELD_AMOUNT) return amount.to_string();
+	else if (field_index == TRANSACTION_FIELD_DESCRIPTION) return description;
+	else if (field_index == TRANSACTION_FIELD_ADDED) return DateUtils::to_string(added);
+	else if (field_index == TRANSACTION_FIELD_EDITED) return DateUtils::to_string(edited);
 	else CG_THROW("Invalid transaction field name!");
 }
 
-std::string Transaction::get_field_view(const std::string& field_name) const
+void Transaction::set_field(int32_t field_index, const std::string& value)
 {
-	namespace tfn = TransactionFieldNames;
-	if (field_name == tfn::Amount) return amount.to_string_view();
-	else return get_field(field_name);
-}
-
-void Transaction::set_field(const std::string& field_name, const std::string& value)
-{
-	namespace tfn = TransactionFieldNames;
-	if (field_name == tfn::ID) id = std::stoull(value);
-	else if (field_name == tfn::Date)
+	if (field_index == TRANSACTION_FIELD_ID) id = std::stoull(value);
+	else if (field_index == TRANSACTION_FIELD_DATE)
 	{
 		std::istringstream iss(value);
 		DateTime date_time;
 		iss >> std::chrono::parse("%d.%m.%Y", date_time);
 		if (!iss.fail()) date = DateUtils::to_date(date_time);
 	}
-	else if (field_name == tfn::Category) category = value;
-	else if (field_name == tfn::Amount)
+	else if (field_index == TRANSACTION_FIELD_CATEGORY) category_id = std::stoull(value);
+	else if (field_index == TRANSACTION_FIELD_AMOUNT)
 	{
 		Amount new_amount;
 		if (to_amount(value, new_amount)) amount = new_amount;
 	}
-	else if (field_name == tfn::Description) description = value;
-	else if (field_name == tfn::Added)
+	else if (field_index == TRANSACTION_FIELD_DESCRIPTION) description = value;
+	else if (field_index == TRANSACTION_FIELD_ADDED)
 	{ 
 		std::istringstream iss(value);
 		DateTime date_time;
 		iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
 		if (!iss.fail()) added = date_time;
 	}
-	else if (field_name == tfn::Edited)
+	else if (field_index == TRANSACTION_FIELD_EDITED)
 	{
 		std::istringstream iss(value);
 		DateTime date_time;
@@ -199,16 +177,6 @@ void Transaction::set_field(const std::string& field_name, const std::string& va
 		if (!iss.fail()) edited = date_time;
 	}
 	else CG_THROW("Invalid transaction field name!");
-}
-
-std::string Transaction::to_string() const
-{
-	std::string output = "";
-	for (const std::string& field : get_field_names())
-	{
-		output += field + ": " + get_field(field) + "; ";
-	}
-	return output;
 }
 
 bool operator<(const Transaction& a, const Transaction& b)
@@ -233,10 +201,9 @@ bool operator>(const Transaction& a, const Transaction& b)
 
 bool operator==(const Transaction& a, const Transaction& b)
 {
-	std::vector<std::string> fields = Transaction::get_field_names();
-	for (const std::string& field : fields)
+	for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
 	{
-		if (a.get_field(field) != b.get_field(field)) return false;
+		if (a.get_field(i) != b.get_field(i)) return false;
 	}
 	return true;
 }
@@ -269,11 +236,6 @@ const std::vector<Transaction>& TransactionGroup::get_transactions() const
 	return transactions;
 }
 
-std::string TransactionGroup::to_string() const
-{
-	return Transaction::to_string() + "Transaction Group";
-}
-
 void TransactionGroup::update_amount()
 {
 	amount.value = 0;
@@ -282,10 +244,9 @@ void TransactionGroup::update_amount()
 
 bool operator==(const TransactionGroup& a, const TransactionGroup& b)
 {
-	std::vector<std::string> fields = Transaction::get_field_names();
-	for (const std::string& field : fields)
+	for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
 	{
-		if (a.get_field(field) != b.get_field(field)) return false;
+		if (a.get_field(i) != b.get_field(i)) return false;
 	}
 	if (a.get_transactions().size() != b.get_transactions().size()) return false;
 	for (int32_t i = 0; i < a.get_transactions().size(); i++)

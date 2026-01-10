@@ -17,7 +17,7 @@ public:
 	const std::vector<std::shared_ptr<const Transaction>>& get_transactions() const;
 	void clear();
 	bool is_empty() const;
-	std::vector<std::string> get_unique_value_list(const std::string& field_name) const;
+	std::vector<std::string> get_unique_value_list(int32_t field_index) const;
 	bool get_auto_complete_transaction(const std::string& description, std::shared_ptr<const Transaction>& completed_transaction) const;
 	Amount get_total_amount() const;
 

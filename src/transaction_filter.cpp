@@ -8,10 +8,9 @@ TransactionFilter::TransactionFilter()
 
 void TransactionFilter::init(const CategoryModel& category_model)
 {
-	for (const std::string& category : category_model.get_names())
+	for (const Category& category : category_model.get_categories())
 	{
-		if (category.empty()) continue;
-		category_entries.push_back(CategoryEntry(category, category_model.get_colors().at(category), true));
+		category_entries.push_back(CategoryEntry(category.id, category.name, category.color, true));
 	}
 	reset();
 	show_advanced = false;
@@ -21,6 +20,7 @@ void TransactionFilter::init(const CategoryModel& category_model)
 void TransactionFilter::reset()
 {
 	simple_input.init();
+	simple_phrase = "";
 	search_phrases_table.init();
 	ignore_phrases_table.init();
 	for (CategoryEntry& entry : category_entries) entry.selected = true;
@@ -141,16 +141,12 @@ bool TransactionFilter::check(const std::shared_ptr<const Transaction> transacti
 			}
 		}
 		bool category_match = false;
-		if (transaction->category.empty()) category_match = true;
-		else
+		for (const CategoryEntry& entry : category_entries)
 		{
-			for (const CategoryEntry& entry : category_entries)
+			if (entry.selected && entry.id == transaction->category_id)
 			{
-				if (entry.selected && entry.name == transaction->category)
-				{
-					category_match = true;
-					break;
-				}
+				category_match = true;
+				break;
 			}
 		}
 		bool date_range_match = false;

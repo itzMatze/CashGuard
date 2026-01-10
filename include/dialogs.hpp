@@ -25,7 +25,7 @@ private:
 	DateInput date_input;
 	CompletionInput description_input;
 	AmountInput amount_input;
-	Dropdown category_dropdown;
+	CategoryDropdown category_dropdown;
 	Transaction transaction;
 };
 
@@ -43,7 +43,7 @@ private:
 	DateInput date_input;
 	CompletionInput description_input;
 	AmountInput amount_input;
-	Dropdown category_dropdown;
+	CategoryDropdown category_dropdown;
 	std::shared_ptr<Transaction> transaction;
 	int32_t selected_group_row = -1;
 

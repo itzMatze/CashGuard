@@ -43,6 +43,7 @@ private:
 	void draw_category_table(const std::string& label);
 	struct CategoryEntry
 	{
+		uint64_t id;
 		std::string name;
 		Color color;
 		bool selected;

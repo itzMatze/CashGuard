@@ -1,26 +1,30 @@
 #include "category_model.hpp"
+#include "util/log.hpp"
 
-void CategoryModel::add(const std::string& name, const Color& color)
+void CategoryModel::add(const Category& category)
 {
-	category_names.push_back(name);
-	category_colors.emplace(name, color);
+	int32_t index = 0;
+	while (index < categories.size() && category.id < categories[index].id) index++;
+	categories.insert(categories.begin() + index, category);
 	dirty = true;
 }
 
 void CategoryModel::clear()
 {
-	category_names.clear();
-	category_colors.clear();
+	categories.clear();
 	dirty = true;
 }
 
-const std::vector<std::string>& CategoryModel::get_names() const
+const Category& CategoryModel::get_category(uint64_t id) const
 {
-	return category_names;
+	for (int32_t i = 0; i < categories.size(); i++)
+	{
+		if (categories[i].id == id) return categories[i];
+	}
+	CG_THROW("Failed to find category id!");
 }
 
-const std::unordered_map<std::string, Color>& CategoryModel::get_colors() const
+const std::vector<Category>& CategoryModel::get_categories() const
 {
-	return category_colors;
+	return categories;
 }
-

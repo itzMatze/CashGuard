@@ -8,16 +8,29 @@
 #include "util/log.hpp"
 #include "util/random_generator.hpp"
 
-const char* version_string = "0.2.0";
+const char* version_string = "0.3.0";
+
+const std::array<std::string, TRANSACTION_FIELD_COUNT>& get_transation_field_names()
+{
+	static std::array<std::string, TRANSACTION_FIELD_COUNT> transaction_field_names;
+	transaction_field_names[TRANSACTION_FIELD_ID] = "ID";
+	transaction_field_names[TRANSACTION_FIELD_DATE] = "Date";
+	transaction_field_names[TRANSACTION_FIELD_CATEGORY] = "Category";
+	transaction_field_names[TRANSACTION_FIELD_AMOUNT] = "Amount";
+	transaction_field_names[TRANSACTION_FIELD_DESCRIPTION] = "Description";
+	transaction_field_names[TRANSACTION_FIELD_ADDED] = "Added";
+	transaction_field_names[TRANSACTION_FIELD_EDITED] = "Edited";
+	return transaction_field_names;
+}
 
 Transaction parse_transaction(const auto& rj_transaction)
 {
-	std::vector<std::string> fields = Transaction::get_field_names();
 	Transaction transaction;
-	for (const std::string& field : fields)
+	for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
 	{
+		const std::string& field = get_transation_field_names()[i];
 		if (!rj_transaction.HasMember(field.c_str())) continue;
-		transaction.set_field(field, rj_transaction[field.c_str()].GetString());
+		transaction.set_field(i, rj_transaction[field.c_str()].GetString());
 	}
 	return transaction;
 }
@@ -38,7 +51,7 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 	transaction_model.clear();
 	account_model.clear();
 	category_model.clear();
-	category_model.add("", Color(0.0f, 0.0f, 0.0f, 1.0f));
+	category_model.add(Category(0, "", Color(0.0f, 0.0f, 0.0f, 1.0f)));
 	transaction_model.dirty = false;
 	account_model.dirty = false;
 	category_model.dirty = false;
@@ -58,7 +71,17 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 		return false;
 	}
 
-	for (const auto& rj_category : doc["Categories"].GetArray()) category_model.add(rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));
+	std::set<uint64_t> ids;
+	Category category;
+	for (const auto& rj_category : doc["Categories"].GetArray())
+	{
+		const Category category(std::stoull(rj_category["ID"].GetString()), rj_category["Name"].GetString(), Color(rj_category["Color"].GetString()));
+		if (!ids.emplace(category.id).second)
+		{
+			CG_THROW("Duplicate Category ID: {}", std::to_string(category.id));
+		}
+		category_model.add(category);
+	}
 	for (const auto& rj_account : doc["Accounts"].GetArray())
 	{
 		Account account{.name = rj_account["Name"].GetString()};
@@ -69,20 +92,25 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 		}
 		account_model.add(account);
 	}
-	std::set<uint64_t> ids;
+	ids.clear();
 	for (const auto& rj_transaction : doc["Transactions"].GetArray())
 	{
-		Transaction transaction = parse_transaction(rj_transaction);
+		const Transaction transaction = parse_transaction(rj_transaction);
 		if (!ids.emplace(transaction.id).second)
 		{
-			CG_THROW("Duplicate ID: {}", transaction.get_field(TransactionFieldNames::ID));
+			CG_THROW("Duplicate Transaction ID: {}", transaction.get_field(TRANSACTION_FIELD_ID));
 		}
 		if (rj_transaction.HasMember("Transactions"))
 		{
 			std::shared_ptr<TransactionGroup> transaction_group = std::make_shared<TransactionGroup>(transaction);
 			for (const auto& rj_sub_transaction : rj_transaction["Transactions"].GetArray())
 			{
-				transaction_group->add_transaction(parse_transaction(rj_sub_transaction));
+				const Transaction sub_transaction = parse_transaction(rj_sub_transaction);
+				if (!ids.emplace(sub_transaction.id).second)
+				{
+					CG_THROW("Duplicate Transaction ID: {}", sub_transaction.get_field(TRANSACTION_FIELD_ID));
+				}
+				transaction_group->add_transaction(sub_transaction);
 			}
 			transaction_model.add(transaction_group);
 		}
@@ -100,11 +128,10 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 void serialize_transaction(const Transaction& transaction, rapidjson::Value& json_object, rapidjson::Document::AllocatorType& allocator)
 {
 	json_object.SetObject();
-	std::vector<std::string> fields = Transaction::get_field_names();
-	for (const std::string& field : fields)
+	for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
 	{
-		rapidjson::Value name(field.c_str(), allocator);
-		rapidjson::Value value(transaction.get_field(field).c_str(), allocator);
+		rapidjson::Value name(get_transation_field_names()[i].c_str(), allocator);
+		rapidjson::Value value(transaction.get_field(i).c_str(), allocator);
 		json_object.AddMember(name, value, allocator);
 	}
 }
@@ -119,17 +146,21 @@ bool CGFileHandler::save_to_file(const std::filesystem::path& file_path, const T
 
 	rapidjson::Value json_categories;
 	json_categories.SetArray();
-	for (const std::string& category : category_model.get_names())
+	for (const Category& category : category_model.get_categories())
 	{
-		if (category.empty()) continue;
+		if (category.id == 0) continue;
 		rapidjson::Value json_object;
 		json_object.SetObject();
 		{
-			rapidjson::Value value(category.c_str(), allocator);
+			rapidjson::Value value(std::to_string(category.id).c_str(), allocator);
+			json_object.AddMember("ID", value, allocator);
+		}
+		{
+			rapidjson::Value value(category.name.c_str(), allocator);
 			json_object.AddMember("Name", value, allocator);
 		}
 		{
-			rapidjson::Value value(category_model.get_colors().at(category).to_string().c_str(), allocator);
+			rapidjson::Value value(category.color.to_string().c_str(), allocator);
 			json_object.AddMember("Color", value, allocator);
 		}
 		json_categories.PushBack(json_object, allocator);

@@ -1,4 +1,5 @@
 #include "inputs.hpp"
+#include "category_model.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "util/log.hpp"
@@ -116,51 +117,43 @@ bool AmountInput::is_active() const
 	return input.is_active();
 }
 
-void Dropdown::init(const std::vector<std::string>& options, int32_t initial_option, const std::unordered_map<std::string, Color>& colors)
+void CategoryDropdown::init(const std::vector<Category>& categories, uint64_t selected_category_id)
 {
-	this->options.clear();
-	this->options.reserve(options.size());
-	for (const std::string& option : options) this->options.push_back(option);
-	this->colors.clear();
-	this->colors.reserve(colors.size());
-	for (const std::pair<std::string, Color>& entry : colors) this->colors.insert(entry);
-	current = initial_option;
+	this->categories.clear();
+	this->categories.reserve(categories.size());
+	for (const Category& category : categories) this->categories.push_back(category);
+	current_id = selected_category_id;
+	for (int32_t i = 0; i < categories.size(); i++)
+	{
+		if (categories[i].id == current_id)
+		{
+			current_index = i;
+			break;
+		}
+	}
 	active = false;
 }
 
-void Dropdown::init(const std::vector<std::string>& options, const std::string& initial_option, const std::unordered_map<std::string, Color>& colors)
+void CategoryDropdown::update(uint64_t new_selected_category_id)
 {
-	for (int32_t i = 0; i < options.size(); i++)
+	current_id = new_selected_category_id;
+	for (int32_t i = 0; i < categories.size(); i++)
 	{
-		if (options[i] == initial_option)
+		if (categories[i].id == current_id)
 		{
-			init(options, i, colors);
-			return;
-		}
-	}
-	init(options, -1, colors);
-}
-
-void Dropdown::update(const std::string& new_selected_option)
-{
-	for (int32_t i = 0; i < options.size(); i++)
-	{
-		if (options[i] == new_selected_option)
-		{
-			current = i;
-			return;
+			current_index = i;
+			break;
 		}
 	}
 }
 
-bool Dropdown::draw(const std::string& label, const char* hint)
+bool CategoryDropdown::draw(const std::string& label, const char* hint)
 {
-	const bool current_valid = (current >= 0 && current < options.size());
 	bool changed = false;
-	const ImU32 selected_category_color = (!current_valid || colors.empty()) ? IM_COL32(0, 0, 0, 255) : colors.at(options[current]).get_ImU32();
+	const ImU32 selected_category_color = categories[current_index].color.get_ImU32();
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, selected_category_color);
 	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, selected_category_color);
-	if (ImGui::BeginCombo(label.c_str(), (current_valid ? options[current].c_str() : "")))
+	if (ImGui::BeginCombo(label.c_str(), categories[current_index].name.c_str()))
 	{
 		ImGui::PopStyleColor(2);
 		if (ImGui::IsWindowAppearing())
@@ -170,24 +163,26 @@ bool Dropdown::draw(const std::string& label, const char* hint)
 		}
 		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_F);
 		filter.Draw("##Filter", -FLT_MIN);
-		for (int i = 0; i < options.size(); i++)
+		for (int i = 0; i < categories.size(); i++)
 		{
-			if (filter.PassFilter(options[i].c_str()))
+			const Category& category = categories[i];
+			if (filter.PassFilter(category.name.c_str()))
 			{
-				const ImU32 category_color = colors.empty() ? IM_COL32(0, 0, 0, 255) : colors.at(options[i]).get_ImU32();
+				const ImU32 category_color = category.color.get_ImU32();
 				ImGui::PushStyleColor(ImGuiCol_Header, category_color);
 				ImGui::PushStyleColor(ImGuiCol_HeaderHovered, category_color);
 				ImGui::PushStyleColor(ImGuiCol_HeaderActive, category_color);
-				bool selected = (i == current);
+				bool selected = (i == current_index);
 				constexpr float marker_size = 8.0f;
 				constexpr float marker_padding = 2.0f;
 				ImGui::Dummy(ImVec2(marker_size + marker_padding, 0.0f));
 				float min_x = ImGui::GetItemRectMin().x;
 				ImGui::SameLine();
-				if (ImGui::Selectable((options[i] + "##" + std::to_string(i)).c_str(), selected))
+				if (ImGui::Selectable((category.name + "##" + std::to_string(i)).c_str(), selected))
 				{
 					changed = true;
-					current = i;
+					current_index = i;
+					current_id = categories[i].id;
 				}
 
 				bool hovered = ImGui::IsItemHovered();
@@ -211,16 +206,9 @@ bool Dropdown::draw(const std::string& label, const char* hint)
 	return changed;
 }
 
-int32_t Dropdown::get_result()
+Category CategoryDropdown::get_result()
 {
-	return current;
-}
-
-std::string Dropdown::get_result_string()
-{
-	CG_ASSERT(current >= 0 && current < options.size(), "Invalid current element!");
-	if (current < 0 || current >= options.size()) return std::string();
-	return options[current];
+	return categories[current_index];
 }
 
 int32_t input_callback(ImGuiInputTextCallbackData* data)

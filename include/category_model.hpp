@@ -2,22 +2,27 @@
 
 #include "util/color.hpp"
 #include <string>
-#include <unordered_map>
 #include <vector>
+
+struct Category
+{
+	uint64_t id;
+	std::string name;
+	Color color;
+};
 
 class CategoryModel
 {
 public:
 	CategoryModel() = default;
 
-	void add(const std::string& name, const Color& color);
+	void add(const Category& category);
 	void clear();
-	const std::vector<std::string>& get_names() const;
-	const std::unordered_map<std::string, Color>& get_colors() const;
+	const Category& get_category(uint64_t id) const;
+	const std::vector<Category>& get_categories() const;
 
 	mutable bool dirty = false;
 
 private:
-	std::vector<std::string> category_names;
-	std::unordered_map<std::string, Color> category_colors;
+	std::vector<Category> categories;
 };
