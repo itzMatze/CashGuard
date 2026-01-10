@@ -70,7 +70,7 @@ class CategoriesDialog
 {
 public:
 	void init(CategoryModel& category_model);
-	void draw(CategoryModel& category_model);
+	void draw(CategoryModel& category_model, const std::unordered_map<uint64_t, int32_t>& category_usage_counts);
 
 private:
 	StringInput input;

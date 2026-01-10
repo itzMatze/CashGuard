@@ -456,7 +456,7 @@ void CategoriesDialog::init(CategoryModel& category_model)
 	set_focus = false;
 }
 
-void CategoriesDialog::draw(CategoryModel& category_model)
+void CategoriesDialog::draw(CategoryModel& category_model, const std::unordered_map<uint64_t, int32_t>& category_usage_counts)
 {
 	for (int row = 0; row < category_model.get_categories().size(); row++)
 	{
@@ -488,6 +488,23 @@ void CategoriesDialog::draw(CategoryModel& category_model)
 				selected_row = -1;
 			}
 			ImGui::SameLine();
+			const int32_t usage_count = (category_usage_counts.count(category.id) > 0) ? (category_usage_counts.at(category.id)) : 0;
+			const std::string label = std::format("Remove Category (used {} times)##CategoryEdit", usage_count);
+			if (usage_count > 0)
+			{
+				ImGui::BeginDisabled();
+				ImGui::Button(label.c_str());
+				ImGui::EndDisabled();
+			}
+			else
+			{
+				if (ImGui::Button(label.c_str()))
+				{
+					category_model.remove(selected_row);
+					selected_row = -1;
+				}
+			}
+			ImGui::SameLine();
 			if (ImGui::Button("Cancel##CategoryEdit")) selected_row = -1;
 			set_focus = false;
 			ImGui::Separator();
@@ -498,7 +515,7 @@ void CategoriesDialog::draw(CategoryModel& category_model)
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_A);
 	if (ImGui::Button("Add##CategoryDialog"))
 	{
-		const Category new_category(rng::random_int64(), "", Color());
+		const Category new_category(rng::random_int64(), "", Color(0.0f, 0.0f, 0.0f, 1.0f));
 		category_model.add(new_category);
 		selected_row = category_model.count() - 1;
 		input.init(new_category.name);

@@ -175,7 +175,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 		categories_dialog.init(category_model);
 		ImGui::OpenPopup("Categories##Dialog");
 	}
-	if (ImGui::BeginPopupModal("Categories##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) categories_dialog.draw(category_model);
+	if (ImGui::BeginPopupModal("Categories##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) categories_dialog.draw(category_model, transaction_model.get_category_usage_counts());
 	if (!valid_file) ImGui::EndDisabled();
 
 	// Open File

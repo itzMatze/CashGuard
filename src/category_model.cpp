@@ -12,6 +12,12 @@ void CategoryModel::add(const Category& category)
 	dirty = true;
 }
 
+void CategoryModel::remove(int32_t index)
+{
+	categories.erase(categories.begin() + index);
+	dirty = true;
+}
+
 void CategoryModel::set_name(int32_t index, const std::string& new_name)
 {
 	categories[index].name = new_name;

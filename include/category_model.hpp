@@ -18,6 +18,7 @@ public:
 
 	int32_t count() const;
 	void add(const Category& category);
+	void remove(int32_t index);
 	void set_name(int32_t index, const std::string& name);
 	void set_color(int32_t index, const Color& new_color);
 	void clear();

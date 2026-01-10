@@ -19,11 +19,21 @@ void TransactionModel::add(const std::shared_ptr<const Transaction> transaction)
 	int32_t index = 0;
 	while (index < transactions.size() && *transaction < *transactions[index]) index++;
 	transactions.insert(transactions.begin() + index, transaction);
+	category_usage_counts[transaction->category_id]++;
+	if (const std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transaction))
+	{
+		for (const Transaction& sub_transaction : transaction_group->get_transactions()) category_usage_counts[sub_transaction.category_id]++;
+	}
 	dirty = true;
 }
 
 void TransactionModel::remove(int32_t index)
 {
+	category_usage_counts[transactions[index]->category_id]++;
+	if (const std::shared_ptr<const TransactionGroup> transaction_group = std::dynamic_pointer_cast<const TransactionGroup>(transactions[index]))
+	{
+		for (const Transaction& sub_transaction : transaction_group->get_transactions()) category_usage_counts[sub_transaction.category_id]++;
+	}
 	transactions.erase(transactions.begin() + index);
 	dirty = true;
 }
@@ -106,6 +116,11 @@ Amount TransactionModel::get_total_amount() const
 	int32_t total_amount = 0;
 	for (const std::shared_ptr<const Transaction> t : transactions) total_amount += t->amount.value;
 	return Amount(total_amount);
+}
+
+const std::unordered_map<uint64_t, int32_t>& TransactionModel::get_category_usage_counts() const
+{
+	return category_usage_counts;
 }
 
 int32_t TransactionModel::get_transaction_index(std::shared_ptr<const Transaction> transaction) const
