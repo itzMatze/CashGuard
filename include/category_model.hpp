@@ -16,7 +16,10 @@ class CategoryModel
 public:
 	CategoryModel() = default;
 
+	int32_t count() const;
 	void add(const Category& category);
+	void set_name(int32_t index, const std::string& name);
+	void set_color(int32_t index, const Color& new_color);
 	void clear();
 	const Category& get_category(uint64_t id) const;
 	const std::vector<Category>& get_categories() const;

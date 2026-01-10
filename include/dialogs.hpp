@@ -65,3 +65,17 @@ private:
 	int32_t selected_row;
 	int32_t opened_row;
 };
+
+class CategoriesDialog
+{
+public:
+	void init(CategoryModel& category_model);
+	void draw(CategoryModel& category_model);
+
+private:
+	StringInput input;
+	ImVec4 color_buffer;
+	int32_t selected_row;
+	int32_t opened_row;
+	bool set_focus;
+};

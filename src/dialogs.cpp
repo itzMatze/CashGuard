@@ -449,3 +449,67 @@ void AccountsDialog::draw(AccountModel& account_model)
 	if (ImGui::Button("Close##AccountsDialog")) ImGui::CloseCurrentPopup();
 	ImGui::EndPopup();
 }
+
+void CategoriesDialog::init(CategoryModel& category_model)
+{
+	selected_row = -1;
+	set_focus = false;
+}
+
+void CategoriesDialog::draw(CategoryModel& category_model)
+{
+	for (int row = 0; row < category_model.get_categories().size(); row++)
+	{
+		const Category& category = category_model.get_categories()[row];
+		if (category.id == 0) continue;
+		ImGui::PushStyleColor(ImGuiCol_Header, category.color.get_ImU32());
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, category.color.get_ImU32());
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, category.color.get_ImU32());
+		bool selected = (row == selected_row);
+		if (ImGui::Selectable((category.name + "##" + std::to_string(row)).c_str(), selected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_DontClosePopups) && selected_row == -1)
+		{
+			selected_row = row;
+			input.init(category.name);
+			color_buffer.x = category.color.r;
+			color_buffer.y = category.color.g;
+			color_buffer.z = category.color.b;
+			color_buffer.w = category.color.a;
+			set_focus = true;
+		}
+		if (selected)
+		{
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			input.draw("##CategoryDialogStringInput" + std::to_string(row), "", set_focus);
+			ImGui::ColorEdit4("Color Editor", (float*)(&color_buffer), ImGuiColorEditFlags_None);
+			if (ImGui::Button("OK##CategoryEdit"))
+			{
+				category_model.set_name(selected_row, input.get_result());
+				category_model.set_color(selected_row, Color(color_buffer.x, color_buffer.y, color_buffer.z, color_buffer.w));
+				selected_row = -1;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel##CategoryEdit")) selected_row = -1;
+			set_focus = false;
+			ImGui::Separator();
+		}
+
+		ImGui::PopStyleColor(3);
+	}
+	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_A);
+	if (ImGui::Button("Add##CategoryDialog"))
+	{
+		const Category new_category(rng::random_int64(), "", Color());
+		category_model.add(new_category);
+		selected_row = category_model.count() - 1;
+		input.init(new_category.name);
+		color_buffer.x = new_category.color.r;
+		color_buffer.y = new_category.color.g;
+		color_buffer.z = new_category.color.b;
+		color_buffer.w = new_category.color.a;
+		set_focus = true;
+	}
+	ImGui::SameLine();
+	ImGui::SetNextItemShortcut(ImGuiKey_Escape);
+	if (ImGui::Button("Close##CategoryDialog")) ImGui::CloseCurrentPopup();
+	ImGui::EndPopup();
+}

@@ -167,6 +167,15 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 		if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
+	ImGui::SameLine();
+
+	// Categories
+	if (ImGui::Button("Categories", button_size))
+	{
+		categories_dialog.init(category_model);
+		ImGui::OpenPopup("Categories##Dialog");
+	}
+	if (ImGui::BeginPopupModal("Categories##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) categories_dialog.draw(category_model);
 	if (!valid_file) ImGui::EndDisabled();
 
 	// Open File

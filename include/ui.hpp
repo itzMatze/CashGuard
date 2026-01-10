@@ -25,6 +25,7 @@ private:
 	TransactionTable transaction_table;
 	TransactionDialog transaction_dialog;
 	AccountsDialog accounts_dialog;
+	CategoriesDialog categories_dialog;
 	bool show_amounts = false;
 
 	void draw_transaction_tab(ImVec2 available_space, TransactionModel& transaction_model, AccountModel& account_model, CategoryModel& category_model, bool valid_file);
