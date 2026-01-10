@@ -127,6 +127,7 @@ namespace DateUtils
 Transaction::Transaction() :
 	id(0),
 	date(DateUtils::to_date(Clock::now())),
+	category_id(0),
 	amount(0),
 	description(""),
 	added(Clock::now()),

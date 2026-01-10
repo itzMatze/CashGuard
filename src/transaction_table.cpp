@@ -19,11 +19,14 @@ void TransactionTable::draw(ImVec2 available_space, const TransactionModel& tran
 	{
 		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
 		ImGui::TableSetupScrollFreeze(0, 1);
-		for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
-		{
-			ImGui::TableSetupColumn(std::to_string(i).c_str(), ImGuiTableColumnFlags_None);
-		}
-		ImGui::TableSetupColumn("Group", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_ID).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_DATE).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_CATEGORY).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_AMOUNT).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_DESCRIPTION).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_ADDED).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_EDITED).c_str());
+		ImGui::TableSetupColumn("Group");
 		ImGui::TableHeadersRow();
 		ImGuiListClipper clipper;
 		clipper.Begin(transaction_model.count());

@@ -9,7 +9,7 @@ void TransactionMemberDialog::init(const TransactionModel& transaction_model, co
 {
 	this->transaction = transaction;
 	date_input.init(transaction.date);
-	description_input.init(transaction_model.get_unique_value_list(TRANSACTION_FIELD_CATEGORY), transaction.description);
+	description_input.init(transaction_model.get_unique_value_list(TRANSACTION_FIELD_DESCRIPTION), transaction.description);
 	amount_input.init(transaction.amount);
 	category_dropdown.init(category_model.get_categories(), transaction.category_id);
 }
@@ -106,17 +106,17 @@ DialogResult TransactionDialog::draw(const std::string& label, const Transaction
 		draw_transaction_table(transaction_model, category_model);
 		const bool row_valid = selected_group_row > -1 && selected_group_row < transaction_group->get_transactions().size();
 
-		// Add
+		// New Sub-Transaction
 		ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
-		if (ImGui::Button("Add##TransactionDialog"))
+		if (ImGui::Button("New Sub-Transaction##TransactionDialog"))
 		{
 			Transaction new_transaction = Transaction();
 			new_transaction.category_id = transaction_group->category_id;
 			new_transaction.date = transaction_group->date;
 			member_dialog.init(transaction_model, category_model, new_transaction);
-			ImGui::OpenPopup("Transaction Add##MemberDialog");
+			ImGui::OpenPopup("New Sub-Transaction##MemberDialog");
 		}
-		if (ImGui::BeginPopupModal("Transaction Add##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+		if (ImGui::BeginPopupModal("New Sub-Transaction##MemberDialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 		{
 			DialogResult result = member_dialog.draw("Member Transaction Dialog", transaction_model);
 			if (result == DialogResult::Accept)
@@ -275,10 +275,13 @@ void TransactionDialog::draw_transaction_table(const TransactionModel& transacti
 	{
 		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
 		ImGui::TableSetupScrollFreeze(0, 1);
-		for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
-		{
-			ImGui::TableSetupColumn(std::to_string(i).c_str(), ImGuiTableColumnFlags_None);
-		}
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_ID).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_DATE).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_CATEGORY).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_AMOUNT).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_DESCRIPTION).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_ADDED).c_str());
+		ImGui::TableSetupColumn(get_transation_field_name(TRANSACTION_FIELD_EDITED).c_str());
 		ImGui::TableHeadersRow();
 		for (int32_t row = 0; row < transaction_group->get_transactions().size(); row++)
 		{

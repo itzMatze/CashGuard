@@ -77,14 +77,14 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	ImVec2 button_size(available_space.x * (1.0f / float(button_count_x)) - ImGui::GetStyle().ItemSpacing.x * float(button_count_x - 1) / float(button_count_x), (available_space.y * buttons_relative_height - ImGui::GetStyle().ItemSpacing.y) / float(button_count_y));
 
 	if (!valid_file) ImGui::BeginDisabled();
-	// Add
+	// New Transaction
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_N);
-	if (ImGui::Button("Add", button_size))
+	if (ImGui::Button("New Transaction", button_size))
 	{
 		transaction_dialog.init(filtered_transaction_model, category_model, Transaction());
-		ImGui::OpenPopup("Transaction Add##Dialog");
+		ImGui::OpenPopup("New Transaction##Dialog");
 	}
-	if (ImGui::BeginPopupModal("Transaction Add##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	if (ImGui::BeginPopupModal("New Transaction##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		DialogResult result = transaction_dialog.draw("Transaction Dialog", filtered_transaction_model, category_model);
 		if (result == DialogResult::Accept)

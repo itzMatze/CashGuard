@@ -10,25 +10,12 @@
 
 const char* version_string = "0.3.0";
 
-const std::array<std::string, TRANSACTION_FIELD_COUNT>& get_transation_field_names()
-{
-	static std::array<std::string, TRANSACTION_FIELD_COUNT> transaction_field_names;
-	transaction_field_names[TRANSACTION_FIELD_ID] = "ID";
-	transaction_field_names[TRANSACTION_FIELD_DATE] = "Date";
-	transaction_field_names[TRANSACTION_FIELD_CATEGORY] = "Category";
-	transaction_field_names[TRANSACTION_FIELD_AMOUNT] = "Amount";
-	transaction_field_names[TRANSACTION_FIELD_DESCRIPTION] = "Description";
-	transaction_field_names[TRANSACTION_FIELD_ADDED] = "Added";
-	transaction_field_names[TRANSACTION_FIELD_EDITED] = "Edited";
-	return transaction_field_names;
-}
-
 Transaction parse_transaction(const auto& rj_transaction)
 {
 	Transaction transaction;
 	for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
 	{
-		const std::string& field = get_transation_field_names()[i];
+		const std::string& field = get_transation_field_name(i);
 		if (!rj_transaction.HasMember(field.c_str())) continue;
 		transaction.set_field(i, rj_transaction[field.c_str()].GetString());
 	}
@@ -130,7 +117,7 @@ void serialize_transaction(const Transaction& transaction, rapidjson::Value& jso
 	json_object.SetObject();
 	for (int32_t i = 0; i < TRANSACTION_FIELD_COUNT; i++)
 	{
-		rapidjson::Value name(get_transation_field_names()[i].c_str(), allocator);
+		rapidjson::Value name(get_transation_field_name(i).c_str(), allocator);
 		rapidjson::Value value(transaction.get_field(i).c_str(), allocator);
 		json_object.AddMember(name, value, allocator);
 	}

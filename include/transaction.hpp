@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/log.hpp"
 #include <chrono>
 #include <cstdint>
 #include <string>
@@ -33,6 +34,18 @@ enum TransactionFieldIndices : uint32_t
 	TRANSACTION_FIELD_EDITED = 6,
 	TRANSACTION_FIELD_COUNT
 };
+
+static inline std::string get_transation_field_name(int32_t transaction_field_index)
+{
+	if (transaction_field_index == TRANSACTION_FIELD_ID) return "ID";
+	else if (transaction_field_index == TRANSACTION_FIELD_DATE) return "Date";
+	else if (transaction_field_index == TRANSACTION_FIELD_CATEGORY) return "Category";
+	else if (transaction_field_index == TRANSACTION_FIELD_AMOUNT) return "Amount";
+	else if (transaction_field_index == TRANSACTION_FIELD_DESCRIPTION) return "Description";
+	else if (transaction_field_index == TRANSACTION_FIELD_ADDED) return "Added";
+	else if (transaction_field_index == TRANSACTION_FIELD_EDITED) return "Edited";
+	CG_THROW("Invalid transaction field index!");
+}
 
 using Clock = std::chrono::system_clock;
 using Date = std::chrono::year_month_day;
