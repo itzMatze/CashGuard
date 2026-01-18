@@ -299,7 +299,7 @@ void TransactionDialog::draw_transaction_table(const TransactionModel& transacti
 			ImGui::TableSetColumnIndex(0);
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, background_color);
 			selected = (row == selected_group_row);
-			if (ImGui::Selectable(std::to_string(transaction.id).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
+			if (ImGui::Selectable(std::to_string(transaction.id).c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_NoAutoClosePopups))
 			{
 				selected_group_row = row;
 			}
