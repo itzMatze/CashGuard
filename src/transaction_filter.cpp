@@ -344,7 +344,7 @@ void TransactionFilter::DateRangeTable::draw(const std::string& label)
 			if (is_edited)
 			{
 				ImGui::SetNextItemWidth(-FLT_MIN);
-				if (begin_input.draw("##BeginInput" + label + std::to_string(row), "", set_focus))
+				if (begin_input.draw("##BeginInput" + label + std::to_string(row), set_focus))
 				{
 					date_ranges[opened_row].begin = begin_input.get_result();
 				}

@@ -7,7 +7,6 @@
 #include "util/timer.hpp"
 #include <array>
 #include <string>
-#include <unordered_map>
 
 inline bool lost_active(bool has_active, bool& had_active)
 {
@@ -54,7 +53,7 @@ public:
 	DateInput() = default;
 	void init(const Date& initial_date = Date());
 	void update(const Date& new_date);
-	bool draw(const std::string& label, const char* hint = "", bool set_focus = false);
+	bool draw(const std::string& label, bool set_focus = false);
 	Date get_result();
 	bool is_active() const;
 

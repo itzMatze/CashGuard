@@ -50,7 +50,7 @@ void DateInput::update(const Date& new_date)
 	year = int32_t(new_date.year());
 }
 
-bool DateInput::draw(const std::string& label, const char* hint, bool set_focus)
+bool DateInput::draw(const std::string& label, bool set_focus)
 {
 	bool any_is_active = false;
 	ImGui::PushItemWidth(50.0f);

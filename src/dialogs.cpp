@@ -66,6 +66,7 @@ void TransactionDialog::init(const TransactionModel& transaction_model, const Ca
 	description_input.init(transaction_model.get_unique_value_list(TRANSACTION_FIELD_DESCRIPTION), transaction.description);
 	amount_input.init(transaction.amount);
 	category_dropdown.init(category_model.get_categories(), transaction.category_id);
+	first_draw = true;
 }
 
 void TransactionDialog::init(const TransactionModel& transaction_model, const CategoryModel& category_model, const TransactionGroup& transaction_group)
@@ -74,6 +75,7 @@ void TransactionDialog::init(const TransactionModel& transaction_model, const Ca
 	date_input.init(transaction_group.date);
 	description_input.init(transaction_model.get_unique_value_list(TRANSACTION_FIELD_DESCRIPTION), transaction_group.description);
 	category_dropdown.init(category_model.get_categories(), transaction_group.category_id);
+	first_draw = true;
 }
 
 DialogResult TransactionDialog::draw(const std::string& label, const TransactionModel& transaction_model, const CategoryModel& category_model)
@@ -175,7 +177,7 @@ DialogResult TransactionDialog::draw(const std::string& label, const Transaction
 	}
 	else
 	{
-		if (date_input.draw("##TransactionDialogDate")) transaction->date = date_input.get_result();
+		if (date_input.draw("##TransactionDialogDate", first_draw)) transaction->date = date_input.get_result();
 		if (description_input.draw("##TransactionDialogDescription", "Description"))
 		{
 			transaction->description = description_input.get_result();
@@ -202,6 +204,7 @@ DialogResult TransactionDialog::draw(const std::string& label, const Transaction
 		if (amount_input.draw("##TransactionDialogAmount")) transaction->amount = amount_input.get_result();
 		if (category_dropdown.draw("##TransactionDialogCategory")) transaction->category_id = category_dropdown.get_result().id;
 	}
+	first_draw = false;
 
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_O);
 	if (ImGui::Button("OK##TransactionDialog")) return DialogResult::Accept;

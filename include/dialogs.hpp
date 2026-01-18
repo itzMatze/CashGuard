@@ -46,6 +46,7 @@ private:
 	CategoryDropdown category_dropdown;
 	std::shared_ptr<Transaction> transaction;
 	int32_t selected_group_row = -1;
+	bool first_draw = false;
 
 	void update_ui();
 	void draw_transaction_table(const TransactionModel& transaction_model, const CategoryModel& category_model);
