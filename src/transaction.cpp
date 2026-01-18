@@ -22,47 +22,30 @@ bool Amount::is_negative() const
 
 bool get_euros(const std::string& string_value, int32_t& position, int64_t& euros)
 {
-	bool has_digits = false;
+	int32_t old_position = position;
 	euros = 0;
-	while (position < string_value.size())
-	{
-		if (std::isdigit(string_value[position]))
-		{
-			has_digits = true;
-			euros = euros * 10 + (string_value[position] - '0');
-			position++;
-		}
-		else if (string_value[position] == ' ') position++;
-		else break;
-	}
-	return has_digits;
+	std::from_chars_result result = std::from_chars(string_value.data() + position, string_value.data() + string_value.size(), euros);
+	position = result.ptr - string_value.data();
+	return position > old_position;
 }
 
 bool get_cents(const std::string& string_value, int32_t& position, int64_t& cents)
 {
-	bool has_digits = false;
-	int32_t digit_count = 0;
-	while (position < string_value.size())
-	{
-		if (std::isdigit(string_value[position]))
-		{
-			has_digits = true;
-			cents = cents * 10 + (string_value[position] - '0');
-			position++;
-			digit_count++;
-		}
-		else if (string_value[position] == ' ') position++;
-		else break;
-		if (digit_count == 2) break;
-	}
-	// if only one digit is present after the separator it is ten cents
-	if (digit_count == 1) cents *= 10;
-	return has_digits;
+	int32_t old_position = position;
+	cents = 0;
+	std::from_chars_result result = std::from_chars(string_value.data() + position, string_value.data() + string_value.size(), cents);
+	position = result.ptr - string_value.data();
+	if (position - old_position == 1) cents *= 10;
+	return (position - old_position < 3 && position != old_position);
 }
 
 bool to_amount(const std::string& string_value, Amount& amount)
 {
-	if (string_value.size() == 0) return false;
+	if (string_value.size() == 0)
+	{
+		amount.value = 0;
+		return true;
+	}
 	amount.value = 0;
 	int32_t position = 0;
 	bool negative = true;
@@ -78,12 +61,12 @@ bool to_amount(const std::string& string_value, Amount& amount)
 	// parse euros
 	int64_t euros = 0;
 	has_digits = get_euros(string_value, position, euros);
-	if (position < string_value.size() && (string_value[position] == ',' || string_value[position] == '.'))
+	position++;
+	// parse cents
+	int64_t cents = 0;
+	if (get_cents(string_value, position, cents))
 	{
-		position++;
-		// parse cents
-		int64_t cents = 0;
-		has_digits |= get_cents(string_value, position, cents);
+		has_digits = true;
 		amount.value += cents;
 	}
 	amount.value += euros * 100;
