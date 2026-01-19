@@ -78,19 +78,19 @@ bool Application::load_file(const std::string& file_path, bool create)
 
 bool Application::prompt_new_file()
 {
-	pfd::save_file file = pfd::save_file("Select directory and filename to create", pfd::path::home(), { "CGT File", "*.cgt" }, pfd::opt::none);
+	pfd::save_file file = pfd::save_file("Select directory and filename to create", pfd::path::home(), { "JSON File", "*.json" }, pfd::opt::none);
 	if (file.result().empty()) return false;
 	std::filesystem::path path(file.result());
-	if (path.extension() != ".cgt") path.replace_extension(".cgt");
+	if (path.extension() != ".json") path.replace_extension(".json");
 	return load_file(path, true);
 }
 
 bool Application::prompt_open_file()
 {
-	pfd::open_file file = pfd::open_file("Select file to open", pfd::path::home(), { "CGT File", "*.cgt" }, pfd::opt::none);
+	pfd::open_file file = pfd::open_file("Select file to open", pfd::path::home(), { "JSON File", "*.json" }, pfd::opt::none);
 	if (file.result().empty()) return false;
 	std::filesystem::path path(file.result().at(0));
-	if (path.extension() != ".cgt") path.replace_extension(".cgt");
+	if (path.extension() != ".json") path.replace_extension(".json");
 	return load_file(path, false);
 }
 

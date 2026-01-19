@@ -8,7 +8,7 @@
 #include "util/log.hpp"
 #include "util/random_generator.hpp"
 
-const char* version_string = "0.3.0";
+const char* version_string = "cgt_0.3.0";
 
 Transaction parse_transaction(const auto& rj_transaction)
 {
