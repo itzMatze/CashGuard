@@ -24,6 +24,7 @@ bool get_euros(const std::string& string_value, int32_t& position, int64_t& euro
 {
 	int32_t old_position = position;
 	euros = 0;
+	if (position >= string_value.size()) return false;
 	std::from_chars_result result = std::from_chars(string_value.data() + position, string_value.data() + string_value.size(), euros);
 	position = result.ptr - string_value.data();
 	return position > old_position;
@@ -33,6 +34,7 @@ bool get_cents(const std::string& string_value, int32_t& position, int64_t& cent
 {
 	int32_t old_position = position;
 	cents = 0;
+	if (position >= string_value.size()) return false;
 	std::from_chars_result result = std::from_chars(string_value.data() + position, string_value.data() + string_value.size(), cents);
 	position = result.ptr - string_value.data();
 	if (position - old_position == 1) cents *= 10;
