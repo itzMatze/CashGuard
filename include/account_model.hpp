@@ -8,6 +8,7 @@ struct Account
 {
 	std::string name;
 	Amount amount;
+	DateTime edited;
 };
 
 class AccountModel
@@ -20,6 +21,7 @@ public:
 	void set(int32_t index, const Account& account);
 	void set_name(int32_t index, const std::string& name);
 	void set_amount(int32_t index, const Amount& amount);
+	void set_edited(int32_t index, const DateTime& edited);
 	void add(const Account& account);
 	void remove(int32_t index);
 	void clear();

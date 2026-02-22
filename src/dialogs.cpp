@@ -371,13 +371,14 @@ void AccountsDialog::draw(AccountModel& account_model)
 	if (account_total_amount == transaction_total_amount) ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Accounts match!");
 	else ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Accounts don't match! Difference: %s", Amount(account_total_amount - transaction_total_amount).to_string_view().c_str());
 	ImGui::PopFont();
-	if (ImGui::BeginTable("Accounts", 3, flags))
+	if (ImGui::BeginTable("Accounts", 4, flags))
 	{
 		ImGui::TableSetupScrollFreeze(0, 1);
 		ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, IM_COL32(0, 0, 0, 255));
 		ImGui::TableSetupColumn("##Index", ImGuiTableColumnFlags_None);
 		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
 		ImGui::TableSetupColumn("Amount", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn("Amount Edited", ImGuiTableColumnFlags_None);
 		ImGui::TableHeadersRow();
 		for (int32_t row = 0; row < account_model.count(); row++)
 		{
@@ -419,8 +420,13 @@ void AccountsDialog::draw(AccountModel& account_model)
 				ImGui::SetNextItemWidth(-FLT_MIN);
 				if (amount_input.draw("##AccountAmount", "Amount"))
 				{
-					account_model.set_amount(opened_row, amount_input.get_result());
-					account_total_amount = account_model.get_total_amount().value;
+					Amount new_amount = amount_input.get_result();
+					if (account_model.at(opened_row).amount != new_amount)
+					{
+						account_model.set_amount(opened_row, new_amount);
+						account_total_amount = account_model.get_total_amount().value;
+						account_model.set_edited(opened_row, Clock::now());
+					}
 				}
 			}
 			else
@@ -429,13 +435,17 @@ void AccountsDialog::draw(AccountModel& account_model)
 				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
 				ImGui::Text("%s", account_model.at(row).amount.to_string_view().c_str());
 			}
+			ImGui::TableSetColumnIndex(3);
+			ImGui::AlignTextToFramePadding();
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetStyle().ItemInnerSpacing.x);
+			ImGui::Text("%s", DateUtils::to_string(account_model.at(row).edited).c_str());
 			if (selected || hovered)
 			{
 				ImU32 highlight_color = IM_COL32(0, 255, 255, 128);
 				if (selected) highlight_color = IM_COL32(0, 255, 255, 255);
 				ImGuiTable* table = ImGui::GetCurrentTable();
 				ImVec2 min(ImGui::TableGetCellBgRect(table, 0).Min);
-				ImVec2 max(ImGui::TableGetCellBgRect(table, 2).Max);
+				ImVec2 max(ImGui::TableGetCellBgRect(table, 3).Max);
 				constexpr float border_thickness = 4.0f;
 				ImDrawList* dl = ImGui::GetWindowDrawList();
 				dl->AddRect(ImVec2(min.x + border_thickness / 2.0f, min.y), ImVec2(max.x - border_thickness / 2.0f, min.y + row_height), highlight_color, 0.0f, 0, border_thickness);
@@ -446,7 +456,12 @@ void AccountsDialog::draw(AccountModel& account_model)
 	ImGui::PopStyleColor(3);
 	ImGui::PopStyleVar(2);
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_A);
-	if (ImGui::Button("Add##AccountsDialog")) account_model.add(Account());
+	if (ImGui::Button("Add##AccountsDialog"))
+	{
+		Account new_account;
+		new_account.edited = Clock::now();
+		account_model.add(new_account);
+	}
 	ImGui::SameLine();
 	ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_R);
 	if (ImGui::Button("Remove##AccountsDialog")) account_model.remove(selected_row);

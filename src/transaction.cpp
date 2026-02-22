@@ -86,6 +86,11 @@ bool operator>(const Amount& a, const Amount& b)
 	return a.value > b.value;
 }
 
+bool operator==(const Amount& a, const Amount& b)
+{
+	return a.value == b.value;
+}
+
 namespace DateUtils
 {
 	std::string to_string(const Date& date)
@@ -106,6 +111,24 @@ namespace DateUtils
 	Date to_date(int32_t day, int32_t month, int32_t year)
 	{
 		return Date(std::chrono::year{year}, std::chrono::month{uint32_t(month)}, std::chrono::day{uint32_t(day)});
+	}
+
+	Date to_date(const std::string& date)
+	{
+		std::istringstream iss(date);
+		DateTime date_time;
+		iss >> std::chrono::parse("%d.%m.%Y", date_time);
+		if (!iss.fail()) return DateUtils::to_date(date_time);
+		return Date();
+	}
+
+	DateTime to_date_time(const std::string& time_point)
+	{
+		std::istringstream iss(time_point);
+		DateTime date_time;
+		iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
+		if (!iss.fail()) return date_time;
+		return DateTime();
 	}
 }
 
@@ -136,10 +159,7 @@ void Transaction::set_field(int32_t field_index, const std::string& value)
 	if (field_index == TRANSACTION_FIELD_ID) id = std::stoull(value);
 	else if (field_index == TRANSACTION_FIELD_DATE)
 	{
-		std::istringstream iss(value);
-		DateTime date_time;
-		iss >> std::chrono::parse("%d.%m.%Y", date_time);
-		if (!iss.fail()) date = DateUtils::to_date(date_time);
+		date = DateUtils::to_date(value);
 	}
 	else if (field_index == TRANSACTION_FIELD_CATEGORY) category_id = std::stoull(value);
 	else if (field_index == TRANSACTION_FIELD_AMOUNT)
@@ -150,17 +170,11 @@ void Transaction::set_field(int32_t field_index, const std::string& value)
 	else if (field_index == TRANSACTION_FIELD_DESCRIPTION) description = value;
 	else if (field_index == TRANSACTION_FIELD_ADDED)
 	{ 
-		std::istringstream iss(value);
-		DateTime date_time;
-		iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
-		if (!iss.fail()) added = date_time;
+		added = DateUtils::to_date_time(value);
 	}
 	else if (field_index == TRANSACTION_FIELD_EDITED)
 	{
-		std::istringstream iss(value);
-		DateTime date_time;
-		iss >> std::chrono::parse("%d.%m.%Y %H:%M:%S", date_time);
-		if (!iss.fail()) edited = date_time;
+		edited = DateUtils::to_date_time(value);
 	}
 	else CG_THROW("Invalid transaction field name!");
 }

@@ -22,6 +22,7 @@ bool to_amount(const std::string& string_value, Amount& amount);
 
 bool operator<(const Amount& a, const Amount& b);
 bool operator>(const Amount& a, const Amount& b);
+bool operator==(const Amount& a, const Amount& b);
 
 enum TransactionFieldIndices : uint32_t
 {
@@ -57,6 +58,8 @@ namespace DateUtils
 	std::string to_string(const DateTime& time_point);
 	Date to_date(DateTime time_point);
 	Date to_date(int32_t day, int32_t month, int32_t year);
+	Date to_date(const std::string& date);
+	DateTime to_date_time(const std::string& time_point);
 }
 
 class Transaction

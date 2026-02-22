@@ -28,6 +28,12 @@ void AccountModel::set_amount(int32_t index, const Amount& amount)
 	dirty = true;
 }
 
+void AccountModel::set_edited(int32_t index, const DateTime& edited)
+{
+	accounts[index].edited = edited;
+	dirty = true;
+}
+
 void AccountModel::add(const Account& account)
 {
 	accounts.push_back(account);

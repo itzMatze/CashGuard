@@ -8,7 +8,7 @@
 #include "util/log.hpp"
 #include "util/random_generator.hpp"
 
-const char* version_string = "cgt_0.3.0";
+const char* version_string = "cgt_0.4.0";
 
 Transaction parse_transaction(const auto& rj_transaction)
 {
@@ -77,6 +77,7 @@ bool CGFileHandler::load_from_file(const std::filesystem::path& file_path, Trans
 			cglog::error("Failed to parse amount!");
 			return false;
 		}
+		account.edited = DateUtils::to_date_time(rj_account["Edited"].GetString());
 		account_model.add(account);
 	}
 	ids.clear();
@@ -167,6 +168,10 @@ bool CGFileHandler::save_to_file(const std::filesystem::path& file_path, const T
 		{
 			rapidjson::Value value(account.amount.to_string().c_str(), allocator);
 			json_object.AddMember("Amount", value, allocator);
+		}
+		{
+			rapidjson::Value value(DateUtils::to_string(account.edited).c_str(), allocator);
+			json_object.AddMember("Edited", value, allocator);
 		}
 		json_accounts.PushBack(json_object, allocator);
 	}
