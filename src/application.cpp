@@ -43,26 +43,25 @@ Application::~Application()
 	cache_file.close();
 }
 
-bool Application::load_file(const std::string& file_path, bool create)
+bool Application::load_file(const std::filesystem::path& file_path, bool create)
 {
-	std::filesystem::path file(file_path);
 	if (create)
 	{
-		if (std::filesystem::exists(file))
+		if (std::filesystem::exists(file_path))
 		{
-			cglog::error("Failed to create file \"{}\". It already exists.", file_path);
+			cglog::error("Failed to create file \"{}\". It already exists.", file_path.string());
 			return false;
 		}
-		if (file.has_parent_path() && !std::filesystem::exists(file.parent_path()))
+		if (file_path.has_parent_path() && !std::filesystem::exists(file_path.parent_path()))
 		{
-			bool success = std::filesystem::create_directories(file.parent_path());
+			bool success = std::filesystem::create_directories(file_path.parent_path());
 			if (!success)
 			{
 				cglog::error("Failed to create directories!");
 				return false;
 			}
 		}
-		std::ofstream out_file(file);
+		std::ofstream out_file(file_path);
 		if (!out_file.is_open())
 		{
 			cglog::error("Failed to create file!");
@@ -70,8 +69,8 @@ bool Application::load_file(const std::string& file_path, bool create)
 		}
 		out_file.close();
 	}
-	if (!cg_file_handler.load_from_file(file, transaction_model, account_model, category_model)) return false;
-	this->file_path = std::filesystem::absolute(file);
+	if (!cg_file_handler.load_from_file(file_path, transaction_model, account_model, category_model)) return false;
+	this->file_path = std::filesystem::absolute(file_path);
 	file_path_valid = true;
 	return true;
 }

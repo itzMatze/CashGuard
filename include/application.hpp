@@ -23,7 +23,7 @@ private:
 	CategoryModel category_model;
 	UI ui;
 
-	bool load_file(const std::string& file_path, bool create);
+	bool load_file(const std::filesystem::path& file_path, bool create);
 	bool prompt_new_file();
 	bool prompt_open_file();
 };
