@@ -41,8 +41,8 @@ void TotalAmountGraph::draw_small_graph(ImVec2 available_space, bool show_amount
 	ImPlot::PushStyleVar(ImPlotStyleVar_LabelPadding, ImVec2(0.0f, 0.0f));
 	ImPlot::PushStyleColor(ImPlotCol_PlotBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ImPlot::PushStyleColor(ImPlotCol_AxisBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-	// keep space for custom drawn labels
-	available_space.y -= ImGui::GetTextLineHeight();
+	// keep space for custom drawn labels and spacing below them
+	available_space.y -= (ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y);
 	if (ImPlot::BeginPlot("##Small Total Amount Plot", available_space, ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText))
 	{
 		ImPlot::SetupAxes("##Time", "##Amount", ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickLabels);
@@ -93,6 +93,7 @@ void TotalAmountGraph::draw_small_graph(ImVec2 available_space, bool show_amount
 	}
 	ImPlot::PopStyleColor(2);
 	ImPlot::PopStyleVar(2);
+	// space for custom labels, remove spacing above
 	ImGui::Dummy(ImVec2(0.0f, ImGui::GetTextLineHeight() - ImGui::GetStyle().ItemSpacing.y));
 }
 
