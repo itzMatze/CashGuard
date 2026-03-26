@@ -42,9 +42,19 @@ void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, Accou
 			draw_transaction_tab(available_space, transaction_model, account_model, category_model, valid_file);
 			ImGui::EndTabItem();
 		}
-		if (ImGui::BeginTabItem("Graph"))
+		if (ImGui::BeginTabItem("Total Amount Graph"))
 		{
 			draw_graph_tab(available_space, transaction_model, account_model, category_model);
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Total Amount Bar"))
+		{
+			draw_bar_tab(available_space, transaction_model, account_model, category_model);
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Category Amounts"))
+		{
+			draw_diagram_tab(available_space, transaction_model, account_model, category_model);
 			ImGui::EndTabItem();
 		}
 		ImGui::EndTabBar();
@@ -254,4 +264,30 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 void UI::draw_graph_tab(ImVec2 available_space, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
 	total_amount_graph.draw_large_graph(ImVec2(-1.0f, available_space.y));
+}
+
+void UI::draw_bar_tab(ImVec2 available_space, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
+{
+  total_amount_graph.draw_bar_spending_graph(filtered_transaction_model, ImVec2(-1.0f, available_space.y));
+}
+
+void UI::draw_diagram_tab(ImVec2 available_space, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
+{
+	static int selected_view = 0; 
+	const char* view_names[] = { "Bar Chart", "Pie Chart"};
+
+	ImGui::SetNextItemWidth(250.0f);
+	ImGui::Combo("Diagram Type", &selected_view, view_names, IM_ARRAYSIZE(view_names));
+	ImGui::Separator();
+	
+	ImVec2 chart_size(available_space.x, available_space.y - ImGui::GetFrameHeightWithSpacing() * 2);
+
+	if (selected_view == 0)
+	{
+		diagrams.draw_bar_group(category_model, transaction_model, chart_size);
+	}
+	else if (selected_view == 1)
+	{
+		diagrams.draw_pie_chart(category_model, transaction_model, chart_size);
+	}
 }

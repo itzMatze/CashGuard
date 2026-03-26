@@ -2,6 +2,7 @@
 #include "implot.h"
 #include "implot_internal.h"
 #include "util/utils.hpp"
+#include <map>
 
 constexpr int64_t year_second_count = 31536000;
 
@@ -161,5 +162,117 @@ void TotalAmountGraph::draw_large_graph(ImVec2 available_space)
 		ImPlot::EndPlot();
 	}
 	ImPlot::PopStyleColor(6);
+	ImPlot::PopStyleVar(2);
+}
+
+void TotalAmountGraph::draw_bar_spending_graph(const TransactionModel& transaction_model, ImVec2 available_space)
+{
+	static const char* timeframe_names[] = { "Day", "Week", "Month", "Year" };
+	static int selected_timeframe = 2; 
+	
+	ImGui::SetNextItemWidth(150.0f);
+	bool changed = ImGui::Combo("Interval##Bars", &selected_timeframe, timeframe_names, IM_ARRAYSIZE(timeframe_names));
+
+	// Use map to group transactions by their period start date
+	std::map<int64_t, double> bucket_data;
+	double max_val = 0.0;
+
+	for (int32_t i = 0; i < transaction_model.count(); ++i)
+	{
+		const std::shared_ptr<const Transaction> t = transaction_model.at(i);
+		Date date = t->date;
+
+		// Clamp the date to the beginning of the period
+		if (selected_timeframe == 1)
+		{ // Week
+			std::chrono::sys_days sys_d = std::chrono::sys_days{date};
+			// sunday is 0 - saturday is 6
+			unsigned int weekday = std::chrono::weekday{sys_d}.c_encoding();
+			
+			// Clamp to monday
+			int days_to_subtract = (weekday == 0 ? 6 : (int)weekday - 1);
+			date = Date{sys_d - std::chrono::days{days_to_subtract}};
+		} 
+		else if (selected_timeframe == 2)
+		{
+			date = date.year() / date.month() / 1; // Month
+		} 
+		else if (selected_timeframe == 3)
+		{
+			date = date.year() / 1 / 1; // Year
+		}
+
+		int64_t time_stamp = std::chrono::system_clock::to_time_t(std::chrono::sys_days{date});
+		double amount = std::abs(static_cast<double>(t->amount.value) / 100.0);
+		
+		bucket_data[time_stamp] += amount;
+		// Set the highest peak 
+		if (bucket_data[time_stamp] > max_val) max_val = bucket_data[time_stamp];
+	}
+
+	if (bucket_data.empty()) return;
+
+	// Convert map to vectors for ImPlot
+	std::vector<double> xs, ys;
+	for (const std::pair<const int64_t, double>& entry : bucket_data)
+	{
+		xs.push_back(static_cast<double>(entry.first));
+		ys.push_back(entry.second);
+	}
+
+	static constexpr ImVec4 theme_color(0.0f, 0.4f, 0.4f, 1.0f);
+	ImDrawList* draw_list = ImPlot::GetPlotDrawList();
+
+	ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0.0f, 0.0f));
+	ImPlot::PushStyleVar(ImPlotStyleVar_LabelPadding, ImVec2(0.0f, 0.0f));
+	
+	ImPlot::PushStyleColor(ImPlotCol_PlotBg, ImVec4(0,0,0,1));
+	ImPlot::PushStyleColor(ImPlotCol_AxisBg, ImVec4(0,0,0,1));
+	ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0,0,0,1));
+	ImPlot::PushStyleColor(ImPlotCol_AxisBgHovered, ImVec4(theme_color.x + 0.2f, theme_color.y + 0.2f, theme_color.z + 0.2f, theme_color.w));
+	ImPlot::PushStyleColor(ImPlotCol_AxisBgActive, ImVec4(theme_color.x + 0.2f, theme_color.y + 0.2f, theme_color.z + 0.2f, theme_color.w));
+
+	if (ImPlot::BeginPlot("##SpendingBarPlot", available_space, ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText)) 
+	{
+		ImPlot::SetupAxes("##Time", "##Amount", ImPlotAxisFlags_NoLabel, ImPlotAxisFlags_NoLabel);
+		ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+
+		// Set the width of the time axis for each bar
+		double width_seconds = 86400.0; // 1 Day
+		if (selected_timeframe == 1) width_seconds *= 7; // Week
+		else if (selected_timeframe == 2) width_seconds *= 28; // Month
+		else if (selected_timeframe == 3) width_seconds *= 365; // Year
+
+		ImPlot::SetupAxesLimits(xs.front() - width_seconds, xs.back() + width_seconds, 0, max_val * 1.1, changed ? ImGuiCond_Always : ImGuiCond_Once);
+
+		if (ImPlot::BeginItem("##BarItem")) 
+		{
+			// Draw bars
+			ImPlot::PushStyleColor(ImPlotCol_Fill, theme_color);
+			ImPlot::PlotBars("##Bars", xs.data(), ys.data(), (int)xs.size(), width_seconds * 0.7);
+			ImPlot::PopStyleColor();
+
+			// Hover logic
+			if (ImPlot::IsPlotHovered())
+			{
+				ImPlotPoint mouse = ImPlot::GetPlotMousePos();
+				int32_t idx = binary_search_less_equal(xs.begin(), xs.end(), mouse.x);
+				
+				if (idx >= 0 && idx < xs.size())
+				{
+					ImGui::BeginTooltip();
+					std::string date_str = DateUtils::to_string(DateUtils::to_date(DateTime{std::chrono::seconds{(int64_t)xs[idx]}}));
+					ImGui::Text("Period Start: %s", date_str.c_str());
+					ImGui::Text("Total: %.2f €", ys[idx]);
+					ImGui::EndTooltip();
+
+					draw_list->AddCircleFilled(ImPlot::PlotToPixels(xs[idx], ys[idx]), 8.0f, IM_COL32(255, 0, 0, 255));
+				}
+			}
+				ImPlot::EndItem();
+			}
+		ImPlot::EndPlot();
+	}
+	ImPlot::PopStyleColor(5);
 	ImPlot::PopStyleVar(2);
 }

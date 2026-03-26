@@ -10,6 +10,7 @@ public:
 	void update_data(const TransactionModel& transaction_model);
 	void draw_small_graph(ImVec2 available_space, bool show_amounts);
 	void draw_large_graph(ImVec2 available_space);
+	void draw_bar_spending_graph(const TransactionModel& transaction_model, ImVec2 available_space);
 
 private:
 	std::vector<double> time_points;

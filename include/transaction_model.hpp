@@ -22,12 +22,14 @@ public:
 	bool get_auto_complete_transaction(const std::string& description, std::shared_ptr<const Transaction>& completed_transaction) const;
 	Amount get_total_amount() const;
 	const std::unordered_map<uint64_t, int32_t>& get_category_usage_counts() const;
+	const std::unordered_map<uint64_t, Amount>& get_category_amounts() const;
 
 	mutable bool dirty = false;
 
 private:
 	std::vector<std::shared_ptr<const Transaction>> transactions;
 	std::unordered_map<uint64_t, int32_t> category_usage_counts;
+	std::unordered_map<uint64_t, Amount> category_amounts;
 
 	int32_t get_transaction_index(std::shared_ptr<const Transaction> transaction) const;
 };
