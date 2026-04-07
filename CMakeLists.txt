@@ -15,6 +15,7 @@ set(SOURCE_FILES
 	src/application.cpp
 	src/category_model.cpp
 	src/cg_file_handler.cpp
+	src/diagrams.cpp
 	src/dialogs.cpp
 	src/graphs.cpp
 	src/inputs.cpp
