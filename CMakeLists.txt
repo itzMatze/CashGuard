@@ -15,15 +15,14 @@ set(SOURCE_FILES
 	src/application.cpp
 	src/category_model.cpp
 	src/cg_file_handler.cpp
-	src/diagrams.cpp
 	src/dialogs.cpp
-	src/graphs.cpp
 	src/inputs.cpp
 	src/transaction.cpp
 	src/transaction_filter.cpp
 	src/transaction_model.cpp
 	src/transaction_table.cpp
 	src/ui.cpp
+	src/visualizations.cpp
 	src/window.cpp
 	src/util/color.cpp
 	src/util/random_generator.cpp

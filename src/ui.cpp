@@ -9,6 +9,7 @@ void UI::init(const TransactionModel& transaction_model, const AccountModel& acc
 	open_existing_file = false;
 	create_new_file = false;
 	total_amount_graph.update_data(transaction_model);
+	diagrams.update_data(category_model, transaction_model);
 	transaction_filter.init(category_model);
 	filtered_transaction_model.clear();
 	for (const std::shared_ptr<const Transaction> t : transaction_model.get_transactions())
@@ -47,7 +48,7 @@ void UI::draw(ImVec2 available_space, TransactionModel& transaction_model, Accou
 			draw_graph_tab(available_space, transaction_model, account_model, category_model);
 			ImGui::EndTabItem();
 		}
-		if (ImGui::BeginTabItem("Total Amount Bar"))
+		if (ImGui::BeginTabItem("Net Amount"))
 		{
 			draw_bar_tab(available_space, transaction_model, account_model, category_model);
 			ImGui::EndTabItem();
@@ -108,6 +109,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 			{
 				filtered_transaction_model.add(new_transaction);
 				total_amount_graph.update_data(filtered_transaction_model);
+				diagrams.update_data(category_model, transaction_model);
 				filtered_transaction_model.dirty = false;
 			}
 			ImGui::CloseCurrentPopup();
@@ -145,6 +147,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 			if (filtered_transaction_model.dirty)
 			{
 				total_amount_graph.update_data(filtered_transaction_model);
+				diagrams.update_data(category_model, transaction_model);
 				filtered_transaction_model.dirty = false;
 			}
 			ImGui::CloseCurrentPopup();
@@ -168,6 +171,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 			if (filtered_transaction_model.dirty)
 			{
 				total_amount_graph.update_data(filtered_transaction_model);
+				diagrams.update_data(category_model, transaction_model);
 				filtered_transaction_model.dirty = false;
 			}
 			ImGui::CloseCurrentPopup();
@@ -216,21 +220,7 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 	{
 		ImGui::OpenPopup("Filter##Dialog");
 	}
-	if (ImGui::BeginPopupModal("Filter##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		DialogResult result = transaction_filter.draw("Transaction Filter");
-		if (result == DialogResult::Accept || result == DialogResult::Cancel)
-		{
-			filtered_transaction_model.clear();
-			for (const std::shared_ptr<const Transaction> t : transaction_model.get_transactions())
-			{
-				if (transaction_filter.check(t)) filtered_transaction_model.add(t);
-			}
-			total_amount_graph.update_data(filtered_transaction_model);
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
+	draw_filter(transaction_model, category_model, filtered_transaction_model, transaction_filter, total_amount_graph);	
 	ImGui::SameLine();
 
 	// show / hide amounts
@@ -263,31 +253,78 @@ void UI::draw_transaction_tab(ImVec2 available_space, TransactionModel& transact
 
 void UI::draw_graph_tab(ImVec2 available_space, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_F))
+	{
+		ImGui::OpenPopup("Filter##Dialog");
+	}
+	draw_filter(transaction_model, category_model, filtered_transaction_model, transaction_filter, total_amount_graph);
 	total_amount_graph.draw_large_graph(ImVec2(-1.0f, available_space.y));
 }
 
 void UI::draw_bar_tab(ImVec2 available_space, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_F))
+	{
+		ImGui::OpenPopup("Filter##Dialog");
+	}
+	draw_filter(transaction_model, category_model, filtered_transaction_model, transaction_filter, total_amount_graph);
   total_amount_graph.draw_bar_spending_graph(filtered_transaction_model, ImVec2(-1.0f, available_space.y));
 }
 
 void UI::draw_diagram_tab(ImVec2 available_space, const TransactionModel& transaction_model, const AccountModel& account_model, const CategoryModel& category_model)
 {
-	static int selected_view = 0; 
-	const char* view_names[] = { "Bar Chart", "Pie Chart"};
-
+	int32_t selected_diagram_view = static_cast<int32_t>(current_selection);
 	ImGui::SetNextItemWidth(250.0f);
-	ImGui::Combo("Diagram Type", &selected_view, view_names, IM_ARRAYSIZE(view_names));
-	ImGui::Separator();
-	
-	ImVec2 chart_size(available_space.x, available_space.y - ImGui::GetFrameHeightWithSpacing() * 2);
 
-	if (selected_view == 0)
+	if (ImGui::Combo("Diagram Type", &selected_diagram_view, diagram_chart_names.data(), static_cast<int>(diagram_chart_names.size())))
 	{
-		diagrams.draw_bar_group(category_model, transaction_model, chart_size);
+		current_selection = static_cast<Chart>(selected_diagram_view);
 	}
-	else if (selected_view == 1)
+	
+	ImGui::Separator();
+
+	if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_F))
 	{
-		diagrams.draw_pie_chart(category_model, transaction_model, chart_size);
+		ImGui::OpenPopup("Filter##Dialog");
+	}
+	draw_filter(transaction_model, category_model, filtered_transaction_model, transaction_filter, total_amount_graph);
+	
+	float remaining_height = ImGui::GetContentRegionAvail().y;
+	ImGuiWindowFlags chart_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+	
+	if (ImGui::BeginChild("ChartRegion", ImVec2(0, remaining_height), ImGuiChildFlags_None, chart_flags))
+	{
+		ImVec2 chart_size = ImGui::GetContentRegionAvail();
+		chart_size.y -= 45.0f; 
+
+		if (current_selection == Chart::BarChart)
+		{
+			diagrams.draw_bar_group(chart_size);
+		}
+		else if (current_selection == Chart::PieChart)
+		{
+			diagrams.draw_pie_chart(chart_size);
+		}
+	}
+	ImGui::EndChild();
+}
+
+void UI::draw_filter(const TransactionModel& transaction_model, const CategoryModel& category_model, TransactionModel& filtered_transaction_model, TransactionFilter& transaction_filter, TotalAmountGraph& total_amount_graph)
+{
+	if (ImGui::BeginPopupModal("Filter##Dialog", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		DialogResult result = transaction_filter.draw("Transaction Filter");
+		if (result == DialogResult::Accept || result == DialogResult::Cancel)
+		{
+			filtered_transaction_model.clear();
+			for (const std::shared_ptr<const Transaction>& t : transaction_model.get_transactions())
+			{
+				if (transaction_filter.check(t)) filtered_transaction_model.add(t);
+			}
+			total_amount_graph.update_data(filtered_transaction_model);
+			diagrams.update_data(category_model, filtered_transaction_model);
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
 	}
 }
